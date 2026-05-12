@@ -7,7 +7,6 @@ Application Expo hors ligne pour le suivi d'élèves : classes, ticks, croix, m�
 - Node.js LTS
 - npm
 - Expo Go pour le développement local
-- Compte Expo et EAS CLI pour générer une APK Android installable
 
 ## Installation
 
@@ -37,9 +36,43 @@ npm test
 
 Objectif de couverture : 80 % minimum.
 
-## Générer une APK Android sans Expo Go
+## Générer une APK Android sans compte Expo
 
-Cette méthode permet de créer une vraie application Android installable directement sur un téléphone.
+Cette méthode utilise GitHub Actions.
+
+Elle ne nécessite pas :
+
+- Expo Go ;
+- compte Expo ;
+- EAS cloud ;
+- Android Studio installé localement.
+
+### Étapes
+
+1. Aller sur GitHub.
+2. Ouvrir l'onglet **Actions**.
+3. Sélectionner le workflow **Build Android APK**.
+4. Cliquer sur **Run workflow**.
+5. Attendre la fin du build.
+6. Télécharger l'artefact **carnet-rose-debug-apk**.
+7. Extraire le fichier `.zip`.
+8. Installer `app-debug.apk` sur un téléphone Android.
+
+### Emplacement de l'APK dans le workflow
+
+```txt
+android/app/build/outputs/apk/debug/app-debug.apk
+```
+
+### Note
+
+Cette APK est une version debug. Elle suffit pour tester l'application sans Expo Go.
+
+Pour une version production signée, il faudra configurer une signature Android release.
+
+## Générer une APK Android avec EAS cloud
+
+Cette méthode optionnelle permet de créer une vraie application Android installable via EAS cloud.
 
 ### Prérequis
 
