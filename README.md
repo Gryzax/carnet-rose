@@ -36,6 +36,34 @@ npm test
 
 Objectif de couverture : 80 % minimum.
 
+## Utiliser l'application sur iPhone sans Expo Go
+
+Cette version utilise une PWA.
+
+Elle ne nécessite pas :
+
+- Expo Go ;
+- compte Expo ;
+- compte Apple Developer ;
+- TestFlight ;
+- App Store.
+
+### Étapes côté utilisateur iPhone
+
+1. Ouvrir le lien de la PWA dans Safari.
+2. Appuyer sur le bouton Partager.
+3. Choisir Ajouter à l'écran d'accueil.
+4. Valider avec Ajouter.
+5. Ouvrir l'app depuis l'icône sur l'écran d'accueil.
+
+### Important
+
+La première ouverture nécessite Internet.
+
+Ensuite, l'app peut fonctionner hors ligne si les fichiers ont bien été mis en cache.
+
+Les données sont stockées localement sur l'iPhone via IndexedDB.
+
 ## Générer une APK Android sans compte Expo
 
 Cette méthode utilise GitHub Actions.

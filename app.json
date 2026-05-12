@@ -16,6 +16,13 @@
         "backgroundColor": "#FCE7F3"
       }
     },
+    "web": {
+      "bundler": "metro",
+      "favicon": "./assets/favicon.png"
+    },
+    "experiments": {
+      "baseUrl": "/carnet-rose"
+    },
     "plugins": [
       "expo-font",
       "expo-sqlite"

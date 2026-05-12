@@ -1,0 +1,19 @@
+{
+  "name": "Carnet Rose",
+  "short_name": "Carnet Rose",
+  "description": "Carnet de suivi hors ligne pour classes et eleves.",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#DB2777",
+  "background_color": "#FFF7FB",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
