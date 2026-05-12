@@ -1,0 +1,20 @@
+import { getDb } from '../database/db';
+
+export const getClasses = async () => {
+  const db = await getDb();
+  return db.getAllAsync(`
+    SELECT c.*, COUNT(e.id) as nombreEleves, COALESCE(SUM(e.merites), 0) as totalMerites, COALESCE(SUM(e.retenues), 0) as totalRetenues
+    FROM classes c LEFT JOIN eleves e ON e.classeId = c.id
+    GROUP BY c.id ORDER BY c.nom COLLATE NOCASE
+  `);
+};
+
+export const createClass = async (nom) => {
+  const db = await getDb();
+  return db.runAsync('INSERT INTO classes (nom, creeLe, derniereUtilisation) VALUES (?, datetime("now"), datetime("now"))', nom);
+};
+
+export const touchClass = async (id) => {
+  const db = await getDb();
+  return db.runAsync('UPDATE classes SET derniereUtilisation = datetime("now") WHERE id = ?', id);
+};

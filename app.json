@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "name": "Carnet Rose",
+    "slug": "carnet-rose",
+    "version": "1.0.0",
+    "orientation": "default",
+    "scheme": "carnetrose",
+    "userInterfaceStyle": "automatic",
+    "ios": { "supportsTablet": true },
+    "android": { "adaptiveIcon": { "backgroundColor": "#FCE7F3" } }
+  }
+}
