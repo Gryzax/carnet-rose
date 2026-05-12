@@ -3,10 +3,22 @@
     "name": "Carnet Rose",
     "slug": "carnet-rose",
     "version": "1.0.0",
-    "orientation": "default",
+    "orientation": "portrait",
     "scheme": "carnetrose",
     "userInterfaceStyle": "automatic",
-    "ios": { "supportsTablet": true },
-    "android": { "adaptiveIcon": { "backgroundColor": "#FCE7F3" } }
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "package": "com.gryzax.carnetrose",
+      "versionCode": 1,
+      "adaptiveIcon": {
+        "backgroundColor": "#FCE7F3"
+      }
+    },
+    "plugins": [
+      "expo-font",
+      "expo-sqlite"
+    ]
   }
 }
