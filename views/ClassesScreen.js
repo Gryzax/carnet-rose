@@ -3,7 +3,7 @@ import { FlatList, Modal, Text, TextInput, TouchableOpacity, useWindowDimensions
 import { useMemo, useState } from 'react';
 import { colors } from '../constants/colors';
 import { strings } from '../constants/strings';
-import { ajouterClasse } from '../controllers/classController';
+import { ajouterClasse, supprimerClasse } from '../controllers/classController';
 import { useClasses } from '../hooks/useClasses';
 import { getAllStudents } from '../models/studentModel';
 import { Screen, Title, useThemeColors } from '../components/Themed';
@@ -15,7 +15,10 @@ export const ClassesScreen = ({ navigation }) => {
   const [addModalVisible, setAddModalVisible] = useState(false);
   const [className, setClassName] = useState('');
   const [addError, setAddError] = useState('');
+  const [classToDelete, setClassToDelete] = useState(null);
+  const [deleteError, setDeleteError] = useState('');
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const { width } = useWindowDimensions();
   const { classes, refresh } = useClasses(sort);
   const theme = useThemeColors();
@@ -61,6 +64,33 @@ export const ClassesScreen = ({ navigation }) => {
     }
   };
 
+  const openDeleteModal = (classe) => {
+    setClassToDelete(classe);
+    setDeleteError('');
+  };
+
+  const closeDeleteModal = () => {
+    if (deleting) return;
+    setClassToDelete(null);
+    setDeleteError('');
+  };
+
+  const confirmDeleteClass = async () => {
+    if (!classToDelete) return;
+
+    setDeleting(true);
+    setDeleteError('');
+    try {
+      await supprimerClasse(classToDelete);
+      await refresh();
+      setClassToDelete(null);
+    } catch (error) {
+      setDeleteError(error.message || 'Impossible de supprimer la classe.');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   return (
     <Screen>
       <Title>{strings.classesTitle}</Title>
@@ -71,7 +101,17 @@ export const ClassesScreen = ({ navigation }) => {
       {results.map((s) => <TouchableOpacity key={s.id} onPress={() => navigation.navigate('StudentDetail', { studentId: s.id })}><Text style={{ color: theme.text, marginBottom: 8 }}>{s.prenom} {s.nom} - {s.classeNom}</Text></TouchableOpacity>)}
       <FlatList key={columns} data={data} numColumns={columns} keyExtractor={(item) => String(item.id)} initialNumToRender={8} getItemLayout={(_, index) => ({ length: 132, offset: 132 * index, index })} renderItem={({ item }) => (
         <TouchableOpacity onPress={() => navigation.navigate('ClassDashboard', { classe: item })} style={{ flex: 1, backgroundColor: theme.card, borderRadius: 20, padding: 18, margin: 6, shadowColor: colors.primaryPink, shadowOpacity: 0.14, shadowRadius: 10 }}>
-          <Text style={{ fontFamily: 'Nunito_800ExtraBold', fontSize: 20, color: theme.text }}>{item.nom}</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+            <Text style={{ flex: 1, fontFamily: 'Nunito_800ExtraBold', fontSize: 20, color: theme.text }}>{item.nom}</Text>
+            <TouchableOpacity
+              accessibilityLabel={`Supprimer ${item.nom}`}
+              testID={`delete-class-${item.id}`}
+              onPress={() => openDeleteModal(item)}
+              style={{ backgroundColor: colors.lightPink, borderRadius: 18, width: 36, height: 36, alignItems: 'center', justifyContent: 'center' }}
+            >
+              <Ionicons name="trash-outline" color={colors.deepPink} size={20} />
+            </TouchableOpacity>
+          </View>
           <Text style={{ color: theme.muted, marginTop: 8 }}>{item.nombreEleves} élèves</Text>
           <Text style={{ color: colors.deepPink, marginTop: 8 }}>Mérites {item.totalMerites} · Retenues {item.totalRetenues}</Text>
         </TouchableOpacity>
@@ -107,6 +147,24 @@ export const ClassesScreen = ({ navigation }) => {
               </TouchableOpacity>
               <TouchableOpacity disabled={saving} onPress={submitClass} style={{ backgroundColor: colors.primaryPink, borderRadius: 50, paddingVertical: 12, paddingHorizontal: 18, opacity: saving ? 0.7 : 1 }}>
                 <Text style={{ color: colors.white, fontFamily: 'NunitoSans_700Bold' }}>{saving ? 'Ajout...' : 'Ajouter'}</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+      <Modal visible={!!classToDelete} transparent animationType="fade" onRequestClose={closeDeleteModal}>
+        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.35)', justifyContent: 'center', padding: 20 }}>
+          <View style={{ backgroundColor: theme.card, borderRadius: 20, padding: 20, gap: 12 }}>
+            <Text style={{ fontFamily: 'Nunito_800ExtraBold', fontSize: 22, color: theme.text }}>Supprimer la classe</Text>
+            <Text style={{ fontFamily: 'NunitoSans_700Bold', fontSize: 17, color: theme.text }}>{classToDelete?.nom}</Text>
+            <Text style={{ color: theme.muted, lineHeight: 20 }}>Les eleves de cette classe, leur historique et leurs archives trimestrielles seront supprimes definitivement.</Text>
+            {!!deleteError && <Text style={{ color: colors.deepPink }}>{deleteError}</Text>}
+            <View style={{ flexDirection: 'row', justifyContent: 'flex-end', gap: 10 }}>
+              <TouchableOpacity testID="cancel-delete-class" disabled={deleting} onPress={closeDeleteModal} style={{ backgroundColor: colors.lightPink, borderRadius: 50, paddingVertical: 12, paddingHorizontal: 18 }}>
+                <Text style={{ color: colors.deepPink, fontFamily: 'NunitoSans_700Bold' }}>Annuler</Text>
+              </TouchableOpacity>
+              <TouchableOpacity testID="confirm-delete-class" disabled={deleting} onPress={confirmDeleteClass} style={{ backgroundColor: colors.deepPink, borderRadius: 50, paddingVertical: 12, paddingHorizontal: 18, opacity: deleting ? 0.7 : 1 }}>
+                <Text style={{ color: colors.white, fontFamily: 'NunitoSans_700Bold' }}>{deleting ? 'Suppression...' : 'Supprimer'}</Text>
               </TouchableOpacity>
             </View>
           </View>

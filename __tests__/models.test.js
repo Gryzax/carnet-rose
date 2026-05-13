@@ -6,9 +6,9 @@ const mockDb = {
 
 jest.mock('../database/db', () => ({ getDb: jest.fn(() => Promise.resolve(mockDb)) }));
 
-import { chargerClasses, ajouterClasse } from '../controllers/classController';
+import { ajouterClasse, chargerClasses, supprimerClasse } from '../controllers/classController';
 import { getStatistics } from '../controllers/statisticsController';
-import { createClass, getClasses, touchClass } from '../models/classModel';
+import { createClass, deleteClass, getClasses, touchClass } from '../models/classModel';
 import { archiveStudent, createEvent, getArchives, getCurrentHistory, getLastActiveEvent, markEventCancelled } from '../models/historyModel';
 import { createStudent, getAllStudents, getStudentById, getStudentsByClass, resetAllStudents, updateCounters } from '../models/studentModel';
 
@@ -17,9 +17,14 @@ beforeEach(() => jest.clearAllMocks());
 test('classModel exécute les requêtes', async () => {
   await getClasses();
   await createClass('6e Rose');
+  await deleteClass(1);
   await touchClass(1);
   expect(mockDb.getAllAsync).toHaveBeenCalledWith(expect.stringContaining('FROM classes c LEFT JOIN eleves'));
   expect(mockDb.runAsync).toHaveBeenCalledWith(expect.stringContaining('INSERT INTO classes'), '6e Rose');
+  expect(mockDb.runAsync).toHaveBeenCalledWith(expect.stringContaining('DELETE FROM evenements'), 1);
+  expect(mockDb.runAsync).toHaveBeenCalledWith(expect.stringContaining('DELETE FROM archive_trimestre'), 1);
+  expect(mockDb.runAsync).toHaveBeenCalledWith(expect.stringContaining('DELETE FROM eleves'), 1);
+  expect(mockDb.runAsync).toHaveBeenCalledWith(expect.stringContaining('DELETE FROM classes'), 1);
   expect(mockDb.runAsync).toHaveBeenCalledWith(expect.stringContaining('derniereUtilisation'), 1);
 });
 
@@ -58,6 +63,19 @@ test('classController trie et ajoute une classe', async () => {
 test('classController refuse un nom de classe vide', async () => {
   await expect(ajouterClasse('   ')).rejects.toThrow('Le nom de la classe est obligatoire.');
   expect(mockDb.runAsync).not.toHaveBeenCalled();
+});
+
+test('classController supprime une classe vide', async () => {
+  await supprimerClasse({ id: 10, nom: '4e Rose', nombreEleves: 0 });
+  expect(mockDb.runAsync).toHaveBeenCalledWith(expect.stringContaining('DELETE FROM classes'), 10);
+});
+
+test('classController supprime une classe avec eleves', async () => {
+  await supprimerClasse({ id: 11, nom: '3e Rose', nombreEleves: 4 });
+  expect(mockDb.runAsync).toHaveBeenCalledWith(expect.stringContaining('DELETE FROM evenements'), 11);
+  expect(mockDb.runAsync).toHaveBeenCalledWith(expect.stringContaining('DELETE FROM archive_trimestre'), 11);
+  expect(mockDb.runAsync).toHaveBeenCalledWith(expect.stringContaining('DELETE FROM eleves'), 11);
+  expect(mockDb.runAsync).toHaveBeenCalledWith(expect.stringContaining('DELETE FROM classes'), 11);
 });
 
 test('statisticsController calcule les tops', async () => {
