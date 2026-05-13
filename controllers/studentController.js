@@ -1,6 +1,6 @@
 import { CROSSES_FOR_DETENTION, TICKS_FOR_MERIT, UNDO_LIMIT_SECONDS } from '../constants/config';
 import { createEvent, getLastActiveEvent, archiveStudent, markEventCancelled } from '../models/historyModel';
-import { getAllStudents, getStudentById, updateCounters, resetAllStudents } from '../models/studentModel';
+import { deleteStudent, getAllStudents, getStudentById, updateCounters, resetAllStudents } from '../models/studentModel';
 import { nowIso, secondsBetween } from '../utils/date';
 
 export const ajouterTick = async (eleve, raison = '') => {
@@ -56,4 +56,10 @@ export const reinitialiserTrimestre = async (numeroTrimestre) => {
     totalMerites: students.reduce((sum, s) => sum + s.merites, 0),
     totalRetenues: students.reduce((sum, s) => sum + s.retenues, 0)
   };
+};
+
+export const supprimerEleve = async (eleve) => {
+  const id = typeof eleve === 'object' ? eleve?.id : eleve;
+  if (!id) throw new Error('Eleve introuvable.');
+  return deleteStudent(id);
 };

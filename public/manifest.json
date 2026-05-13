@@ -1,7 +1,7 @@
 {
-  "name": "Carnet Rose",
-  "short_name": "Carnet Rose",
-  "description": "Carnet de suivi hors ligne pour classes et eleves.",
+  "name": "Klassia",
+  "short_name": "Klassia",
+  "description": "Suivi hors ligne des eleves.",
   "start_url": ".",
   "scope": ".",
   "display": "standalone",

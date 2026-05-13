@@ -120,12 +120,18 @@ const createWebDb = () => ({
       const classId = args[0];
       const studentIds = state.eleves.filter((student) => student.classeId === classId).map((student) => student.id);
       state.evenements = state.evenements.filter((event) => !studentIds.includes(event.eleveId));
+    } else if (query.startsWith('delete from evenements where eleveid = ?')) {
+      state.evenements = state.evenements.filter((event) => event.eleveId !== args[0]);
     } else if (query.startsWith('delete from archive_trimestre where eleveid in')) {
       const classId = args[0];
       const studentIds = state.eleves.filter((student) => student.classeId === classId).map((student) => student.id);
       state.archive_trimestre = state.archive_trimestre.filter((archive) => !studentIds.includes(archive.eleveId));
+    } else if (query.startsWith('delete from archive_trimestre where eleveid = ?')) {
+      state.archive_trimestre = state.archive_trimestre.filter((archive) => archive.eleveId !== args[0]);
     } else if (query.startsWith('delete from eleves where classeid = ?')) {
       state.eleves = state.eleves.filter((student) => student.classeId !== args[0]);
+    } else if (query.startsWith('delete from eleves where id = ?')) {
+      state.eleves = state.eleves.filter((student) => student.id !== args[0]);
     } else if (query.startsWith('delete from classes where id = ?')) {
       state.classes = state.classes.filter((classe) => classe.id !== args[0]);
     } else if (query.startsWith('update eleves set ticks = ?, croix = ?')) {

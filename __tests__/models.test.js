@@ -10,7 +10,7 @@ import { ajouterClasse, chargerClasses, supprimerClasse } from '../controllers/c
 import { getStatistics } from '../controllers/statisticsController';
 import { createClass, deleteClass, getClasses, touchClass } from '../models/classModel';
 import { archiveStudent, createEvent, getArchives, getCurrentHistory, getLastActiveEvent, markEventCancelled } from '../models/historyModel';
-import { createStudent, getAllStudents, getStudentById, getStudentsByClass, resetAllStudents, updateCounters } from '../models/studentModel';
+import { createStudent, deleteStudent, getAllStudents, getStudentById, getStudentsByClass, resetAllStudents, updateCounters } from '../models/studentModel';
 
 beforeEach(() => jest.clearAllMocks());
 
@@ -33,11 +33,15 @@ test('studentModel exécute les requêtes CRUD', async () => {
   await getStudentById(2);
   await getAllStudents();
   await createStudent({ classeId: 1, prenom: 'Emma', nom: 'Martin' });
+  await deleteStudent(2);
   await updateCounters(2, { ticks: 1, croix: 2, merites: 3, retenues: 4, trimestreActuel: 1 });
   await resetAllStudents();
   expect(mockDb.getAllAsync).toHaveBeenCalledWith(expect.stringContaining('WHERE classeId = ?'), 1);
   expect(mockDb.getFirstAsync).toHaveBeenCalledWith(expect.stringContaining('WHERE id = ?'), 2);
   expect(mockDb.runAsync).toHaveBeenCalledWith(expect.stringContaining('INSERT INTO eleves'), 1, 'Emma', 'Martin');
+  expect(mockDb.runAsync).toHaveBeenCalledWith(expect.stringContaining('DELETE FROM evenements'), 2);
+  expect(mockDb.runAsync).toHaveBeenCalledWith(expect.stringContaining('DELETE FROM archive_trimestre'), 2);
+  expect(mockDb.runAsync).toHaveBeenCalledWith(expect.stringContaining('DELETE FROM eleves WHERE id'), 2);
 });
 
 test('historyModel exécute historique et archives', async () => {

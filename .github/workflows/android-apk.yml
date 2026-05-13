@@ -49,5 +49,5 @@ jobs:
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: carnet-rose-debug-apk
+          name: klassia-debug-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
