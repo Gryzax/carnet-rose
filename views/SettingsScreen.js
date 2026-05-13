@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { colors } from '../constants/colors';
 import { reinitialiserTrimestre } from '../controllers/studentController';
 import { getAllStudents } from '../models/studentModel';
+import { BackButton } from '../components/BackButton';
 import { PillButton, Screen, Title, useThemeColors } from '../components/Themed';
 
 const Section = ({ title, children }) => {
@@ -15,7 +16,7 @@ const Section = ({ title, children }) => {
   );
 };
 
-export const SettingsScreen = () => {
+export const SettingsScreen = ({ navigation }) => {
   const [summary, setSummary] = useState(null);
   const [success, setSuccess] = useState(null);
   const [confirmText, setConfirmText] = useState('');
@@ -36,6 +37,7 @@ export const SettingsScreen = () => {
 
   return (
     <Screen>
+      <BackButton navigation={navigation} fallbackRoute="Classes" />
       <Title>Paramètres</Title>
       <Section title="À propos">
         <Text style={{ color: theme.text, fontFamily: 'NunitoSans_700Bold' }}>Carnet Rose</Text>

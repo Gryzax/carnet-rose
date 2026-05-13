@@ -1,4 +1,4 @@
-import { render, waitFor } from '@testing-library/react-native';
+import { fireEvent, render, waitFor } from '@testing-library/react-native';
 import { StatisticsScreen } from '../../views/StatisticsScreen';
 
 jest.mock('react-native-gifted-charts', () => ({
@@ -14,10 +14,20 @@ jest.mock('../../controllers/statisticsController', () => ({
 }));
 
 test('statistiques affiche légende et tops', async () => {
-  const { getByText, getByTestId } = render(<StatisticsScreen />);
+  const { getByText, getByTestId } = render(<StatisticsScreen navigation={{ navigate: jest.fn(), canGoBack: jest.fn(() => false) }} />);
   await waitFor(() => expect(getByTestId('chart-legend')).toBeTruthy());
   expect(getByText(/Mérites/)).toBeTruthy();
   expect(getByText(/Retenues/)).toBeTruthy();
   expect(getByText('Top 3 participatifs')).toBeTruthy();
   expect(getByText('Top 3 à surveiller')).toBeTruthy();
+});
+
+test("statistiques affiche une flèche retour vers l'accueil", async () => {
+  const navigation = { navigate: jest.fn(), canGoBack: jest.fn(() => false), goBack: jest.fn() };
+  const { getByTestId } = render(<StatisticsScreen navigation={navigation} />);
+  await waitFor(() => expect(getByTestId('back-button')).toBeTruthy());
+
+  fireEvent.press(getByTestId('back-button'));
+
+  expect(navigation.navigate).toHaveBeenCalledWith('Classes');
 });

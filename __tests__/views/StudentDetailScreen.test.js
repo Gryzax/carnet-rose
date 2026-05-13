@@ -44,7 +44,7 @@ import { ajouterTick } from '../../controllers/studentController';
 beforeEach(() => jest.clearAllMocks());
 
 test('détail élève affiche le toast après tick', async () => {
-  const { getByText } = render(<StudentDetailScreen route={{ params: { studentId: 1 } }} />);
+  const { getByText } = render(<StudentDetailScreen route={{ params: { studentId: 1 } }} navigation={{ navigate: jest.fn(), canGoBack: jest.fn(() => false) }} />);
   await waitFor(() => expect(getByText('Emma Martin')).toBeTruthy());
   fireEvent.press(getByText('TICK'));
   await waitFor(() => expect(getByText('Participation')).toBeTruthy());
@@ -53,4 +53,15 @@ test('détail élève affiche le toast après tick', async () => {
   });
   await waitFor(() => expect(ajouterTick).toHaveBeenCalled());
   expect(getByText('Tick ajouté à Emma')).toBeTruthy();
+});
+
+test('détail élève affiche une flèche retour avec fallback accueil', async () => {
+  const navigation = { navigate: jest.fn(), canGoBack: jest.fn(() => false), goBack: jest.fn() };
+  const { getByTestId, getByText } = render(<StudentDetailScreen route={{ params: { studentId: 1 } }} navigation={navigation} />);
+
+  await waitFor(() => expect(getByText('Emma Martin')).toBeTruthy());
+  fireEvent.press(getByTestId('back-button'));
+
+  expect(navigation.goBack).not.toHaveBeenCalled();
+  expect(navigation.navigate).toHaveBeenCalledWith('ClassesHome');
 });

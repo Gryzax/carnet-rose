@@ -8,6 +8,7 @@ import { CROSS_REASONS, TICK_REASONS } from '../constants/config';
 import { ajouterCroix, ajouterTick, annulerDerniereAction } from '../controllers/studentController';
 import { getStudentById } from '../models/studentModel';
 import { EmptyState } from '../components/EmptyState';
+import { BackButton } from '../components/BackButton';
 import { ProgressBar } from '../components/ProgressBar';
 import { ReasonSheet } from '../components/ReasonSheet';
 import { Screen, useThemeColors } from '../components/Themed';
@@ -15,7 +16,7 @@ import { StudentAvatar } from '../components/StudentAvatar';
 import { UndoSnackbar } from '../components/UndoSnackbar';
 import { useHistory } from '../hooks/useHistory';
 
-export const StudentDetailScreen = ({ route }) => {
+export const StudentDetailScreen = ({ route, navigation }) => {
   const [student, setStudent] = useState(null);
   const [action, setAction] = useState(null);
   const [snack, setSnack] = useState(false);
@@ -59,10 +60,11 @@ export const StudentDetailScreen = ({ route }) => {
     refresh();
   };
 
-  if (!student) return <Screen><Text style={{ color: theme.text }}>Chargement</Text></Screen>;
+  if (!student) return <Screen><BackButton navigation={navigation} fallbackRoute="ClassesHome" /><Text style={{ color: theme.text }}>Chargement</Text></Screen>;
 
   return (
     <Screen>
+      <BackButton navigation={navigation} fallbackRoute="ClassesHome" />
       <LinearGradient colors={theme.dark ? ['#5A1F3A', colors.darkBg] : [colors.lightPink, colors.white]} style={{ borderRadius: 20, padding: 18, marginBottom: 16 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
           <StudentAvatar student={student} size={60} />

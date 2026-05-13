@@ -3,10 +3,11 @@ import { Text, View } from 'react-native';
 import { useEffect, useMemo, useState } from 'react';
 import { colors } from '../constants/colors';
 import { getStatistics } from '../controllers/statisticsController';
+import { BackButton } from '../components/BackButton';
 import { EmptyState } from '../components/EmptyState';
 import { Screen, Title, useThemeColors } from '../components/Themed';
 
-export const StatisticsScreen = () => {
+export const StatisticsScreen = ({ navigation }) => {
   const [stats, setStats] = useState({ classes: [], topParticipatifs: [], topSurveillance: [] });
   const theme = useThemeColors();
   useEffect(() => { getStatistics().then(setStats); }, []);
@@ -25,6 +26,7 @@ export const StatisticsScreen = () => {
 
   return (
     <Screen>
+      <BackButton navigation={navigation} fallbackRoute="Classes" />
       <Title>Statistiques</Title>
       {!hasData ? <EmptyState icon="bar-chart-outline" title="Pas encore de statistiques." message="Commencez à noter vos élèves !" /> : (
         <>
