@@ -36,6 +36,41 @@ npm test
 
 Objectif de couverture : 80 % minimum.
 
+## Configuration Supabase
+
+L'application est preparee pour Supabase Auth. Ne committez jamais de vraie cle dans le repo.
+
+Variables attendues dans `.env` en local et dans GitHub Actions Variables pour la PWA :
+
+```env
+EXPO_PUBLIC_SUPABASE_URL=
+EXPO_PUBLIC_SUPABASE_ANON_KEY=
+EXPO_PUBLIC_APP_URL=https://gryzax.github.io/carnet-rose/
+```
+
+`.env` est ignore par Git. `.env.example` sert uniquement de modele.
+
+Dans Supabase Authentication -> URL Configuration :
+
+Site URL :
+
+```txt
+https://gryzax.github.io/carnet-rose/
+```
+
+Redirect URLs :
+
+```txt
+https://gryzax.github.io/carnet-rose/
+https://gryzax.github.io/carnet-rose/auth/callback
+http://localhost:8081
+http://localhost:19006
+```
+
+Les redirect URLs doivent correspondre exactement a ce que l'app utilise. Supabase les utilise pour autoriser les retours apres login OAuth.
+
+Voir `docs/supabase-setup.md` pour Google Auth, Apple Auth et `docs/supabase-schema.sql` pour le schema SQL a executer manuellement.
+
 ## Utiliser l'application sur iPhone sans Expo Go
 
 Cette version utilise une PWA.
