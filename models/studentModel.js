@@ -20,6 +20,13 @@ export const createStudent = async ({ classeId, prenom, nom }) => {
   return db.runAsync('INSERT INTO eleves (classeId, prenom, nom, ticks, croix, merites, retenues, trimestreActuel) VALUES (?, ?, ?, 0, 0, 0, 0, 1)', classeId, prenom, nom);
 };
 
+export const deleteStudent = async (id) => {
+  const db = await getDb();
+  await db.runAsync('DELETE FROM evenements WHERE eleveId = ?', id);
+  await db.runAsync('DELETE FROM archive_trimestre WHERE eleveId = ?', id);
+  return db.runAsync('DELETE FROM eleves WHERE id = ?', id);
+};
+
 export const updateCounters = async (id, fields) => {
   const db = await getDb();
   return db.runAsync('UPDATE eleves SET ticks = ?, croix = ?, merites = ?, retenues = ?, trimestreActuel = ? WHERE id = ?', fields.ticks, fields.croix, fields.merites, fields.retenues, fields.trimestreActuel, id);

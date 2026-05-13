@@ -8,7 +8,8 @@ export const useThemeColors = () => {
     bg: dark ? colors.darkBg : colors.offWhite,
     card: dark ? colors.darkCard : colors.white,
     text: dark ? colors.white : colors.textDark,
-    muted: colors.textMuted
+    muted: dark ? colors.softPink : colors.textMuted,
+    border: dark ? '#4A2434' : colors.lightPink
   };
 };
 

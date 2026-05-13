@@ -1,6 +1,7 @@
 import { fireEvent, render } from '@testing-library/react-native';
 import { ReasonSheet } from '../../components/ReasonSheet';
 import { UndoSnackbar } from '../../components/UndoSnackbar';
+import { EmptyState } from '../../components/EmptyState';
 
 test('ouverture et fermeture des modales', () => {
   const onClose = jest.fn();
@@ -18,4 +19,12 @@ test('snackbar Undo', () => {
   expect(onUndo).toHaveBeenCalled();
   rerender(<UndoSnackbar visible={false} onUndo={onUndo} />);
   expect(queryByTestId('undo-snackbar')).toBeNull();
+});
+
+test('EmptyState affiche action optionnelle', () => {
+  const onAction = jest.fn();
+  const { getByText, getByTestId } = render(<EmptyState title="Aucune classe" message="Creez une classe" actionLabel="Ajouter" onAction={onAction} />);
+  expect(getByTestId('empty-state')).toBeTruthy();
+  fireEvent.press(getByText('Ajouter'));
+  expect(onAction).toHaveBeenCalled();
 });
