@@ -13,7 +13,7 @@ jest.mock('../../controllers/studentController', () => ({
 test('paramètres affiche les sections enrichies', () => {
   const { getByText } = render(<SettingsScreen />);
   expect(getByText('À propos')).toBeTruthy();
-  expect(getByText('Klassia')).toBeTruthy();
+  expect(getByText('Carnet Rose')).toBeTruthy();
   expect(getByText('Données')).toBeTruthy();
   expect(getByText('Trimestre')).toBeTruthy();
 });

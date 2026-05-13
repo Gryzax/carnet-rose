@@ -1,7 +1,14 @@
 jest.mock('localforage', () => {
-  const data = new Map();
+  const stores = new Map();
+  const getStore = (name = 'default') => {
+    if (!stores.has(name)) stores.set(name, new Map());
+    return stores.get(name);
+  };
   return {
-    createInstance: jest.fn(() => ({
+    __stores: stores,
+    createInstance: jest.fn((options = {}) => {
+      const data = getStore(options.name);
+      return {
       getItem: jest.fn((key) => Promise.resolve(data.get(key) || null)),
       setItem: jest.fn((key, value) => {
         data.set(key, value);
@@ -11,11 +18,37 @@ jest.mock('localforage', () => {
         data.clear();
         return Promise.resolve();
       })
-    }))
+      };
+    })
   };
 });
 
+import localforage from 'localforage';
 import { getDb, migrate, seedDemo } from '../../database/storage.web';
+
+test('stockage web: migre les donnees Klassia vers CarnetRose', async () => {
+  const legacyState = {
+    classes: [{ id: 1, nom: 'Classe migrée', creeLe: 'now', derniereUtilisation: 'now' }],
+    eleves: [],
+    evenements: [],
+    archive_trimestre: [],
+    seq: { classes: 1, eleves: 0, evenements: 0, archive_trimestre: 0 }
+  };
+  localforage.__stores.get('Klassia').set('state:v1', legacyState);
+
+  const db = await getDb();
+  const classes = await db.getAllAsync(`
+    SELECT c.*, COUNT(e.id) as nombreEleves, COALESCE(SUM(e.merites), 0) as totalMerites, COALESCE(SUM(e.retenues), 0) as totalRetenues
+    FROM classes c LEFT JOIN eleves e ON e.classeId = c.id
+    GROUP BY c.id ORDER BY c.nom COLLATE NOCASE
+  `);
+
+  expect(classes).toEqual([expect.objectContaining({ nom: 'Classe migrée' })]);
+  expect(localforage.__stores.get('CarnetRose').get('state:v1')).toEqual(legacyState);
+
+  localforage.__stores.get('Klassia').clear();
+  localforage.__stores.get('CarnetRose').clear();
+});
 
 test('stockage web: seed demo persiste classes et eleves dans IndexedDB', async () => {
   const db = await getDb();

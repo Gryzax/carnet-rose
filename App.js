@@ -26,7 +26,7 @@ export default function App() {
 
       const appleTitle = document.createElement('meta');
       appleTitle.name = 'apple-mobile-web-app-title';
-      appleTitle.content = 'Klassia';
+      appleTitle.content = 'Carnet Rose';
       document.head.appendChild(appleTitle);
 
       const themeColor = document.createElement('meta');
