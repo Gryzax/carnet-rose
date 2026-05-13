@@ -47,6 +47,36 @@ test('stockage web: ajout de classe persiste dans IndexedDB', async () => {
   expect(classes).toEqual(expect.arrayContaining([expect.objectContaining({ nom: '4e Rose', nombreEleves: 0 })]));
 });
 
+test('stockage web: suppression de classe supprime les donnees liees', async () => {
+  const db = await getDb();
+  const classResult = await db.runAsync('INSERT INTO classes (nom, creeLe, derniereUtilisation) VALUES (?, datetime("now"), datetime("now"))', 'Classe a supprimer');
+  const studentResult = await db.runAsync('INSERT INTO eleves (classeId, prenom, nom, ticks, croix, merites, retenues, trimestreActuel) VALUES (?, ?, ?, ?, ?, ?, ?, 1)', classResult.lastInsertRowId, 'Ada', 'Lovelace', 1, 0, 0, 0);
+  await db.runAsync(
+    'INSERT INTO evenements (eleveId, type, raison, trimestre, creeLe, previousTicks, previousCroix, newTicks, newCroix, annule) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0)',
+    studentResult.lastInsertRowId, 'tick', 'Participation', 1, new Date().toISOString(), 0, 0, 1, 0
+  );
+  await db.runAsync('INSERT INTO archive_trimestre (eleveId, trimestre, merites, retenues, totalTicks, totalCroix, archiveLe) VALUES (?, ?, ?, ?, ?, ?, ?)', studentResult.lastInsertRowId, 1, 0, 0, 1, 0, new Date().toISOString());
+
+  await db.runAsync('DELETE FROM evenements WHERE eleveId IN (SELECT id FROM eleves WHERE classeId = ?)', classResult.lastInsertRowId);
+  await db.runAsync('DELETE FROM archive_trimestre WHERE eleveId IN (SELECT id FROM eleves WHERE classeId = ?)', classResult.lastInsertRowId);
+  await db.runAsync('DELETE FROM eleves WHERE classeId = ?', classResult.lastInsertRowId);
+  await db.runAsync('DELETE FROM classes WHERE id = ?', classResult.lastInsertRowId);
+
+  const classes = await db.getAllAsync(`
+    SELECT c.*, COUNT(e.id) as nombreEleves, COALESCE(SUM(e.merites), 0) as totalMerites, COALESCE(SUM(e.retenues), 0) as totalRetenues
+    FROM classes c LEFT JOIN eleves e ON e.classeId = c.id
+    GROUP BY c.id ORDER BY c.nom COLLATE NOCASE
+  `);
+  const deletedStudent = await db.getFirstAsync('SELECT * FROM eleves WHERE id = ?', studentResult.lastInsertRowId);
+  const deletedHistory = await db.getAllAsync('SELECT * FROM evenements WHERE eleveId = ? AND trimestre = ? ORDER BY creeLe DESC', studentResult.lastInsertRowId, 1);
+  const deletedArchives = await db.getAllAsync('SELECT * FROM archive_trimestre WHERE eleveId = ? ORDER BY archiveLe DESC', studentResult.lastInsertRowId);
+
+  expect(classes).not.toEqual(expect.arrayContaining([expect.objectContaining({ id: classResult.lastInsertRowId })]));
+  expect(deletedStudent).toBeNull();
+  expect(deletedHistory).toHaveLength(0);
+  expect(deletedArchives).toHaveLength(0);
+});
+
 test('stockage web: compteurs, historique et annulation utilisent la meme API que SQLite', async () => {
   const db = await getDb();
   const student = await db.getFirstAsync('SELECT * FROM eleves WHERE id = ?', 1);

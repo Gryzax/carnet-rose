@@ -116,6 +116,18 @@ const createWebDb = () => ({
     } else if (query.startsWith('update classes set derniereutilisation')) {
       const classe = state.classes.find((item) => item.id === args[0]);
       if (classe) classe.derniereUtilisation = now();
+    } else if (query.startsWith('delete from evenements where eleveid in')) {
+      const classId = args[0];
+      const studentIds = state.eleves.filter((student) => student.classeId === classId).map((student) => student.id);
+      state.evenements = state.evenements.filter((event) => !studentIds.includes(event.eleveId));
+    } else if (query.startsWith('delete from archive_trimestre where eleveid in')) {
+      const classId = args[0];
+      const studentIds = state.eleves.filter((student) => student.classeId === classId).map((student) => student.id);
+      state.archive_trimestre = state.archive_trimestre.filter((archive) => !studentIds.includes(archive.eleveId));
+    } else if (query.startsWith('delete from eleves where classeid = ?')) {
+      state.eleves = state.eleves.filter((student) => student.classeId !== args[0]);
+    } else if (query.startsWith('delete from classes where id = ?')) {
+      state.classes = state.classes.filter((classe) => classe.id !== args[0]);
     } else if (query.startsWith('update eleves set ticks = ?, croix = ?')) {
       const student = state.eleves.find((item) => item.id === args[5]);
       if (student) Object.assign(student, { ticks: args[0], croix: args[1], merites: args[2], retenues: args[3], trimestreActuel: args[4] });

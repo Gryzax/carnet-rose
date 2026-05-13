@@ -14,6 +14,14 @@ export const createClass = async (nom) => {
   return db.runAsync('INSERT INTO classes (nom, creeLe, derniereUtilisation) VALUES (?, datetime("now"), datetime("now"))', nom);
 };
 
+export const deleteClass = async (id) => {
+  const db = await getDb();
+  await db.runAsync('DELETE FROM evenements WHERE eleveId IN (SELECT id FROM eleves WHERE classeId = ?)', id);
+  await db.runAsync('DELETE FROM archive_trimestre WHERE eleveId IN (SELECT id FROM eleves WHERE classeId = ?)', id);
+  await db.runAsync('DELETE FROM eleves WHERE classeId = ?', id);
+  return db.runAsync('DELETE FROM classes WHERE id = ?', id);
+};
+
 export const touchClass = async (id) => {
   const db = await getDb();
   return db.runAsync('UPDATE classes SET derniereUtilisation = datetime("now") WHERE id = ?', id);
