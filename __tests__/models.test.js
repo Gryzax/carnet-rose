@@ -55,6 +55,11 @@ test('classController trie et ajoute une classe', async () => {
   expect(mockDb.runAsync).toHaveBeenCalledWith(expect.stringContaining('INSERT INTO classes'), '4e Rose');
 });
 
+test('classController refuse un nom de classe vide', async () => {
+  await expect(ajouterClasse('   ')).rejects.toThrow('Le nom de la classe est obligatoire.');
+  expect(mockDb.runAsync).not.toHaveBeenCalled();
+});
+
 test('statisticsController calcule les tops', async () => {
   mockDb.getAllAsync
     .mockResolvedValueOnce([{ nom: '6e', totalMerites: 2, totalRetenues: 1 }])

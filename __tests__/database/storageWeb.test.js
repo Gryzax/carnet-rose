@@ -34,6 +34,19 @@ test('stockage web: seed demo persiste classes et eleves dans IndexedDB', async 
   expect(students).toHaveLength(5);
 });
 
+test('stockage web: ajout de classe persiste dans IndexedDB', async () => {
+  const db = await getDb();
+  await db.runAsync('INSERT INTO classes (nom, creeLe, derniereUtilisation) VALUES (?, datetime("now"), datetime("now"))', '4e Rose');
+
+  const classes = await db.getAllAsync(`
+    SELECT c.*, COUNT(e.id) as nombreEleves, COALESCE(SUM(e.merites), 0) as totalMerites, COALESCE(SUM(e.retenues), 0) as totalRetenues
+    FROM classes c LEFT JOIN eleves e ON e.classeId = c.id
+    GROUP BY c.id ORDER BY c.nom COLLATE NOCASE
+  `);
+
+  expect(classes).toEqual(expect.arrayContaining([expect.objectContaining({ nom: '4e Rose', nombreEleves: 0 })]));
+});
+
 test('stockage web: compteurs, historique et annulation utilisent la meme API que SQLite', async () => {
   const db = await getDb();
   const student = await db.getFirstAsync('SELECT * FROM eleves WHERE id = ?', 1);
