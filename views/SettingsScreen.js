@@ -1,10 +1,11 @@
 import { Alert, Modal, StyleSheet, Text, View } from 'react-native';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { colors } from '../constants/colors';
 import { reinitialiserTrimestre } from '../controllers/studentController';
 import { getAllStudents } from '../models/studentModel';
 import { BackButton } from '../components/BackButton';
 import { Card, InfoIcon, JournalInput, Pill, PillButton, Screen, Sparkle, Title } from '../components/Themed';
+import { getAuthStatus, getCurrentUser, signInWithApple, signInWithGoogle, signOut } from '../services/auth/authService';
 
 const Section = ({ title, children }) => (
   <Card washi>
@@ -13,10 +14,23 @@ const Section = ({ title, children }) => (
   </Card>
 );
 
-export const SettingsScreen = ({ navigation }) => {
+export const SettingsScreen = ({ navigation, onSignedOut }) => {
   const [summary, setSummary] = useState(null);
   const [success, setSuccess] = useState(null);
   const [confirmText, setConfirmText] = useState('');
+  const [account, setAccount] = useState({ user: null, localMode: false, supabaseReady: false });
+
+  useEffect(() => {
+    let active = true;
+    getCurrentUser().then(({ user }) => {
+      if (!active) return;
+      const status = getAuthStatus();
+      setAccount({ user, localMode: status.localModeEnabled, supabaseReady: status.enabled });
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const prepare = async () => {
     const students = await getAllStudents();
@@ -31,10 +45,37 @@ export const SettingsScreen = ({ navigation }) => {
     setSuccess(res);
   };
 
+  const disconnect = async () => {
+    await signOut();
+    onSignedOut?.();
+  };
+
   return (
     <Screen>
       <BackButton navigation={navigation} fallbackRoute="Classes" />
       <Title>Paramètres</Title>
+      <Section title="Compte">
+        {account.user ? (
+          <>
+            <Text testID="account-user" style={styles.strong}>{account.user.email || account.user.user_metadata?.name || 'Utilisateur connecté'}</Text>
+            <PillButton testID="sync-now" onPress={() => Alert.alert('Synchroniser maintenant', 'Synchronisation Supabase à configurer.')} variant="light">Synchroniser maintenant</PillButton>
+            <PillButton testID="sign-out" onPress={disconnect} variant="pink">Se déconnecter</PillButton>
+          </>
+        ) : (
+          <>
+            <Text testID="local-account-title" style={styles.strong}>Mode local uniquement</Text>
+            <Text style={styles.muted}>Connectez-vous pour sauvegarder et synchroniser vos données.</Text>
+            {account.supabaseReady && (
+              <>
+                <PillButton testID="settings-google" onPress={signInWithGoogle} variant="light">Continuer avec Google</PillButton>
+                <PillButton testID="settings-apple" onPress={signInWithApple} variant="light">Continuer avec Apple</PillButton>
+              </>
+            )}
+            {!account.supabaseReady && <Text style={styles.muted}>Supabase n'est pas encore configuré.</Text>}
+            <PillButton testID="sign-out" onPress={disconnect} variant="light">Se déconnecter</PillButton>
+          </>
+        )}
+      </Section>
       <Section title="À propos">
         <View style={styles.infoRow}><InfoIcon /><Text style={styles.strong}>Carnet Rose</Text></View>
         <Text style={styles.muted}>Suivi hors ligne des élèves</Text>
