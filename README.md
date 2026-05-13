@@ -1,4 +1,4 @@
-# Klassia
+# Carnet Rose
 
 Application Expo hors ligne pour le suivi d'élèves : classes, ticks, croix, mérites, retenues, historique et archivage trimestriel.
 
@@ -82,7 +82,7 @@ Elle ne nécessite pas :
 3. Sélectionner le workflow **Build Android APK**.
 4. Cliquer sur **Run workflow**.
 5. Attendre la fin du build.
-6. Télécharger l'artefact **klassia-debug-apk**.
+6. Télécharger l'artefact **carnet-rose-debug-apk**.
 7. Extraire le fichier `.zip`.
 8. Installer `app-debug.apk` sur un téléphone Android.
 

@@ -38,7 +38,7 @@ export const SettingsScreen = () => {
     <Screen>
       <Title>Paramètres</Title>
       <Section title="À propos">
-        <Text style={{ color: theme.text, fontFamily: 'NunitoSans_700Bold' }}>Klassia</Text>
+        <Text style={{ color: theme.text, fontFamily: 'NunitoSans_700Bold' }}>Carnet Rose</Text>
         <Text style={{ color: theme.muted, marginTop: 4 }}>Suivi hors ligne des élèves</Text>
         <Text style={{ color: theme.muted, marginTop: 4 }}>fourkane ahmerelain</Text>
         <Text style={{ color: theme.muted, marginTop: 4 }}>v1.0.0</Text>

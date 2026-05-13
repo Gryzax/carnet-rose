@@ -1,4 +1,4 @@
-const CACHE_NAME = 'klassia-pwa-v1';
+const CACHE_NAME = 'carnet-rose-pwa-v1';
 const APP_SHELL = ['./'];
 
 self.addEventListener('install', (event) => {

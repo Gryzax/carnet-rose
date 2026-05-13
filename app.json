@@ -1,16 +1,16 @@
 {
   "expo": {
-    "name": "Klassia",
-    "slug": "klassia",
+    "name": "Carnet Rose",
+    "slug": "carnet-rose",
     "version": "1.0.0",
     "orientation": "portrait",
-    "scheme": "klassia",
+    "scheme": "carnetrose",
     "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true
     },
     "android": {
-      "package": "com.gryzax.klassia",
+      "package": "com.gryzax.carnetrose",
       "versionCode": 1,
       "adaptiveIcon": {
         "backgroundColor": "#FCE7F3"

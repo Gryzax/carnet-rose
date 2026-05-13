@@ -1,7 +1,7 @@
 import localforage from 'localforage';
 
-const store = localforage.createInstance({ name: 'Klassia', storeName: 'database' });
-const legacyStore = localforage.createInstance({ name: 'CarnetRose', storeName: 'database' });
+const store = localforage.createInstance({ name: 'CarnetRose', storeName: 'database' });
+const legacyStore = localforage.createInstance({ name: 'Klassia', storeName: 'database' });
 const STORAGE_KEY = 'state:v1';
 
 const emptyState = () => ({

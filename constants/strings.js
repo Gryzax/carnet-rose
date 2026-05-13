@@ -1,5 +1,5 @@
 export const strings = {
-  appName: 'Klassia',
+  appName: 'Carnet Rose',
   classesTitle: 'Mes classes',
   addClass: 'Ajouter une classe',
   addStudent: 'Ajouter un élève',
