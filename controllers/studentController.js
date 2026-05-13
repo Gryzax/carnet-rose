@@ -1,6 +1,6 @@
 import { CROSSES_FOR_DETENTION, TICKS_FOR_MERIT, UNDO_LIMIT_SECONDS } from '../constants/config';
 import { createEvent, getLastActiveEvent, archiveStudent, markEventCancelled } from '../models/historyModel';
-import { deleteStudent, getAllStudents, getStudentById, updateCounters, resetAllStudents } from '../models/studentModel';
+import { createStudent, deleteStudent, getAllStudents, getStudentById, updateCounters, resetAllStudents } from '../models/studentModel';
 import { nowIso, secondsBetween } from '../utils/date';
 
 export const ajouterTick = async (eleve, raison = '') => {
@@ -62,4 +62,13 @@ export const supprimerEleve = async (eleve) => {
   const id = typeof eleve === 'object' ? eleve?.id : eleve;
   if (!id) throw new Error('Élève introuvable.');
   return deleteStudent(id);
+};
+
+export const ajouterEleve = async ({ classeId, prenom, nom }) => {
+  const normalizedPrenom = String(prenom || '').trim();
+  const normalizedNom = String(nom || '').trim();
+  if (!classeId) throw new Error('Classe introuvable.');
+  if (!normalizedPrenom) throw new Error("Le prénom de l'élève est obligatoire.");
+  if (!normalizedNom) throw new Error("Le nom de l'élève est obligatoire.");
+  return createStudent({ classeId, prenom: normalizedPrenom, nom: normalizedNom });
 };

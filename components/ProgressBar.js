@@ -1,10 +1,11 @@
 import { Animated, StyleSheet, View } from 'react-native';
 import { useEffect, useRef } from 'react';
+import { colors } from '../constants/colors';
 
 export const ProgressBar = ({ value, max, color }) => {
   const width = useRef(new Animated.Value(0)).current;
   useEffect(() => {
-    Animated.timing(width, { toValue: Math.min(value / max, 1), duration: 300, useNativeDriver: false }).start();
+    Animated.spring(width, { toValue: Math.min(value / max, 1), friction: 8, tension: 90, useNativeDriver: false }).start();
   }, [value, max, width]);
   return (
     <View style={styles.track} testID="progress-track">
@@ -14,6 +15,6 @@ export const ProgressBar = ({ value, max, color }) => {
 };
 
 const styles = StyleSheet.create({
-  track: { height: 10, borderRadius: 20, backgroundColor: '#F7DDEA', overflow: 'hidden', flex: 1 },
-  fill: { height: 10, borderRadius: 20 }
+  track: { height: 12, borderRadius: 20, backgroundColor: colors.card, borderColor: colors.border, borderWidth: 1.5, overflow: 'hidden', flex: 1 },
+  fill: { height: '100%', borderRadius: 20 }
 });

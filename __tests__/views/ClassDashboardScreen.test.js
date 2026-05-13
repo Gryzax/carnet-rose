@@ -9,10 +9,11 @@ jest.mock('../../hooks/useStudents', () => ({
 }));
 
 jest.mock('../../controllers/studentController', () => ({
+  ajouterEleve: jest.fn(() => Promise.resolve({ lastInsertRowId: 2 })),
   supprimerEleve: jest.fn(() => Promise.resolve())
 }));
 
-import { supprimerEleve } from '../../controllers/studentController';
+import { ajouterEleve, supprimerEleve } from '../../controllers/studentController';
 
 beforeEach(() => jest.clearAllMocks());
 
@@ -23,4 +24,25 @@ test('suppression élève demande confirmation puis refresh', async () => {
   fireEvent.press(getByTestId('confirm-delete-student'));
   await waitFor(() => expect(supprimerEleve).toHaveBeenCalledWith(student));
   expect(mockRefresh).toHaveBeenCalled();
+});
+
+test('flèche retour revient en arrière sur le tableau de bord classe', () => {
+  const navigation = { navigate: jest.fn(), canGoBack: jest.fn(() => true), goBack: jest.fn() };
+  const { getByTestId } = render(<ClassDashboardScreen route={{ params: { classe: { id: 1, nom: '4e Rose' } } }} navigation={navigation} />);
+
+  fireEvent.press(getByTestId('back-button'));
+
+  expect(navigation.goBack).toHaveBeenCalled();
+});
+
+test("annuler l'ajout d'élève ne crée pas d'élève", () => {
+  const { getByText, getByPlaceholderText, getByTestId, queryByPlaceholderText } = render(<ClassDashboardScreen route={{ params: { classe: { id: 1, nom: '4e Rose' } } }} navigation={{ navigate: jest.fn(), canGoBack: jest.fn(() => false) }} />);
+
+  fireEvent.press(getByText('Ajouter un élève'));
+  fireEvent.changeText(getByPlaceholderText('Prénom'), 'Ada');
+  fireEvent.changeText(getByPlaceholderText('Nom'), 'Lovelace');
+  fireEvent.press(getByTestId('cancel-add-student'));
+
+  expect(ajouterEleve).not.toHaveBeenCalled();
+  expect(queryByPlaceholderText('Prénom')).toBeNull();
 });

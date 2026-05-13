@@ -1,15 +1,15 @@
 import React, { memo, useEffect, useRef } from 'react';
-import { Animated, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { colors } from '../constants/colors';
 import { CROSSES_FOR_DETENTION, TICKS_FOR_MERIT } from '../constants/config';
 import { ProgressBar } from './ProgressBar';
 import { StudentAvatar, getStudentAvatarColor } from './StudentAvatar';
-import { useThemeColors } from './Themed';
+import { Pill, Sparkle } from './Themed';
 
 export const getStudentStateColor = (student) => getStudentAvatarColor(student);
 
 const StudentCardBase = ({ student, onPress, onDelete }) => {
-  const theme = useThemeColors();
   const fade = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -18,30 +18,33 @@ const StudentCardBase = ({ student, onPress, onDelete }) => {
 
   return (
     <Animated.View style={{ opacity: fade }}>
-      <TouchableOpacity testID="student-card" onPress={onPress} onLongPress={onDelete} style={[styles.card, { backgroundColor: theme.card, borderLeftColor: getStudentStateColor(student) }]}>
+      <Pressable testID="student-card" onPress={onPress} onLongPress={onDelete} style={({ pressed }) => [styles.card, pressed && styles.pressed]}>
+        <View style={styles.washi} />
         <View style={styles.header}>
           <StudentAvatar student={student} />
-          <View style={{ flex: 1 }}>
-            <Text style={[styles.name, { color: theme.text }]}>{student.nom.toUpperCase()} {student.prenom}</Text>
-            <Text style={[styles.subtle, { color: theme.muted }]}>Appui long pour supprimer</Text>
+          <View style={styles.nameBlock}>
+            <Text style={styles.name}>{student.nom.toUpperCase()} {student.prenom}</Text>
+            <Text style={styles.subtle}>Appui long pour supprimer</Text>
           </View>
-          <TouchableOpacity testID={`delete-student-${student.id}`} onPress={onDelete} style={styles.more}>
-            <Text style={styles.moreText}>Options</Text>
-          </TouchableOpacity>
+          <Pressable testID={`delete-student-${student.id}`} onPress={onDelete} style={({ pressed }) => [styles.more, pressed && styles.pressed]}>
+            <Ionicons name="ellipsis-horizontal" size={22} color={colors.ink} />
+          </Pressable>
         </View>
         <View style={styles.row}>
-          <Text style={[styles.label, { color: theme.muted }]}>Ticks {student.ticks}/{TICKS_FOR_MERIT}</Text>
+          <Pill style={styles.metric}>TICKS</Pill>
+          <Text style={styles.count}>{student.ticks}/{TICKS_FOR_MERIT}</Text>
           <ProgressBar value={student.ticks} max={TICKS_FOR_MERIT} color={colors.successGreen} />
         </View>
         <View style={styles.row}>
-          <Text style={[styles.label, { color: theme.muted }]}>Croix {student.croix}/{CROSSES_FOR_DETENTION}</Text>
+          <Pill style={styles.metric}>CROIX</Pill>
+          <Text style={styles.count}>{student.croix}/{CROSSES_FOR_DETENTION}</Text>
           <ProgressBar value={student.croix} max={CROSSES_FOR_DETENTION} color={colors.dangerRed} />
         </View>
         <View style={styles.badges}>
-          <Text style={styles.badge}>Mérites {student.merites}</Text>
-          <Text style={styles.badgeWarn}>Retenues {student.retenues}</Text>
+          <View style={styles.badgeRow}><Sparkle /><Text style={styles.badge}>Mérites {student.merites}</Text></View>
+          <View style={styles.badgeRow}><Sparkle /><Text style={styles.badge}>Retenues {student.retenues}</Text></View>
         </View>
-      </TouchableOpacity>
+      </Pressable>
     </Animated.View>
   );
 };
@@ -49,15 +52,18 @@ const StudentCardBase = ({ student, onPress, onDelete }) => {
 export const StudentCard = memo(StudentCardBase);
 
 const styles = StyleSheet.create({
-  card: { borderRadius: 20, padding: 16, marginBottom: 12, borderLeftWidth: 6, shadowColor: colors.primaryPink, shadowOpacity: 0.16, shadowRadius: 10, elevation: 2 },
-  header: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 10 },
-  name: { fontFamily: 'Nunito_800ExtraBold', fontSize: 17 },
-  subtle: { fontFamily: 'NunitoSans_400Regular', fontSize: 12, marginTop: 2 },
-  row: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 8 },
-  label: { width: 76, fontFamily: 'NunitoSans_600SemiBold', fontSize: 12 },
-  badges: { flexDirection: 'row', gap: 8, marginTop: 12 },
-  badge: { backgroundColor: colors.lightPink, color: colors.deepPink, borderRadius: 50, paddingHorizontal: 12, paddingVertical: 5, overflow: 'hidden', fontFamily: 'NunitoSans_700Bold' },
-  badgeWarn: { backgroundColor: '#FEF3C7', color: '#92400E', borderRadius: 50, paddingHorizontal: 12, paddingVertical: 5, overflow: 'hidden', fontFamily: 'NunitoSans_700Bold' },
-  more: { borderRadius: 50, backgroundColor: colors.lightPink, paddingHorizontal: 10, paddingVertical: 6 },
-  moreText: { color: colors.deepPink, fontFamily: 'NunitoSans_700Bold', fontSize: 12 }
+  card: { backgroundColor: colors.card, borderColor: colors.border, borderWidth: 1.5, borderRadius: 20, padding: 16, marginBottom: 12 },
+  washi: { position: 'absolute', top: -9, left: 24, width: 76, height: 22, borderRadius: 3, backgroundColor: colors.orange, opacity: 0.82, transform: [{ rotate: '-5deg' }] },
+  pressed: { transform: [{ scale: 0.97 }] },
+  header: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 12 },
+  nameBlock: { flex: 1 },
+  name: { fontFamily: 'PatrickHand_400Regular', fontSize: 23, color: colors.ink, lineHeight: 27 },
+  subtle: { fontFamily: 'PatrickHand_400Regular', fontSize: 16, color: colors.muted, marginTop: 1 },
+  more: { width: 40, height: 40, borderRadius: 20, borderWidth: 1.5, borderColor: colors.border, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.card },
+  row: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 8 },
+  metric: { width: 70, textAlign: 'center' },
+  count: { fontFamily: 'PatrickHand_400Regular', color: colors.ink, fontSize: 18, width: 38 },
+  badges: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginTop: 12 },
+  badgeRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  badge: { fontFamily: 'PatrickHand_400Regular', color: colors.ink, fontSize: 17 }
 });

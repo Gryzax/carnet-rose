@@ -61,6 +61,17 @@ test('la modale bloque un nom vide', () => {
   expect(ajouterClasse).not.toHaveBeenCalled();
 });
 
+test("Annuler l'ajout de classe ne crée pas de classe", () => {
+  const { getByTestId, getByPlaceholderText, getByText, queryByPlaceholderText } = render(<ClassesScreen navigation={{ navigate: jest.fn() }} />);
+
+  fireEvent.press(getByTestId('add-class-fab'));
+  fireEvent.changeText(getByPlaceholderText('Nom de la classe'), '3e Rose');
+  fireEvent.press(getByText('Annuler'));
+
+  expect(ajouterClasse).not.toHaveBeenCalled();
+  expect(queryByPlaceholderText('Nom de la classe')).toBeNull();
+});
+
 test('la corbeille ouvre la confirmation de suppression', () => {
   mockClasses = [{ id: 7, nom: '4e Rose', nombreEleves: 2, totalMerites: 0, totalRetenues: 0 }];
   const { getAllByText, getByTestId, getByText } = render(<ClassesScreen navigation={{ navigate: jest.fn() }} />);

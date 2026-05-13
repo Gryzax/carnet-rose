@@ -20,18 +20,21 @@ const ClassesStack = () => (
 );
 
 export const RootNavigator = () => (
-  <Tabs.Navigator screenOptions={({ route }) => ({
-    headerShown: false,
-    tabBarActiveTintColor: colors.deepPink,
-    tabBarInactiveTintColor: colors.textMuted,
-    tabBarStyle: { backgroundColor: colors.white, borderTopColor: colors.lightPink },
-    tabBarIcon: ({ color, size }) => {
-      const icons = { Classes: 'school-outline', Statistiques: 'bar-chart-outline', Parametres: 'settings-outline' };
-      return <Ionicons name={icons[route.name]} size={size} color={color} />;
-    }
-  })}>
-    <Tabs.Screen name="Classes" component={ClassesStack} options={{ title: 'Classes' }} />
-    <Tabs.Screen name="Statistiques" component={StatisticsScreen} />
-    <Tabs.Screen name="Parametres" component={SettingsScreen} options={{ title: 'Paramètres' }} />
+  <Tabs.Navigator
+    screenOptions={({ route }) => ({
+      headerShown: false,
+      tabBarActiveTintColor: colors.ink,
+      tabBarInactiveTintColor: colors.muted,
+      tabBarLabelStyle: { fontFamily: 'PatrickHand_400Regular', fontSize: 15 },
+      tabBarStyle: { backgroundColor: colors.canvas, borderTopWidth: 0, elevation: 0, height: 64, paddingTop: 6 },
+      tabBarIcon: ({ color, size }) => {
+        const icons = { Classes: 'basket-outline', Statistiques: 'restaurant-outline', Parametres: 'grid-outline' };
+        return <Ionicons name={icons[route.name]} size={size} color={color} />;
+      }
+    })}
+  >
+    <Tabs.Screen name="Classes" component={ClassesStack} options={{ title: 'Compra' }} />
+    <Tabs.Screen name="Statistiques" component={StatisticsScreen} options={{ title: 'Recetas' }} />
+    <Tabs.Screen name="Parametres" component={SettingsScreen} options={{ title: 'Mas' }} />
   </Tabs.Navigator>
 );

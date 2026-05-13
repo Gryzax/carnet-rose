@@ -11,7 +11,7 @@ jest.mock('../../controllers/studentController', () => ({
 }));
 
 test('paramètres affiche les sections enrichies', () => {
-  const { getByText } = render(<SettingsScreen />);
+  const { getByText } = render(<SettingsScreen navigation={{ navigate: jest.fn(), canGoBack: jest.fn(() => false) }} />);
   expect(getByText('À propos')).toBeTruthy();
   expect(getByText('Carnet Rose')).toBeTruthy();
   expect(getByText('Données')).toBeTruthy();
@@ -20,7 +20,16 @@ test('paramètres affiche les sections enrichies', () => {
 
 test('export affiche bientôt disponible', () => {
   jest.spyOn(Alert, 'alert').mockImplementation(() => {});
-  const { getByTestId } = render(<SettingsScreen />);
+  const { getByTestId } = render(<SettingsScreen navigation={{ navigate: jest.fn(), canGoBack: jest.fn(() => false) }} />);
   fireEvent.press(getByTestId('export-data'));
   expect(Alert.alert).toHaveBeenCalledWith('Exporter les données', 'Fonctionnalité bientôt disponible');
+});
+
+test("paramètres affiche une flèche retour vers l'accueil", () => {
+  const navigation = { navigate: jest.fn(), canGoBack: jest.fn(() => false), goBack: jest.fn() };
+  const { getByTestId } = render(<SettingsScreen navigation={navigation} />);
+
+  fireEvent.press(getByTestId('back-button'));
+
+  expect(navigation.navigate).toHaveBeenCalledWith('Classes');
 });
