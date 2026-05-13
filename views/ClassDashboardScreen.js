@@ -1,11 +1,11 @@
-import { FlatList, Modal, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { FlatList, Modal, StyleSheet, Text, View } from 'react-native';
 import { useMemo, useState } from 'react';
 import { colors } from '../constants/colors';
 import { ajouterEleve, supprimerEleve } from '../controllers/studentController';
 import { BackButton } from '../components/BackButton';
 import { EmptyState } from '../components/EmptyState';
 import { StudentCard } from '../components/StudentCard';
-import { PillButton, Screen, Title, useThemeColors } from '../components/Themed';
+import { Card, JournalInput, PillButton, Screen, SegmentedControl, Sparkle, Title } from '../components/Themed';
 import { useStudents } from '../hooks/useStudents';
 
 export const ClassDashboardScreen = ({ route, navigation }) => {
@@ -19,7 +19,6 @@ export const ClassDashboardScreen = ({ route, navigation }) => {
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const { students, refresh } = useStudents(classe.id, sort);
-  const theme = useThemeColors();
   const atRisk = useMemo(() => students.filter((s) => s.croix >= 2).length, [students]);
 
   const confirmDeleteStudent = async () => {
@@ -52,7 +51,7 @@ export const ClassDashboardScreen = ({ route, navigation }) => {
       setStudentFirstName('');
       setStudentLastName('');
     } catch (error) {
-      setAddError(error.message || "Impossible d'ajouter l'élève.");
+      setAddError(error.message || "Impossible d'ajouter l'eleve.");
     } finally {
       setSaving(false);
     }
@@ -61,61 +60,66 @@ export const ClassDashboardScreen = ({ route, navigation }) => {
   return (
     <Screen>
       <BackButton navigation={navigation} fallbackRoute="ClassesHome" />
-      <View style={{ marginBottom: 14 }}>
-        <Title>{classe.nom}</Title>
-        <Text style={{ color: theme.muted }}>{students.length} élèves - {atRisk} élèves à risque</Text>
+      <View style={styles.header}>
+        <Title style={styles.title}>{classe.nom}</Title>
+        <View style={styles.metaLine}><Sparkle /><Text style={styles.meta}>{students.length} élèves - {atRisk} élèves à risque</Text></View>
       </View>
-      <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
-        {[['nom', 'Nom'], ['croix', 'Croix'], ['ticks', 'Ticks']].map(([key, label]) => (
-          <TouchableOpacity key={key} onPress={() => setSort(key)} style={{ borderRadius: 50, padding: 10, backgroundColor: sort === key ? colors.primaryPink : colors.lightPink }}>
-            <Text style={{ color: sort === key ? colors.white : colors.deepPink, fontFamily: 'NunitoSans_700Bold' }}>{label}</Text>
-          </TouchableOpacity>
-        ))}
-      </View>
+      <SegmentedControl value={sort} onChange={setSort} options={[{ value: 'nom', label: 'Nom' }, { value: 'croix', label: 'Croix' }, { value: 'ticks', label: 'Ticks' }]} style={styles.segmented} />
       <FlatList
         data={students}
         keyExtractor={(item) => String(item.id)}
         initialNumToRender={10}
-        getItemLayout={(_, index) => ({ length: 164, offset: 164 * index, index })}
+        getItemLayout={(_, index) => ({ length: 174, offset: 174 * index, index })}
         ListEmptyComponent={<EmptyState icon="people-outline" title="Aucun élève dans cette classe" message="Ajoutez votre premier élève pour commencer." actionLabel="Ajouter un élève" onAction={() => setAddModalVisible(true)} />}
         renderItem={({ item }) => <StudentCard student={item} onPress={() => navigation.navigate('StudentDetail', { studentId: item.id })} onDelete={() => setStudentToDelete(item)} />}
       />
-      <PillButton onPress={() => setAddModalVisible(true)} style={{ marginTop: 8 }}>Ajouter un élève</PillButton>
+      <PillButton onPress={() => setAddModalVisible(true)} variant="pink" style={styles.add}>Ajouter un élève</PillButton>
       <Modal visible={addModalVisible} transparent animationType="slide" onRequestClose={closeAddModal}>
-        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.35)', justifyContent: 'flex-end' }}>
-          <View style={{ backgroundColor: theme.card, borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 20, gap: 12 }}>
-            <Text style={{ fontFamily: 'Nunito_800ExtraBold', fontSize: 22, color: theme.text }}>Ajouter un élève</Text>
-            <TextInput placeholder="Prénom" placeholderTextColor={theme.muted} value={studentFirstName} onChangeText={setStudentFirstName} style={{ backgroundColor: theme.bg, borderRadius: 14, padding: 14, color: theme.text }} />
-            <TextInput placeholder="Nom" placeholderTextColor={theme.muted} value={studentLastName} onChangeText={setStudentLastName} style={{ backgroundColor: theme.bg, borderRadius: 14, padding: 14, color: theme.text }} />
-            {!!addError && <Text style={{ color: colors.deepPink }}>{addError}</Text>}
-            <View style={{ flexDirection: 'row', justifyContent: 'flex-end', gap: 10 }}>
-              <TouchableOpacity testID="cancel-add-student" disabled={saving} onPress={closeAddModal} style={{ backgroundColor: colors.lightPink, borderRadius: 50, paddingVertical: 12, paddingHorizontal: 18 }}>
-                <Text style={{ color: colors.deepPink, fontFamily: 'NunitoSans_700Bold' }}>Annuler</Text>
-              </TouchableOpacity>
-              <TouchableOpacity disabled={saving} onPress={submitStudent} style={{ backgroundColor: colors.primaryPink, borderRadius: 50, paddingVertical: 12, paddingHorizontal: 18, opacity: saving ? 0.7 : 1 }}>
-                <Text style={{ color: colors.white, fontFamily: 'NunitoSans_700Bold' }}>{saving ? 'Ajout...' : 'Ajouter'}</Text>
-              </TouchableOpacity>
+        <View style={styles.sheetBackdrop}>
+          <Card style={styles.sheet} washi>
+            <Text style={styles.modalTitle}>Ajouter un élève</Text>
+            <JournalInput placeholder="Prénom" value={studentFirstName} onChangeText={setStudentFirstName} />
+            <JournalInput placeholder="Nom" value={studentLastName} onChangeText={setStudentLastName} />
+            {!!addError && <Text style={styles.error}>{addError}</Text>}
+            <View style={styles.actions}>
+              <PillButton testID="cancel-add-student" disabled={saving} onPress={closeAddModal} variant="light" style={styles.actionButton}>Annuler</PillButton>
+              <PillButton disabled={saving} onPress={submitStudent} variant="pink" style={styles.actionButton}>{saving ? 'Ajout...' : 'Ajouter'}</PillButton>
             </View>
-          </View>
+          </Card>
         </View>
       </Modal>
       <Modal visible={!!studentToDelete} transparent animationType="fade" onRequestClose={() => setStudentToDelete(null)}>
-        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.35)', justifyContent: 'center', padding: 20 }}>
-          <View style={{ backgroundColor: theme.card, borderRadius: 20, padding: 20, gap: 12 }}>
-            <Text style={{ fontFamily: 'Nunito_800ExtraBold', fontSize: 22, color: theme.text }}>Supprimer l'élève</Text>
-            <Text style={{ fontFamily: 'NunitoSans_700Bold', fontSize: 17, color: theme.text }}>{studentToDelete?.prenom} {studentToDelete?.nom}</Text>
-            <Text style={{ color: theme.muted, lineHeight: 20 }}>Son historique et ses archives trimestrielles seront supprimés définitivement.</Text>
-            <View style={{ flexDirection: 'row', justifyContent: 'flex-end', gap: 10 }}>
-              <TouchableOpacity testID="cancel-delete-student" disabled={deleting} onPress={() => setStudentToDelete(null)} style={{ backgroundColor: colors.lightPink, borderRadius: 50, paddingVertical: 12, paddingHorizontal: 18 }}>
-                <Text style={{ color: colors.deepPink, fontFamily: 'NunitoSans_700Bold' }}>Annuler</Text>
-              </TouchableOpacity>
-              <TouchableOpacity testID="confirm-delete-student" disabled={deleting} onPress={confirmDeleteStudent} style={{ backgroundColor: colors.deepPink, borderRadius: 50, paddingVertical: 12, paddingHorizontal: 18, opacity: deleting ? 0.7 : 1 }}>
-                <Text style={{ color: colors.white, fontFamily: 'NunitoSans_700Bold' }}>{deleting ? 'Suppression...' : 'Supprimer'}</Text>
-              </TouchableOpacity>
+        <View style={styles.backdrop}>
+          <Card style={styles.dialog} washi>
+            <Text style={styles.modalTitle}>Supprimer l'élève</Text>
+            <Text style={styles.modalStrong}>{studentToDelete?.prenom} {studentToDelete?.nom}</Text>
+            <Text style={styles.modalText}>Son historique et ses archives trimestrielles seront supprimés définitivement.</Text>
+            <View style={styles.actions}>
+              <PillButton testID="cancel-delete-student" disabled={deleting} onPress={() => setStudentToDelete(null)} variant="light" style={styles.actionButton}>Annuler</PillButton>
+              <PillButton testID="confirm-delete-student" disabled={deleting} onPress={confirmDeleteStudent} variant="pink" style={styles.actionButton}>{deleting ? 'Suppression...' : 'Supprimer'}</PillButton>
             </View>
-          </View>
+          </Card>
         </View>
       </Modal>
     </Screen>
   );
 };
+
+const styles = StyleSheet.create({
+  header: { marginBottom: 14 },
+  title: { marginBottom: 4 },
+  metaLine: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  meta: { fontFamily: 'PatrickHand_400Regular', color: colors.muted, fontSize: 19 },
+  segmented: { marginBottom: 12 },
+  add: { marginTop: 8 },
+  sheetBackdrop: { flex: 1, backgroundColor: colors.scrim, justifyContent: 'flex-end', padding: 12 },
+  backdrop: { flex: 1, backgroundColor: colors.scrim, justifyContent: 'center', padding: 20 },
+  sheet: { gap: 12 },
+  dialog: { gap: 12 },
+  modalTitle: { fontFamily: 'PatrickHand_400Regular', fontSize: 28, color: colors.ink },
+  modalStrong: { fontFamily: 'PatrickHand_400Regular', fontSize: 22, color: colors.ink },
+  modalText: { fontFamily: 'PatrickHand_400Regular', fontSize: 19, color: colors.muted, lineHeight: 24 },
+  error: { fontFamily: 'PatrickHand_400Regular', fontSize: 18, color: colors.dangerRed },
+  actions: { flexDirection: 'row', gap: 10 },
+  actionButton: { flex: 1 }
+});

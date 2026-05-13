@@ -1,26 +1,22 @@
-import { Alert, Modal, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, Modal, StyleSheet, Text, View } from 'react-native';
 import { useState } from 'react';
 import { colors } from '../constants/colors';
 import { reinitialiserTrimestre } from '../controllers/studentController';
 import { getAllStudents } from '../models/studentModel';
 import { BackButton } from '../components/BackButton';
-import { PillButton, Screen, Title, useThemeColors } from '../components/Themed';
+import { Card, InfoIcon, JournalInput, Pill, PillButton, Screen, Sparkle, Title } from '../components/Themed';
 
-const Section = ({ title, children }) => {
-  const theme = useThemeColors();
-  return (
-    <View style={{ backgroundColor: theme.card, borderRadius: 20, padding: 16, marginBottom: 14 }}>
-      <Text style={{ color: theme.text, fontFamily: 'Nunito_800ExtraBold', fontSize: 20, marginBottom: 10 }}>{title}</Text>
-      {children}
-    </View>
-  );
-};
+const Section = ({ title, children }) => (
+  <Card washi>
+    <Pill>{title}</Pill>
+    <View style={styles.sectionBody}>{children}</View>
+  </Card>
+);
 
 export const SettingsScreen = ({ navigation }) => {
   const [summary, setSummary] = useState(null);
   const [success, setSuccess] = useState(null);
   const [confirmText, setConfirmText] = useState('');
-  const theme = useThemeColors();
 
   const prepare = async () => {
     const students = await getAllStudents();
@@ -40,32 +36,42 @@ export const SettingsScreen = ({ navigation }) => {
       <BackButton navigation={navigation} fallbackRoute="Classes" />
       <Title>Paramètres</Title>
       <Section title="À propos">
-        <Text style={{ color: theme.text, fontFamily: 'NunitoSans_700Bold' }}>Carnet Rose</Text>
-        <Text style={{ color: theme.muted, marginTop: 4 }}>Suivi hors ligne des élèves</Text>
-        <Text style={{ color: theme.muted, marginTop: 4 }}>fourkane ahmerelain</Text>
-        <Text style={{ color: theme.muted, marginTop: 4 }}>v1.0.0</Text>
+        <View style={styles.infoRow}><InfoIcon /><Text style={styles.strong}>Carnet Rose</Text></View>
+        <Text style={styles.muted}>Suivi hors ligne des élèves</Text>
+        <Text style={styles.muted}>fourkane ahmerelain</Text>
+        <Text style={styles.muted}>v1.0.0</Text>
       </Section>
       <Section title="Données">
-        <TouchableOpacity testID="export-data" onPress={() => Alert.alert('Exporter les données', 'Fonctionnalité bientôt disponible')} style={{ borderColor: colors.deepPink, borderWidth: 1, borderRadius: 50, paddingVertical: 12, alignItems: 'center' }}>
-          <Text style={{ color: colors.deepPink, fontFamily: 'NunitoSans_700Bold' }}>Exporter les données</Text>
-        </TouchableOpacity>
+        <PillButton testID="export-data" onPress={() => Alert.alert('Exporter les données', 'Fonctionnalité bientôt disponible')} variant="light">Exporter les données</PillButton>
       </Section>
       <Section title="Trimestre">
-        <PillButton onPress={prepare}>Terminer le trimestre</PillButton>
-        {success && <View style={{ marginTop: 14, backgroundColor: colors.lightPink, borderRadius: 20, padding: 14 }}><Text style={{ color: colors.textDark }}>Trimestre archivé : {success.totalEleves} élèves, {success.totalMerites} mérites, {success.totalRetenues} retenues.</Text></View>}
+        <PillButton onPress={prepare} variant="pink">Terminer le trimestre</PillButton>
+        {success && <View style={styles.success}><Sparkle /><Text style={styles.text}>Trimestre archivé : {success.totalEleves} élèves, {success.totalMerites} mérites, {success.totalRetenues} retenues.</Text></View>}
       </Section>
       <Modal transparent visible={Boolean(summary)} onRequestClose={() => setSummary(null)}>
-        <View style={{ flex: 1, justifyContent: 'center', padding: 24, backgroundColor: 'rgba(0,0,0,0.25)' }}>
-          <View style={{ backgroundColor: theme.card, borderRadius: 20, padding: 20, gap: 12 }}>
-            <Text style={{ fontSize: 22, fontFamily: 'Nunito_800ExtraBold', color: theme.text }}>Confirmer la fin du trimestre</Text>
-            <Text style={{ color: theme.muted }}>Toutes classes : {summary?.totalMerites} mérites, {summary?.totalRetenues} retenues, {summary?.totalEleves} élèves.</Text>
-            <Text style={{ color: theme.text }}>Saisissez CONFIRMER pour continuer.</Text>
-            <TextInput testID="trimester-confirm-input" value={confirmText} onChangeText={setConfirmText} autoCapitalize="characters" style={{ backgroundColor: theme.bg, color: theme.text, borderRadius: 14, padding: 12 }} />
-            <PillButton onPress={confirm} style={{ opacity: confirmText === 'CONFIRMER' ? 1 : 0.5 }}>Je confirme</PillButton>
-            <TouchableOpacity onPress={() => setSummary(null)}><Text style={{ textAlign: 'center', marginTop: 4, color: theme.muted }}>Annuler</Text></TouchableOpacity>
-          </View>
+        <View style={styles.backdrop}>
+          <Card style={styles.dialog} washi>
+            <Text style={styles.modalTitle}>Confirmer la fin du trimestre</Text>
+            <Text style={styles.muted}>Toutes classes : {summary?.totalMerites} mérites, {summary?.totalRetenues} retenues, {summary?.totalEleves} élèves.</Text>
+            <Text style={styles.text}>Saisissez CONFIRMER pour continuer.</Text>
+            <JournalInput testID="trimester-confirm-input" value={confirmText} onChangeText={setConfirmText} autoCapitalize="characters" />
+            <PillButton onPress={confirm} variant="pink" disabled={confirmText !== 'CONFIRMER'}>Je confirme</PillButton>
+            <PillButton onPress={() => setSummary(null)} variant="light">Annuler</PillButton>
+          </Card>
         </View>
       </Modal>
     </Screen>
   );
 };
+
+const styles = StyleSheet.create({
+  sectionBody: { marginTop: 12, gap: 8 },
+  infoRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  strong: { color: colors.ink, fontFamily: 'PatrickHand_400Regular', fontSize: 23 },
+  muted: { color: colors.muted, fontFamily: 'PatrickHand_400Regular', fontSize: 19, lineHeight: 24 },
+  text: { color: colors.ink, fontFamily: 'PatrickHand_400Regular', fontSize: 19, lineHeight: 24, flex: 1 },
+  success: { marginTop: 14, backgroundColor: colors.sage, borderColor: colors.border, borderWidth: 1.5, borderRadius: 16, padding: 14, flexDirection: 'row', alignItems: 'center', gap: 8 },
+  backdrop: { flex: 1, justifyContent: 'center', padding: 24, backgroundColor: colors.scrim },
+  dialog: { gap: 12 },
+  modalTitle: { fontSize: 28, fontFamily: 'PatrickHand_400Regular', color: colors.ink }
+});

@@ -1,12 +1,6 @@
-import { Ionicons } from '@expo/vector-icons';
-import { StyleSheet, Text, TouchableOpacity } from 'react-native';
-import { colors } from '../constants/colors';
-import { useThemeColors } from './Themed';
+import { IconButton } from './Themed';
 
-export const BackButton = ({ navigation, fallbackRoute = 'Classes', color, style, label = 'Retour' }) => {
-  const theme = useThemeColors();
-  const iconColor = color || (theme.dark ? colors.white : colors.deepPink);
-
+export const BackButton = ({ navigation, fallbackRoute = 'Classes', style, label = 'Retour' }) => {
   const handlePress = () => {
     if (navigation?.canGoBack?.()) {
       navigation.goBack();
@@ -15,32 +9,5 @@ export const BackButton = ({ navigation, fallbackRoute = 'Classes', color, style
     navigation?.navigate?.(fallbackRoute);
   };
 
-  return (
-    <TouchableOpacity
-      accessibilityLabel={label}
-      testID="back-button"
-      onPress={handlePress}
-      style={[styles.button, { backgroundColor: theme.dark ? colors.darkCard : colors.lightPink }, style]}
-    >
-      <Ionicons name="chevron-back-outline" size={24} color={iconColor} />
-      {!!label && <Text style={[styles.label, { color: iconColor }]}>{label}</Text>}
-    </TouchableOpacity>
-  );
+  return <IconButton icon="chevron-back-outline" label={label} onPress={handlePress} style={[{ alignSelf: 'flex-start', marginBottom: 12 }, style]} testID="back-button" />;
 };
-
-const styles = StyleSheet.create({
-  button: {
-    alignSelf: 'flex-start',
-    minHeight: 44,
-    borderRadius: 50,
-    paddingHorizontal: 12,
-    marginBottom: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4
-  },
-  label: {
-    fontFamily: 'NunitoSans_700Bold',
-    fontSize: 14
-  }
-});
