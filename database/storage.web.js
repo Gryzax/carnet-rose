@@ -1,6 +1,7 @@
 import localforage from 'localforage';
 
-const store = localforage.createInstance({ name: 'CarnetRose', storeName: 'database' });
+const store = localforage.createInstance({ name: 'Klassia', storeName: 'database' });
+const legacyStore = localforage.createInstance({ name: 'CarnetRose', storeName: 'database' });
 const STORAGE_KEY = 'state:v1';
 
 const emptyState = () => ({
@@ -17,7 +18,13 @@ const normalizeSql = (sql) => String(sql).replace(/\s+/g, ' ').trim().toLowerCas
 
 const loadState = async () => {
   const state = await store.getItem(STORAGE_KEY);
-  return state || emptyState();
+  if (state) return state;
+  const legacyState = await legacyStore.getItem(STORAGE_KEY);
+  if (legacyState) {
+    await store.setItem(STORAGE_KEY, legacyState);
+    return legacyState;
+  }
+  return emptyState();
 };
 
 const saveState = (state) => store.setItem(STORAGE_KEY, state);

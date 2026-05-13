@@ -60,7 +60,7 @@ export const ClassesScreen = ({ navigation }) => {
       setAddModalVisible(false);
       setClassName('');
     } catch (error) {
-      setAddError(error.message || 'Impossible d ajouter la classe.');
+      setAddError(error.message || "Impossible d'ajouter la classe.");
     } finally {
       setSaving(false);
     }
@@ -101,20 +101,20 @@ export const ClassesScreen = ({ navigation }) => {
           <Text style={{ color: colors.deepPink, fontFamily: 'NunitoSans_700Bold', fontSize: 12 }}>Options</Text>
         </TouchableOpacity>
       </View>
-      <Text style={{ color: theme.muted, marginTop: 8 }}>{item.nombreEleves} eleves</Text>
-      <Text style={{ color: colors.deepPink, marginTop: 8 }}>Merites {item.totalMerites} - Retenues {item.totalRetenues}</Text>
+      <Text style={{ color: theme.muted, marginTop: 8 }}>{item.nombreEleves} élèves</Text>
+      <Text style={{ color: colors.deepPink, marginTop: 8 }}>Mérites {item.totalMerites} - Retenues {item.totalRetenues}</Text>
     </TouchableOpacity>
   );
 
   return (
     <Screen>
       <Title>{strings.classesTitle}</Title>
-      <TextInput placeholder="Rechercher un eleve" placeholderTextColor={theme.muted} value={query} onChangeText={search} style={{ backgroundColor: theme.card, borderRadius: 20, padding: 14, marginBottom: 12, color: theme.text }} />
+      <TextInput placeholder="Rechercher un élève" placeholderTextColor={theme.muted} value={query} onChangeText={search} style={{ backgroundColor: theme.card, borderRadius: 20, padding: 14, marginBottom: 12, color: theme.text }} />
       <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
-        {['alpha', 'recent'].map((s) => <TouchableOpacity key={s} onPress={() => setSort(s)} style={{ backgroundColor: sort === s ? colors.primaryPink : colors.lightPink, borderRadius: 50, padding: 10 }}><Text style={{ color: sort === s ? colors.white : colors.deepPink }}>{s === 'alpha' ? 'A-Z' : 'Recent'}</Text></TouchableOpacity>)}
+        {['alpha', 'recent'].map((s) => <TouchableOpacity key={s} onPress={() => setSort(s)} style={{ backgroundColor: sort === s ? colors.primaryPink : colors.lightPink, borderRadius: 50, padding: 10 }}><Text style={{ color: sort === s ? colors.white : colors.deepPink }}>{s === 'alpha' ? 'A-Z' : 'Récent'}</Text></TouchableOpacity>)}
       </View>
       {results.map((s) => <TouchableOpacity key={s.id} onPress={() => navigation.navigate('StudentDetail', { studentId: s.id })}><Text style={{ color: theme.text, marginBottom: 8 }}>{s.prenom} {s.nom} - {s.classeNom}</Text></TouchableOpacity>)}
-      <FlatList key={columns} data={data} numColumns={columns} keyExtractor={(item) => String(item.id)} initialNumToRender={8} getItemLayout={(_, index) => ({ length: 132, offset: 132 * index, index })} ListEmptyComponent={<EmptyState icon="school-outline" title="Aucune classe pour l'instant" message="Appuyez sur + pour creer votre premiere classe" actionLabel={strings.addClass} onAction={openAddModal} />} renderItem={renderClass} />
+      <FlatList key={columns} data={data} numColumns={columns} keyExtractor={(item) => String(item.id)} initialNumToRender={8} getItemLayout={(_, index) => ({ length: 132, offset: 132 * index, index })} ListEmptyComponent={<EmptyState icon="school-outline" title="Aucune classe pour l'instant" message="Appuyez sur + pour créer votre première classe" actionLabel={strings.addClass} onAction={openAddModal} />} renderItem={renderClass} />
       <TouchableOpacity accessibilityLabel={strings.addClass} testID="add-class-fab" onPress={openAddModal} style={{ position: 'absolute', right: 20, bottom: 24, backgroundColor: colors.primaryPink, width: 58, height: 58, borderRadius: 58, alignItems: 'center', justifyContent: 'center' }}>
         <Ionicons name="add-outline" color={colors.white} size={32} />
       </TouchableOpacity>
@@ -136,7 +136,7 @@ export const ClassesScreen = ({ navigation }) => {
           <View style={{ backgroundColor: theme.card, borderRadius: 20, padding: 20, gap: 12 }}>
             <Text style={{ fontFamily: 'Nunito_800ExtraBold', fontSize: 22, color: theme.text }}>Supprimer la classe</Text>
             <Text style={{ fontFamily: 'NunitoSans_700Bold', fontSize: 17, color: theme.text }}>{classToDelete?.nom}</Text>
-            <Text style={{ color: theme.muted, lineHeight: 20 }}>Les eleves de cette classe, leur historique et leurs archives trimestrielles seront supprimes definitivement.</Text>
+            <Text style={{ color: theme.muted, lineHeight: 20 }}>Les élèves de cette classe, leur historique et leurs archives trimestrielles seront supprimés définitivement.</Text>
             {!!deleteError && <Text style={{ color: colors.deepPink }}>{deleteError}</Text>}
             <View style={{ flexDirection: 'row', justifyContent: 'flex-end', gap: 10 }}>
               <TouchableOpacity testID="cancel-delete-class" disabled={deleting} onPress={closeDeleteModal} style={{ backgroundColor: colors.lightPink, borderRadius: 50, paddingVertical: 12, paddingHorizontal: 18 }}><Text style={{ color: colors.deepPink, fontFamily: 'NunitoSans_700Bold' }}>Annuler</Text></TouchableOpacity>

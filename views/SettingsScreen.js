@@ -36,27 +36,27 @@ export const SettingsScreen = () => {
 
   return (
     <Screen>
-      <Title>Parametres</Title>
-      <Section title="A propos">
+      <Title>Paramètres</Title>
+      <Section title="À propos">
         <Text style={{ color: theme.text, fontFamily: 'NunitoSans_700Bold' }}>Klassia</Text>
-        <Text style={{ color: theme.muted, marginTop: 4 }}>Suivi hors ligne des eleves</Text>
+        <Text style={{ color: theme.muted, marginTop: 4 }}>Suivi hors ligne des élèves</Text>
         <Text style={{ color: theme.muted, marginTop: 4 }}>fourkane ahmerelain</Text>
         <Text style={{ color: theme.muted, marginTop: 4 }}>v1.0.0</Text>
       </Section>
-      <Section title="Donnees">
-        <TouchableOpacity testID="export-data" onPress={() => Alert.alert('Exporter les donnees', 'Fonctionnalite bientot disponible')} style={{ borderColor: colors.deepPink, borderWidth: 1, borderRadius: 50, paddingVertical: 12, alignItems: 'center' }}>
-          <Text style={{ color: colors.deepPink, fontFamily: 'NunitoSans_700Bold' }}>Exporter les donnees</Text>
+      <Section title="Données">
+        <TouchableOpacity testID="export-data" onPress={() => Alert.alert('Exporter les données', 'Fonctionnalité bientôt disponible')} style={{ borderColor: colors.deepPink, borderWidth: 1, borderRadius: 50, paddingVertical: 12, alignItems: 'center' }}>
+          <Text style={{ color: colors.deepPink, fontFamily: 'NunitoSans_700Bold' }}>Exporter les données</Text>
         </TouchableOpacity>
       </Section>
       <Section title="Trimestre">
         <PillButton onPress={prepare}>Terminer le trimestre</PillButton>
-        {success && <View style={{ marginTop: 14, backgroundColor: colors.lightPink, borderRadius: 20, padding: 14 }}><Text style={{ color: colors.textDark }}>Trimestre archive : {success.totalEleves} eleves, {success.totalMerites} merites, {success.totalRetenues} retenues.</Text></View>}
+        {success && <View style={{ marginTop: 14, backgroundColor: colors.lightPink, borderRadius: 20, padding: 14 }}><Text style={{ color: colors.textDark }}>Trimestre archivé : {success.totalEleves} élèves, {success.totalMerites} mérites, {success.totalRetenues} retenues.</Text></View>}
       </Section>
       <Modal transparent visible={Boolean(summary)} onRequestClose={() => setSummary(null)}>
         <View style={{ flex: 1, justifyContent: 'center', padding: 24, backgroundColor: 'rgba(0,0,0,0.25)' }}>
           <View style={{ backgroundColor: theme.card, borderRadius: 20, padding: 20, gap: 12 }}>
             <Text style={{ fontSize: 22, fontFamily: 'Nunito_800ExtraBold', color: theme.text }}>Confirmer la fin du trimestre</Text>
-            <Text style={{ color: theme.muted }}>Toutes classes : {summary?.totalMerites} merites, {summary?.totalRetenues} retenues, {summary?.totalEleves} eleves.</Text>
+            <Text style={{ color: theme.muted }}>Toutes classes : {summary?.totalMerites} mérites, {summary?.totalRetenues} retenues, {summary?.totalEleves} élèves.</Text>
             <Text style={{ color: theme.text }}>Saisissez CONFIRMER pour continuer.</Text>
             <TextInput testID="trimester-confirm-input" value={confirmText} onChangeText={setConfirmText} autoCapitalize="characters" style={{ backgroundColor: theme.bg, color: theme.text, borderRadius: 14, padding: 12 }} />
             <PillButton onPress={confirm} style={{ opacity: confirmText === 'CONFIRMER' ? 1 : 0.5 }}>Je confirme</PillButton>

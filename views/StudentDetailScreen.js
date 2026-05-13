@@ -39,8 +39,8 @@ export const StudentDetailScreen = ({ route }) => {
     Animated.spring(pulse, { toValue: 1.04, friction: 3, useNativeDriver: true }).start(() => pulse.setValue(1));
     const compensated = action === 'tick' ? student.croix > 0 : student.ticks > 0;
     const message = action === 'tick'
-      ? compensated ? `Tick utilise pour annuler une croix de ${student.prenom}` : `Tick ajoute a ${student.prenom}`
-      : compensated ? `Croix ajoutee et un tick retire pour ${student.prenom}` : `Croix ajoutee a ${student.prenom}`;
+      ? compensated ? `Tick utilisé pour annuler une croix de ${student.prenom}` : `Tick ajouté à ${student.prenom}`
+      : compensated ? `Croix ajoutée et un tick retiré pour ${student.prenom}` : `Croix ajoutée à ${student.prenom}`;
     setStudent(result.eleve);
     setAction(null);
     setSnackMessage(message);
@@ -49,12 +49,12 @@ export const StudentDetailScreen = ({ route }) => {
     snackTimer.current = setTimeout(() => setSnack(false), 5000);
     if (snackTimer.current?.unref) snackTimer.current.unref();
     if (result.meritObtenu) {
-      const copy = `Felicitations a ${student.prenom} ! Eleve serieux, participatif et implique.`;
-      Alert.alert('Merite obtenu !', copy, [{ text: 'Copier le message', onPress: () => Clipboard.setStringAsync(copy) }, { text: 'Fermer' }]);
+      const copy = `Félicitations à ${student.prenom} ! Élève sérieux, participatif et impliqué.`;
+      Alert.alert('Mérite obtenu !', copy, [{ text: 'Copier le message', onPress: () => Clipboard.setStringAsync(copy) }, { text: 'Fermer' }]);
     }
     if (result.retenueDeclenchee) {
-      const copy = `${student.prenom} a accumule 4 croix. Travail non fait a plusieurs reprises malgre les rappels.`;
-      Alert.alert('Retenue declenchee', copy, [{ text: 'Copier le message', onPress: () => Clipboard.setStringAsync(copy) }, { text: 'Fermer' }]);
+      const copy = `${student.prenom} a accumulé 4 croix. Travail non fait à plusieurs reprises malgré les rappels.`;
+      Alert.alert('Retenue déclenchée', copy, [{ text: 'Copier le message', onPress: () => Clipboard.setStringAsync(copy) }, { text: 'Fermer' }]);
     }
     refresh();
   };
@@ -72,7 +72,7 @@ export const StudentDetailScreen = ({ route }) => {
           </View>
         </View>
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 16 }}>
-          {[[`Ticks ${student.ticks}/4`, colors.successGreen], [`Croix ${student.croix}/4`, colors.dangerRed], [`Merites ${student.merites}`, colors.primaryPink], [`Retenues ${student.retenues}`, colors.warningOrange]].map(([label, color]) => (
+          {[[`Ticks ${student.ticks}/4`, colors.successGreen], [`Croix ${student.croix}/4`, colors.dangerRed], [`Mérites ${student.merites}`, colors.primaryPink], [`Retenues ${student.retenues}`, colors.warningOrange]].map(([label, color]) => (
             <Text key={label} style={{ backgroundColor: color, color: colors.textDark, borderRadius: 50, paddingHorizontal: 12, paddingVertical: 6, overflow: 'hidden', fontFamily: 'NunitoSans_700Bold' }}>{label}</Text>
           ))}
         </View>
@@ -86,7 +86,7 @@ export const StudentDetailScreen = ({ route }) => {
         <ProgressBar value={student.croix} max={4} color={colors.dangerRed} />
       </View>
       <Text style={{ color: theme.muted, marginBottom: 8, fontFamily: 'NunitoSans_700Bold' }}>Historique du trimestre courant</Text>
-      <FlatList data={history} keyExtractor={(item) => String(item.id)} ListEmptyComponent={<EmptyState icon="time-outline" title="Aucun historique" message="Les actions tick et croix apparaitront ici." />} renderItem={({ item }) => <Text style={{ padding: 10, color: theme.text, backgroundColor: theme.card, borderRadius: 12, marginBottom: 8 }}>{item.type} - {item.raison} {item.annule ? '(annule)' : ''}</Text>} ListFooterComponent={<Text style={{ color: colors.deepPink, marginTop: 12 }}>Archives trimestrielles : {archives.length}</Text>} />
+      <FlatList data={history} keyExtractor={(item) => String(item.id)} ListEmptyComponent={<EmptyState icon="time-outline" title="Aucun historique" message="Les actions tick et croix apparaîtront ici." />} renderItem={({ item }) => <Text style={{ padding: 10, color: theme.text, backgroundColor: theme.card, borderRadius: 12, marginBottom: 8 }}>{item.type} - {item.raison} {item.annule ? '(annulé)' : ''}</Text>} ListFooterComponent={<Text style={{ color: colors.deepPink, marginTop: 12 }}>Archives trimestrielles : {archives.length}</Text>} />
       <ReasonSheet visible={Boolean(action)} reasons={reasons} onSelect={runAction} onClose={() => setAction(null)} />
       <UndoSnackbar visible={snack} message={snackMessage} onUndo={async () => { await annulerDerniereAction(student.id); await load(); await refresh(); setSnack(false); }} />
     </Screen>

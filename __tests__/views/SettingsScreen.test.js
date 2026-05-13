@@ -10,17 +10,17 @@ jest.mock('../../controllers/studentController', () => ({
   reinitialiserTrimestre: jest.fn(() => Promise.resolve({ totalEleves: 1, totalMerites: 2, totalRetenues: 1 }))
 }));
 
-test('parametres affiche les sections enrichies', () => {
+test('paramètres affiche les sections enrichies', () => {
   const { getByText } = render(<SettingsScreen />);
-  expect(getByText('A propos')).toBeTruthy();
+  expect(getByText('À propos')).toBeTruthy();
   expect(getByText('Klassia')).toBeTruthy();
-  expect(getByText('Donnees')).toBeTruthy();
+  expect(getByText('Données')).toBeTruthy();
   expect(getByText('Trimestre')).toBeTruthy();
 });
 
-test('export affiche bientot disponible', () => {
+test('export affiche bientôt disponible', () => {
   jest.spyOn(Alert, 'alert').mockImplementation(() => {});
   const { getByTestId } = render(<SettingsScreen />);
   fireEvent.press(getByTestId('export-data'));
-  expect(Alert.alert).toHaveBeenCalledWith('Exporter les donnees', 'Fonctionnalite bientot disponible');
+  expect(Alert.alert).toHaveBeenCalledWith('Exporter les données', 'Fonctionnalité bientôt disponible');
 });

@@ -60,6 +60,6 @@ export const reinitialiserTrimestre = async (numeroTrimestre) => {
 
 export const supprimerEleve = async (eleve) => {
   const id = typeof eleve === 'object' ? eleve?.id : eleve;
-  if (!id) throw new Error('Eleve introuvable.');
+  if (!id) throw new Error('Élève introuvable.');
   return deleteStudent(id);
 };
