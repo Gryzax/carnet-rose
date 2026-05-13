@@ -47,6 +47,7 @@ export const StudentDetailScreen = ({ route }) => {
     setSnack(true);
     if (snackTimer.current) clearTimeout(snackTimer.current);
     snackTimer.current = setTimeout(() => setSnack(false), 5000);
+    if (snackTimer.current?.unref) snackTimer.current.unref();
     if (result.meritObtenu) {
       const copy = `Felicitations a ${student.prenom} ! Eleve serieux, participatif et implique.`;
       Alert.alert('Merite obtenu !', copy, [{ text: 'Copier le message', onPress: () => Clipboard.setStringAsync(copy) }, { text: 'Fermer' }]);
