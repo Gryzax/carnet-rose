@@ -1,4 +1,4 @@
-import { act, fireEvent, render, waitFor } from '@testing-library/react-native';
+import { fireEvent, render, waitFor } from '@testing-library/react-native';
 import { RootNavigator } from '../../navigation/RootNavigator';
 import * as authService from '../../services/auth/authService';
 
@@ -70,9 +70,7 @@ jest.mock('../../services/api/supabaseClient', () => ({
 }));
 
 jest.mock('../../services/auth/authService', () => ({
-  enableLocalMode: jest.fn(() => Promise.resolve({ localModeEnabled: true, error: null })),
   getCurrentUser: jest.fn(() => Promise.resolve({ user: null, error: null })),
-  isLocalModeEnabled: jest.fn(() => false),
   onAuthStateChange: jest.fn(() => ({ unsubscribe: jest.fn() })),
   signInWithApple: jest.fn(() => Promise.resolve({ user: null, message: 'Apple pending' })),
   signInWithGoogle: jest.fn(() => Promise.resolve({ user: null, message: 'Google pending' }))
@@ -81,38 +79,27 @@ jest.mock('../../services/auth/authService', () => ({
 beforeEach(() => {
   jest.clearAllMocks();
   authService.getCurrentUser.mockResolvedValue({ user: null, error: null });
-  authService.isLocalModeEnabled.mockReturnValue(false);
 });
 
-test('LoginScreen s affiche au lancement si non connecté', async () => {
-  const { getByText } = render(<RootNavigator />);
+test('LoginScreen s affiche au lancement si non connecte', async () => {
+  const { getByText, queryByText } = render(<RootNavigator />);
 
   await waitFor(() => expect(getByText('Carnet Rose')).toBeTruthy());
+  expect(queryByText('Classes')).toBeNull();
 });
 
-test('après mode local, les tabs principales s affichent', async () => {
-  const { getByTestId, getByText } = render(<RootNavigator />);
-  await waitFor(() => expect(getByText('Carnet Rose')).toBeTruthy());
-
-  await act(async () => {
-    fireEvent.press(getByTestId('continue-local'));
-  });
-
-  await waitFor(() => expect(getByText('Classes')).toBeTruthy());
-  expect(getByText('Statistiques')).toBeTruthy();
-  expect(getByText('Parametres')).toBeTruthy();
-});
-
-test('si utilisateur déjà connecté, les tabs s affichent directement', async () => {
+test('les tabs s affichent uniquement si un utilisateur est connecte', async () => {
   authService.getCurrentUser.mockResolvedValueOnce({ user: { email: 'demo@example.com' }, error: null });
 
   const { getByText, queryByText } = render(<RootNavigator />);
 
   await waitFor(() => expect(getByText('Classes')).toBeTruthy());
+  expect(getByText('Statistiques')).toBeTruthy();
+  expect(getByText('Parametres')).toBeTruthy();
   expect(queryByText('Carnet Rose')).toBeNull();
 });
 
-test('déconnexion depuis les paramètres renvoie au login', async () => {
+test('deconnexion depuis les parametres renvoie au login', async () => {
   authService.getCurrentUser.mockResolvedValueOnce({ user: { email: 'demo@example.com' }, error: null });
   const { getByText } = render(<RootNavigator />);
   await waitFor(() => expect(getByText('Settings screen')).toBeTruthy());

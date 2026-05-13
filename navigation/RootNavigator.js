@@ -10,7 +10,7 @@ import { LoginScreen } from '../views/LoginScreen';
 import { StudentDetailScreen } from '../views/StudentDetailScreen';
 import { SettingsScreen } from '../views/SettingsScreen';
 import { StatisticsScreen } from '../views/StatisticsScreen';
-import { getCurrentUser, isLocalModeEnabled, onAuthStateChange } from '../services/auth/authService';
+import { getCurrentUser, onAuthStateChange } from '../services/auth/authService';
 
 const Stack = createNativeStackNavigator();
 const Tabs = createBottomTabNavigator();
@@ -65,7 +65,7 @@ export const AppTabs = ({ onSignedOut }) => (
   >
     <Tabs.Screen name="Classes" component={ClassesStack} options={{ title: 'Classes' }} />
     <Tabs.Screen name="Statistiques" component={StatisticsScreen} options={{ title: 'Statistiques' }} />
-    <Tabs.Screen name="Parametres" options={{ title: 'Paramètres' }}>
+    <Tabs.Screen name="Parametres" options={{ title: 'Parametres' }}>
       {(props) => <SettingsScreen {...props} onSignedOut={onSignedOut} />}
     </Tabs.Screen>
   </Tabs.Navigator>
@@ -73,17 +73,17 @@ export const AppTabs = ({ onSignedOut }) => (
 
 export const RootNavigator = () => {
   const [checkingSession, setCheckingSession] = useState(true);
-  const [authState, setAuthState] = useState({ user: null, localMode: false });
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     let active = true;
     getCurrentUser().then(({ user }) => {
       if (!active) return;
-      setAuthState({ user, localMode: isLocalModeEnabled() });
+      setUser(user);
       setCheckingSession(false);
     });
     const subscription = onAuthStateChange((_event, session) => {
-      setAuthState({ user: session?.user || null, localMode: isLocalModeEnabled() });
+      setUser(session?.user || null);
     });
     return () => {
       active = false;
@@ -99,9 +99,9 @@ export const RootNavigator = () => {
     );
   }
 
-  if (!authState.user && !authState.localMode) {
-    return <AuthStack onAuthenticated={({ user, localMode }) => setAuthState({ user, localMode })} />;
+  if (!user) {
+    return <AuthStack onAuthenticated={({ user }) => setUser(user)} />;
   }
 
-  return <AppTabs onSignedOut={() => setAuthState({ user: null, localMode: false })} />;
+  return <AppTabs onSignedOut={() => setUser(null)} />;
 };

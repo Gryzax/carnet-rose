@@ -12,44 +12,42 @@ jest.mock('../../controllers/studentController', () => ({
 }));
 
 jest.mock('../../services/auth/authService', () => ({
-  getAuthStatus: jest.fn(() => ({ enabled: false, localModeEnabled: true })),
-  getCurrentUser: jest.fn(() => Promise.resolve({ user: null, error: null })),
-  signInWithApple: jest.fn(),
-  signInWithGoogle: jest.fn(),
+  getCurrentUser: jest.fn(() => Promise.resolve({ user: { email: 'demo@example.com' }, error: null })),
   signOut: jest.fn(() => Promise.resolve({ error: null }))
 }));
 
-test('paramètres affiche les sections enrichies', async () => {
+test('parametres affiche les sections enrichies', async () => {
   const { getByText } = render(<SettingsScreen navigation={{ navigate: jest.fn(), canGoBack: jest.fn(() => false) }} />);
-  await waitFor(() => expect(getByText('Mode local uniquement')).toBeTruthy());
-  expect(getByText('À propos')).toBeTruthy();
+  await waitFor(() => expect(getByText('demo@example.com')).toBeTruthy());
+  expect(getByText('A propos')).toBeTruthy();
   expect(getByText('Carnet Rose')).toBeTruthy();
-  expect(getByText('Données')).toBeTruthy();
+  expect(getByText('Donnees')).toBeTruthy();
   expect(getByText('Trimestre')).toBeTruthy();
   expect(getByText('Compte')).toBeTruthy();
 });
 
-test('export affiche bientôt disponible', async () => {
+test('export affiche bientot disponible', async () => {
   jest.spyOn(Alert, 'alert').mockImplementation(() => {});
   const { getByTestId, getByText } = render(<SettingsScreen navigation={{ navigate: jest.fn(), canGoBack: jest.fn(() => false) }} />);
-  await waitFor(() => expect(getByText('Mode local uniquement')).toBeTruthy());
+  await waitFor(() => expect(getByText('demo@example.com')).toBeTruthy());
   fireEvent.press(getByTestId('export-data'));
-  expect(Alert.alert).toHaveBeenCalledWith('Exporter les données', 'Fonctionnalité bientôt disponible');
+  expect(Alert.alert).toHaveBeenCalledWith('Exporter les donnees', 'Fonctionnalite bientot disponible');
 });
 
-test("paramètres affiche une flèche retour vers l'accueil", async () => {
+test("parametres affiche une fleche retour vers l'accueil", async () => {
   const navigation = { navigate: jest.fn(), canGoBack: jest.fn(() => false), goBack: jest.fn() };
   const { getByTestId, getByText } = render(<SettingsScreen navigation={navigation} />);
-  await waitFor(() => expect(getByText('Mode local uniquement')).toBeTruthy());
+  await waitFor(() => expect(getByText('demo@example.com')).toBeTruthy());
 
   fireEvent.press(getByTestId('back-button'));
 
   expect(navigation.navigate).toHaveBeenCalledWith('Classes');
 });
 
-test('se déconnecter revient au login via le callback', async () => {
+test('se deconnecter revient au login via le callback', async () => {
   const onSignedOut = jest.fn();
-  const { getByTestId } = render(<SettingsScreen navigation={{ navigate: jest.fn(), canGoBack: jest.fn(() => false) }} onSignedOut={onSignedOut} />);
+  const { getByTestId, getByText } = render(<SettingsScreen navigation={{ navigate: jest.fn(), canGoBack: jest.fn(() => false) }} onSignedOut={onSignedOut} />);
+  await waitFor(() => expect(getByText('demo@example.com')).toBeTruthy());
 
   fireEvent.press(getByTestId('sign-out'));
 

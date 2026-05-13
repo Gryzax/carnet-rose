@@ -5,7 +5,7 @@ import { reinitialiserTrimestre } from '../controllers/studentController';
 import { getAllStudents } from '../models/studentModel';
 import { BackButton } from '../components/BackButton';
 import { Card, InfoIcon, JournalInput, Pill, PillButton, Screen, Sparkle, Title } from '../components/Themed';
-import { getAuthStatus, getCurrentUser, signInWithApple, signInWithGoogle, signOut } from '../services/auth/authService';
+import { getCurrentUser, signOut } from '../services/auth/authService';
 
 const Section = ({ title, children }) => (
   <Card washi>
@@ -18,14 +18,12 @@ export const SettingsScreen = ({ navigation, onSignedOut }) => {
   const [summary, setSummary] = useState(null);
   const [success, setSuccess] = useState(null);
   const [confirmText, setConfirmText] = useState('');
-  const [account, setAccount] = useState({ user: null, localMode: false, supabaseReady: false });
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     let active = true;
     getCurrentUser().then(({ user }) => {
-      if (!active) return;
-      const status = getAuthStatus();
-      setAccount({ user, localMode: status.localModeEnabled, supabaseReady: status.enabled });
+      if (active) setUser(user);
     });
     return () => {
       active = false;
@@ -47,53 +45,37 @@ export const SettingsScreen = ({ navigation, onSignedOut }) => {
 
   const disconnect = async () => {
     await signOut();
+    setUser(null);
     onSignedOut?.();
   };
 
   return (
     <Screen>
       <BackButton navigation={navigation} fallbackRoute="Classes" />
-      <Title>Paramètres</Title>
+      <Title>Parametres</Title>
       <Section title="Compte">
-        {account.user ? (
-          <>
-            <Text testID="account-user" style={styles.strong}>{account.user.email || account.user.user_metadata?.name || 'Utilisateur connecté'}</Text>
-            <PillButton testID="sync-now" onPress={() => Alert.alert('Synchroniser maintenant', 'Synchronisation Supabase à configurer.')} variant="light">Synchroniser maintenant</PillButton>
-            <PillButton testID="sign-out" onPress={disconnect} variant="pink">Se déconnecter</PillButton>
-          </>
-        ) : (
-          <>
-            <Text testID="local-account-title" style={styles.strong}>Mode local uniquement</Text>
-            <Text style={styles.muted}>Connectez-vous pour sauvegarder et synchroniser vos données.</Text>
-            {account.supabaseReady && (
-              <>
-                <PillButton testID="settings-google" onPress={signInWithGoogle} variant="light">Continuer avec Google</PillButton>
-                <PillButton testID="settings-apple" onPress={signInWithApple} variant="light">Continuer avec Apple</PillButton>
-              </>
-            )}
-            {!account.supabaseReady && <Text style={styles.muted}>Supabase n'est pas encore configuré.</Text>}
-            <PillButton testID="sign-out" onPress={disconnect} variant="light">Se déconnecter</PillButton>
-          </>
-        )}
+        <Text testID="account-user" style={styles.strong}>{user?.email || user?.user_metadata?.name || 'Utilisateur connecte'}</Text>
+        <PillButton testID="sync-now" onPress={() => Alert.alert('Synchroniser maintenant', 'Synchronisation Supabase a configurer.')} variant="light">Synchroniser maintenant</PillButton>
+        <PillButton testID="sign-out" onPress={disconnect} variant="pink">Se deconnecter</PillButton>
       </Section>
-      <Section title="À propos">
+      <Section title="A propos">
         <View style={styles.infoRow}><InfoIcon /><Text style={styles.strong}>Carnet Rose</Text></View>
-        <Text style={styles.muted}>Suivi hors ligne des élèves</Text>
+        <Text style={styles.muted}>Suivi hors ligne des eleves</Text>
         <Text style={styles.muted}>fourkane ahmerelain</Text>
         <Text style={styles.muted}>v1.0.0</Text>
       </Section>
-      <Section title="Données">
-        <PillButton testID="export-data" onPress={() => Alert.alert('Exporter les données', 'Fonctionnalité bientôt disponible')} variant="light">Exporter les données</PillButton>
+      <Section title="Donnees">
+        <PillButton testID="export-data" onPress={() => Alert.alert('Exporter les donnees', 'Fonctionnalite bientot disponible')} variant="light">Exporter les donnees</PillButton>
       </Section>
       <Section title="Trimestre">
         <PillButton onPress={prepare} variant="pink">Terminer le trimestre</PillButton>
-        {success && <View style={styles.success}><Sparkle /><Text style={styles.text}>Trimestre archivé : {success.totalEleves} élèves, {success.totalMerites} mérites, {success.totalRetenues} retenues.</Text></View>}
+        {success && <View style={styles.success}><Sparkle /><Text style={styles.text}>Trimestre archive : {success.totalEleves} eleves, {success.totalMerites} merites, {success.totalRetenues} retenues.</Text></View>}
       </Section>
       <Modal transparent visible={Boolean(summary)} onRequestClose={() => setSummary(null)}>
         <View style={styles.backdrop}>
           <Card style={styles.dialog} washi>
             <Text style={styles.modalTitle}>Confirmer la fin du trimestre</Text>
-            <Text style={styles.muted}>Toutes classes : {summary?.totalMerites} mérites, {summary?.totalRetenues} retenues, {summary?.totalEleves} élèves.</Text>
+            <Text style={styles.muted}>Toutes classes : {summary?.totalMerites} merites, {summary?.totalRetenues} retenues, {summary?.totalEleves} eleves.</Text>
             <Text style={styles.text}>Saisissez CONFIRMER pour continuer.</Text>
             <JournalInput testID="trimester-confirm-input" value={confirmText} onChangeText={setConfirmText} autoCapitalize="characters" />
             <PillButton onPress={confirm} variant="pink" disabled={confirmText !== 'CONFIRMER'}>Je confirme</PillButton>

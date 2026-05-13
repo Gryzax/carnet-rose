@@ -8,22 +8,39 @@ jest.mock('../../services/api/supabaseClient', () => ({
 }));
 
 jest.mock('../../services/auth/authService', () => ({
-  enableLocalMode: jest.fn(() => Promise.resolve({ localModeEnabled: true, error: null })),
   signInWithApple: jest.fn(() => Promise.resolve({ user: null, message: 'Apple pending' })),
   signInWithGoogle: jest.fn(() => Promise.resolve({ user: null, message: 'Google pending' }))
 }));
 
-test('LoginScreen affiche le mode local si Supabase est absent', () => {
-  const { getByText, getByTestId } = render(<LoginScreen />);
+test('LoginScreen s affiche si aucun utilisateur connecte', () => {
+  const { getByText } = render(<LoginScreen />);
 
   expect(getByText('Carnet Rose')).toBeTruthy();
-  expect(getByText('Suivi hors ligne des élèves')).toBeTruthy();
-  expect(getByText('Mode local disponible')).toBeTruthy();
-  expect(getByText("Supabase n'est pas encore configuré.")).toBeTruthy();
-  expect(getByTestId('continue-local')).toBeTruthy();
+  expect(getByText('Suivi hors ligne des eleves')).toBeTruthy();
 });
 
-test('le bouton Google appelle signInWithGoogle', async () => {
+test('le bouton Continuer en mode local n existe plus', () => {
+  const { queryByTestId, queryByText } = render(<LoginScreen />);
+
+  expect(queryByTestId('continue-local')).toBeNull();
+  expect(queryByText('Continuer en mode local')).toBeNull();
+});
+
+test('Supabase absent affiche une erreur et bloque la connexion', () => {
+  const onAuthenticated = jest.fn();
+  const { getByText, getByTestId } = render(<LoginScreen onAuthenticated={onAuthenticated} />);
+
+  expect(getByText('Connexion indisponible')).toBeTruthy();
+  expect(getByText('La connexion n’est pas encore configurée. Veuillez contacter l’administrateur.')).toBeTruthy();
+
+  fireEvent.press(getByTestId('login-google'));
+
+  expect(onAuthenticated).not.toHaveBeenCalled();
+  expect(authService.signInWithGoogle).not.toHaveBeenCalled();
+});
+
+test('le bouton Google appelle signInWithGoogle quand Supabase est configure', async () => {
+  isSupabaseConfigured.mockReturnValueOnce(true);
   const { getByTestId } = render(<LoginScreen />);
 
   fireEvent.press(getByTestId('login-google'));
@@ -31,27 +48,11 @@ test('le bouton Google appelle signInWithGoogle', async () => {
   await waitFor(() => expect(authService.signInWithGoogle).toHaveBeenCalled());
 });
 
-test('le bouton Apple appelle signInWithApple', async () => {
+test('le bouton Apple appelle signInWithApple quand Supabase est configure', async () => {
+  isSupabaseConfigured.mockReturnValueOnce(true);
   const { getByTestId } = render(<LoginScreen />);
 
   fireEvent.press(getByTestId('login-apple'));
 
   await waitFor(() => expect(authService.signInWithApple).toHaveBeenCalled());
-});
-
-test('continuer en mode local authentifie localement', async () => {
-  const onAuthenticated = jest.fn();
-  const { getByTestId } = render(<LoginScreen onAuthenticated={onAuthenticated} />);
-
-  fireEvent.press(getByTestId('continue-local'));
-
-  await waitFor(() => expect(authService.enableLocalMode).toHaveBeenCalled());
-  expect(onAuthenticated).toHaveBeenCalledWith({ user: null, localMode: true });
-});
-
-test('le bouton local disparait quand Supabase est configuré', () => {
-  isSupabaseConfigured.mockReturnValueOnce(true);
-  const { queryByTestId } = render(<LoginScreen />);
-
-  expect(queryByTestId('continue-local')).toBeNull();
 });
