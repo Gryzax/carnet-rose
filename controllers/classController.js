@@ -1,4 +1,4 @@
-import { createClass, deleteClass, getClasses } from '../models/classModel';
+import { createClass, deleteClass, getClasses, touchClass } from '../models/classModel';
 
 export const chargerClasses = async (tri = 'alpha') => {
   const classes = await getClasses();
@@ -16,4 +16,10 @@ export const supprimerClasse = async (classe) => {
   const id = typeof classe === 'object' ? classe?.id : classe;
   if (!id) throw new Error('La classe est introuvable.');
   return deleteClass(id);
+};
+
+export const marquerClasseUtilisee = async (classe) => {
+  const id = typeof classe === 'object' ? classe?.id : classe;
+  if (!id) return null;
+  return touchClass(id);
 };

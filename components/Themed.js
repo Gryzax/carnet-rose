@@ -1,4 +1,6 @@
+import { forwardRef } from 'react';
 import { Animated, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, radii, spacing, typography } from '../constants/colors';
 
@@ -11,11 +13,11 @@ export const useThemeColors = () => ({
   border: colors.border
 });
 
-export const Screen = ({ children }) => (
-  <View style={styles.screen}>
+export const Screen = ({ children, style }) => (
+  <SafeAreaView edges={['top', 'left', 'right']} style={[styles.screen, style]}>
     <View pointerEvents="none" style={[styles.washi, styles.washiTop]} />
     {children}
-  </View>
+  </SafeAreaView>
 );
 
 export const Title = ({ children, style }) => <Text style={[styles.title, style]}>{children}</Text>;
@@ -72,9 +74,9 @@ export const SegmentedControl = ({ options, value, onChange, style }) => (
   </View>
 );
 
-export const JournalInput = ({ style, ...props }) => (
-  <TextInput placeholderTextColor={colors.placeholder} style={[styles.input, style]} {...props} />
-);
+export const JournalInput = forwardRef(({ style, ...props }, ref) => (
+  <TextInput ref={ref} placeholderTextColor={colors.placeholder} style={[styles.input, style]} {...props} />
+));
 
 export const InfoIcon = () => (
   <View style={styles.infoIcon}>
@@ -105,11 +107,11 @@ const bordered = {
 };
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.canvas, padding: spacing.md, overflow: 'hidden' },
+  screen: { flex: 1, backgroundColor: colors.canvas, padding: spacing.md },
   washi: { position: 'absolute', backgroundColor: colors.orange, opacity: 0.28, transform: [{ rotate: '-8deg' }] },
   washiTop: { width: 132, height: 28, top: 14, right: -18 },
   title: { ...baseText, fontSize: 34, lineHeight: 40, marginBottom: spacing.md },
-  card: { backgroundColor: colors.card, borderRadius: radii.lg, padding: spacing.md, marginBottom: spacing.md, ...bordered },
+  card: { backgroundColor: colors.card, borderRadius: radii.md, padding: spacing.md, marginBottom: spacing.md, ...bordered },
   cardWashi: { position: 'absolute', top: -10, alignSelf: 'center', width: 86, height: 24, borderRadius: 3, backgroundColor: colors.orange, opacity: 0.84, transform: [{ rotate: '-4deg' }] },
   pill: { ...baseText, alignSelf: 'flex-start', overflow: 'hidden', borderRadius: radii.full, backgroundColor: colors.sage, paddingHorizontal: 12, paddingVertical: 5, fontSize: 15, textTransform: 'uppercase', ...bordered },
   pillPink: { backgroundColor: colors.pink },
@@ -121,7 +123,7 @@ const styles = StyleSheet.create({
   buttonText: { ...baseText, fontSize: 20, textAlign: 'center' },
   disabled: { opacity: 0.55 },
   pressed: { transform: [{ scale: 0.97 }] },
-  iconButton: { minHeight: 44, borderRadius: radii.full, paddingHorizontal: 12, paddingVertical: 8, flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: colors.card, ...bordered },
+  iconButton: { minHeight: 44, borderRadius: radii.full, paddingHorizontal: 12, paddingVertical: 8, flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: colors.lightPink, ...bordered },
   iconButtonText: { ...baseText, fontSize: 17 },
   segmented: { flexDirection: 'row', borderRadius: radii.full, padding: 3, gap: 2, backgroundColor: colors.card, ...bordered },
   segment: { flex: 1, minHeight: 38, alignItems: 'center', justifyContent: 'center', borderRadius: radii.full, paddingHorizontal: 10 },

@@ -6,7 +6,7 @@ const mockDb = {
 
 jest.mock('../database/db', () => ({ getDb: jest.fn(() => Promise.resolve(mockDb)) }));
 
-import { ajouterClasse, chargerClasses, supprimerClasse } from '../controllers/classController';
+import { ajouterClasse, chargerClasses, marquerClasseUtilisee, supprimerClasse } from '../controllers/classController';
 import { getStatistics } from '../controllers/statisticsController';
 import { createClass, deleteClass, getClasses, touchClass } from '../models/classModel';
 import { archiveStudent, createEvent, getArchives, getCurrentHistory, getLastActiveEvent, markEventCancelled } from '../models/historyModel';
@@ -60,8 +60,10 @@ test('classController trie et ajoute une classe', async () => {
   mockDb.getAllAsync.mockResolvedValueOnce([{ nom: 'B', derniereUtilisation: '2024' }, { nom: 'A', derniereUtilisation: '2026' }]);
   const recent = await chargerClasses('recent');
   await ajouterClasse('  4e Rose  ');
+  await marquerClasseUtilisee(12);
   expect(recent[0].nom).toBe('A');
   expect(mockDb.runAsync).toHaveBeenCalledWith(expect.stringContaining('INSERT INTO classes'), '4e Rose');
+  expect(mockDb.runAsync).toHaveBeenCalledWith(expect.stringContaining('derniereUtilisation'), 12);
 });
 
 test('classController refuse un nom de classe vide', async () => {

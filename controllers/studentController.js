@@ -1,5 +1,6 @@
 import { CROSSES_FOR_DETENTION, TICKS_FOR_MERIT, UNDO_LIMIT_SECONDS } from '../constants/config';
 import { createEvent, getLastActiveEvent, archiveStudent, markEventCancelled } from '../models/historyModel';
+import { touchClass } from '../models/classModel';
 import { createStudent, deleteStudent, getAllStudents, getStudentById, updateCounters, resetAllStudents } from '../models/studentModel';
 import { nowIso, secondsBetween } from '../utils/date';
 
@@ -15,6 +16,7 @@ export const ajouterTick = async (eleve, raison = '') => {
     next.merites += 1;
   }
   await updateCounters(eleve.id, next);
+  await touchClass(eleve.classeId);
   await createEvent({ eleveId: eleve.id, type: 'tick', raison, trimestre: eleve.trimestreActuel, creeLe: nowIso(), previousTicks, previousCroix, newTicks: next.ticks, newCroix: next.croix });
   return { eleve: next, meritObtenu };
 };
@@ -30,6 +32,7 @@ export const ajouterCroix = async (eleve, raison = '') => {
     next.retenues += 1;
   }
   await updateCounters(eleve.id, next);
+  await touchClass(eleve.classeId);
   await createEvent({ eleveId: eleve.id, type: 'croix', raison, trimestre: eleve.trimestreActuel, creeLe: nowIso(), previousTicks, previousCroix, newTicks: next.ticks, newCroix: next.croix });
   return { eleve: next, retenueDeclenchee };
 };
@@ -70,5 +73,7 @@ export const ajouterEleve = async ({ classeId, prenom, nom }) => {
   if (!classeId) throw new Error('Classe introuvable.');
   if (!normalizedPrenom) throw new Error("Le prénom de l'élève est obligatoire.");
   if (!normalizedNom) throw new Error("Le nom de l'élève est obligatoire.");
-  return createStudent({ classeId, prenom: normalizedPrenom, nom: normalizedNom });
+  const result = await createStudent({ classeId, prenom: normalizedPrenom, nom: normalizedNom });
+  await touchClass(classeId);
+  return result;
 };

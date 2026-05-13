@@ -10,18 +10,23 @@ jest.mock('../../models/historyModel', () => ({
   archiveStudent: jest.fn(),
   markEventCancelled: jest.fn()
 }));
+jest.mock('../../models/classModel', () => ({
+  touchClass: jest.fn()
+}));
 
 import { ajouterCroix, ajouterTick, annulerDerniereAction, reinitialiserTrimestre } from '../../controllers/studentController';
 import { getAllStudents, getStudentById, resetAllStudents, updateCounters } from '../../models/studentModel';
 import { archiveStudent, createEvent, getLastActiveEvent, markEventCancelled } from '../../models/historyModel';
+import { touchClass } from '../../models/classModel';
 
-const eleve = { id: 1, prenom: 'Emma', nom: 'Martin', ticks: 0, croix: 0, merites: 0, retenues: 0, trimestreActuel: 1 };
+const eleve = { id: 1, classeId: 5, prenom: 'Emma', nom: 'Martin', ticks: 0, croix: 0, merites: 0, retenues: 0, trimestreActuel: 1 };
 
 beforeEach(() => jest.clearAllMocks());
 
 test('ajouterTick cas normal', async () => {
   const res = await ajouterTick(eleve, 'Participation');
   expect(res.eleve.ticks).toBe(1);
+  expect(touchClass).toHaveBeenCalledWith(5);
   expect(createEvent).toHaveBeenCalledWith(expect.objectContaining({ type: 'tick', previousTicks: 0, newTicks: 1 }));
 });
 
@@ -41,6 +46,7 @@ test('mérite déclenché à 4 ticks', async () => {
 test('ajouterCroix cas normal', async () => {
   const res = await ajouterCroix(eleve, 'Comportement');
   expect(res.eleve.croix).toBe(1);
+  expect(touchClass).toHaveBeenCalledWith(5);
   expect(createEvent).toHaveBeenCalledWith(expect.objectContaining({ type: 'croix', previousCroix: 0, newCroix: 1 }));
 });
 

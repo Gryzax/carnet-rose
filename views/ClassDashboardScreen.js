@@ -1,7 +1,8 @@
-import { FlatList, Modal, StyleSheet, Text, View } from 'react-native';
-import { useMemo, useState } from 'react';
+import { FlatList, KeyboardAvoidingView, Modal, Platform, StyleSheet, Text, View } from 'react-native';
+import { useEffect, useMemo, useState } from 'react';
 import { colors } from '../constants/colors';
 import { ajouterEleve, supprimerEleve } from '../controllers/studentController';
+import { marquerClasseUtilisee } from '../controllers/classController';
 import { BackButton } from '../components/BackButton';
 import { EmptyState } from '../components/EmptyState';
 import { StudentCard } from '../components/StudentCard';
@@ -20,6 +21,10 @@ export const ClassDashboardScreen = ({ route, navigation }) => {
   const [deleting, setDeleting] = useState(false);
   const { students, refresh } = useStudents(classe.id, sort);
   const atRisk = useMemo(() => students.filter((s) => s.croix >= 2).length, [students]);
+
+  useEffect(() => {
+    marquerClasseUtilisee(classe);
+  }, [classe]);
 
   const confirmDeleteStudent = async () => {
     if (!studentToDelete) return;
@@ -75,7 +80,7 @@ export const ClassDashboardScreen = ({ route, navigation }) => {
       />
       <PillButton onPress={() => setAddModalVisible(true)} variant="pink" style={styles.add}>Ajouter un élève</PillButton>
       <Modal visible={addModalVisible} transparent animationType="slide" onRequestClose={closeAddModal}>
-        <View style={styles.sheetBackdrop}>
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.sheetBackdrop}>
           <Card style={styles.sheet} washi>
             <Text style={styles.modalTitle}>Ajouter un élève</Text>
             <JournalInput placeholder="Prénom" value={studentFirstName} onChangeText={setStudentFirstName} />
@@ -86,7 +91,7 @@ export const ClassDashboardScreen = ({ route, navigation }) => {
               <PillButton disabled={saving} onPress={submitStudent} variant="pink" style={styles.actionButton}>{saving ? 'Ajout...' : 'Ajouter'}</PillButton>
             </View>
           </Card>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
       <Modal visible={!!studentToDelete} transparent animationType="fade" onRequestClose={() => setStudentToDelete(null)}>
         <View style={styles.backdrop}>
@@ -111,8 +116,8 @@ const styles = StyleSheet.create({
   metaLine: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   meta: { fontFamily: 'PatrickHand_400Regular', color: colors.muted, fontSize: 19 },
   segmented: { marginBottom: 12 },
-  add: { marginTop: 8 },
-  sheetBackdrop: { flex: 1, backgroundColor: colors.scrim, justifyContent: 'flex-end', padding: 12 },
+  add: { marginTop: 8, marginBottom: 84 },
+  sheetBackdrop: { flex: 1, backgroundColor: colors.scrim, justifyContent: 'flex-end', padding: 12, paddingBottom: 24 },
   backdrop: { flex: 1, backgroundColor: colors.scrim, justifyContent: 'center', padding: 20 },
   sheet: { gap: 12 },
   dialog: { gap: 12 },

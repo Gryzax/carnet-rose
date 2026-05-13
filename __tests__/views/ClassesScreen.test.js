@@ -18,6 +18,7 @@ jest.mock('../../hooks/useClasses', () => ({
 
 jest.mock('../../controllers/classController', () => ({
   ajouterClasse: jest.fn(() => Promise.resolve({ lastInsertRowId: 3 })),
+  marquerClasseUtilisee: jest.fn(() => Promise.resolve()),
   supprimerClasse: jest.fn(() => Promise.resolve())
 }));
 
@@ -25,7 +26,7 @@ jest.mock('../../models/studentModel', () => ({
   getAllStudents: jest.fn(() => Promise.resolve([]))
 }));
 
-import { ajouterClasse, supprimerClasse } from '../../controllers/classController';
+import { ajouterClasse, marquerClasseUtilisee, supprimerClasse } from '../../controllers/classController';
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -104,4 +105,16 @@ test('Supprimer supprime la classe puis rafraichit la liste', async () => {
 
   await waitFor(() => expect(supprimerClasse).toHaveBeenCalledWith(classe));
   expect(mockRefresh).toHaveBeenCalled();
+});
+
+test("ouvrir une classe marque son utilisation recente", async () => {
+  const classe = { id: 7, nom: '4e Rose', nombreEleves: 2, totalMerites: 0, totalRetenues: 0 };
+  const navigation = { navigate: jest.fn() };
+  mockClasses = [classe];
+  const { getByText } = render(<ClassesScreen navigation={navigation} />);
+
+  fireEvent.press(getByText('4e Rose'));
+
+  await waitFor(() => expect(marquerClasseUtilisee).toHaveBeenCalledWith(classe));
+  expect(navigation.navigate).toHaveBeenCalledWith('ClassDashboard', { classe });
 });
