@@ -32,7 +32,7 @@ export const ClassDashboardScreen = ({ route, navigation }) => {
     <Screen>
       <View style={{ marginBottom: 14 }}>
         <Title>{classe.nom}</Title>
-        <Text style={{ color: theme.muted }}>{students.length} eleves - {atRisk} eleves a risque</Text>
+        <Text style={{ color: theme.muted }}>{students.length} élèves - {atRisk} élèves à risque</Text>
       </View>
       <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
         {[['nom', 'Nom'], ['croix', 'Croix'], ['ticks', 'Ticks']].map(([key, label]) => (
@@ -46,16 +46,16 @@ export const ClassDashboardScreen = ({ route, navigation }) => {
         keyExtractor={(item) => String(item.id)}
         initialNumToRender={10}
         getItemLayout={(_, index) => ({ length: 164, offset: 164 * index, index })}
-        ListEmptyComponent={<EmptyState icon="people-outline" title="Aucun eleve dans cette classe" message="Ajoutez votre premier eleve pour commencer." actionLabel="Ajouter un eleve" onAction={() => {}} />}
+        ListEmptyComponent={<EmptyState icon="people-outline" title="Aucun élève dans cette classe" message="Ajoutez votre premier élève pour commencer." actionLabel="Ajouter un élève" onAction={() => {}} />}
         renderItem={({ item }) => <StudentCard student={item} onPress={() => navigation.navigate('StudentDetail', { studentId: item.id })} onDelete={() => setStudentToDelete(item)} />}
       />
-      <PillButton style={{ marginTop: 8 }}>Ajouter un eleve</PillButton>
+      <PillButton style={{ marginTop: 8 }}>Ajouter un élève</PillButton>
       <Modal visible={!!studentToDelete} transparent animationType="fade" onRequestClose={() => setStudentToDelete(null)}>
         <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.35)', justifyContent: 'center', padding: 20 }}>
           <View style={{ backgroundColor: theme.card, borderRadius: 20, padding: 20, gap: 12 }}>
-            <Text style={{ fontFamily: 'Nunito_800ExtraBold', fontSize: 22, color: theme.text }}>Supprimer l'eleve</Text>
+            <Text style={{ fontFamily: 'Nunito_800ExtraBold', fontSize: 22, color: theme.text }}>Supprimer l'élève</Text>
             <Text style={{ fontFamily: 'NunitoSans_700Bold', fontSize: 17, color: theme.text }}>{studentToDelete?.prenom} {studentToDelete?.nom}</Text>
-            <Text style={{ color: theme.muted, lineHeight: 20 }}>Son historique et ses archives trimestrielles seront supprimes definitivement.</Text>
+            <Text style={{ color: theme.muted, lineHeight: 20 }}>Son historique et ses archives trimestrielles seront supprimés définitivement.</Text>
             <View style={{ flexDirection: 'row', justifyContent: 'flex-end', gap: 10 }}>
               <TouchableOpacity testID="cancel-delete-student" disabled={deleting} onPress={() => setStudentToDelete(null)} style={{ backgroundColor: colors.lightPink, borderRadius: 50, paddingVertical: 12, paddingHorizontal: 18 }}>
                 <Text style={{ color: colors.deepPink, fontFamily: 'NunitoSans_700Bold' }}>Annuler</Text>

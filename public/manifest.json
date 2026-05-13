@@ -1,7 +1,7 @@
 {
   "name": "Klassia",
   "short_name": "Klassia",
-  "description": "Suivi hors ligne des eleves.",
+  "description": "Suivi hors ligne des élèves.",
   "start_url": ".",
   "scope": ".",
   "display": "standalone",

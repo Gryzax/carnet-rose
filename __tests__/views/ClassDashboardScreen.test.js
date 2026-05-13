@@ -16,10 +16,10 @@ import { supprimerEleve } from '../../controllers/studentController';
 
 beforeEach(() => jest.clearAllMocks());
 
-test('suppression eleve demande confirmation puis refresh', async () => {
+test('suppression élève demande confirmation puis refresh', async () => {
   const { getByTestId, getByText } = render(<ClassDashboardScreen route={{ params: { classe: { id: 1, nom: '4e Rose' } } }} navigation={{ navigate: jest.fn() }} />);
   fireEvent.press(getByTestId('delete-student-1'));
-  expect(getByText("Supprimer l'eleve")).toBeTruthy();
+  expect(getByText("Supprimer l'élève")).toBeTruthy();
   fireEvent.press(getByTestId('confirm-delete-student'));
   await waitFor(() => expect(supprimerEleve).toHaveBeenCalledWith(student));
   expect(mockRefresh).toHaveBeenCalled();

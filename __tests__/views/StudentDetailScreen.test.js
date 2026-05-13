@@ -43,7 +43,7 @@ import { ajouterTick } from '../../controllers/studentController';
 
 beforeEach(() => jest.clearAllMocks());
 
-test('detail eleve affiche toast apres tick', async () => {
+test('détail élève affiche le toast après tick', async () => {
   const { getByText } = render(<StudentDetailScreen route={{ params: { studentId: 1 } }} />);
   await waitFor(() => expect(getByText('Emma Martin')).toBeTruthy());
   fireEvent.press(getByText('TICK'));
@@ -52,5 +52,5 @@ test('detail eleve affiche toast apres tick', async () => {
     fireEvent.press(getByText('Participation'));
   });
   await waitFor(() => expect(ajouterTick).toHaveBeenCalled());
-  expect(getByText('Tick ajoute a Emma')).toBeTruthy();
+  expect(getByText('Tick ajouté à Emma')).toBeTruthy();
 });

@@ -9,7 +9,7 @@ const student = { id: 1, prenom: 'Emma', nom: 'Martin', ticks: 1, croix: 0, meri
 test('rendu de StudentCard', () => {
   const { getByText } = render(<StudentCard student={student} />);
   expect(getByText('MARTIN Emma')).toBeTruthy();
-  expect(getByText('Merites 2')).toBeTruthy();
+  expect(getByText('Mérites 2')).toBeTruthy();
   expect(getByText('Retenues 1')).toBeTruthy();
 });
 

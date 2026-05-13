@@ -13,11 +13,11 @@ jest.mock('../../controllers/statisticsController', () => ({
   }))
 }));
 
-test('statistiques affiche legende et tops', async () => {
+test('statistiques affiche légende et tops', async () => {
   const { getByText, getByTestId } = render(<StatisticsScreen />);
   await waitFor(() => expect(getByTestId('chart-legend')).toBeTruthy());
-  expect(getByText(/Merites/)).toBeTruthy();
+  expect(getByText(/Mérites/)).toBeTruthy();
   expect(getByText(/Retenues/)).toBeTruthy();
   expect(getByText('Top 3 participatifs')).toBeTruthy();
-  expect(getByText('Top 3 a surveiller')).toBeTruthy();
+  expect(getByText('Top 3 à surveiller')).toBeTruthy();
 });

@@ -38,7 +38,7 @@ const StudentCardBase = ({ student, onPress, onDelete }) => {
           <ProgressBar value={student.croix} max={CROSSES_FOR_DETENTION} color={colors.dangerRed} />
         </View>
         <View style={styles.badges}>
-          <Text style={styles.badge}>Merites {student.merites}</Text>
+          <Text style={styles.badge}>Mérites {student.merites}</Text>
           <Text style={styles.badgeWarn}>Retenues {student.retenues}</Text>
         </View>
       </TouchableOpacity>

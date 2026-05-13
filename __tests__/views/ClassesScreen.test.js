@@ -32,7 +32,7 @@ beforeEach(() => {
   mockClasses = [];
 });
 
-test('le FAB ouvre la modale d ajout de classe', () => {
+test("le FAB ouvre la modale d'ajout de classe", () => {
   const { getByTestId, getByPlaceholderText } = render(<ClassesScreen navigation={{ navigate: jest.fn() }} />);
 
   fireEvent.press(getByTestId('add-class-fab'));
@@ -40,7 +40,7 @@ test('le FAB ouvre la modale d ajout de classe', () => {
   expect(getByPlaceholderText('Nom de la classe')).toBeTruthy();
 });
 
-test('la modale ajoute une classe puis rafraichit la liste', async () => {
+test('la modale ajoute une classe puis rafraîchit la liste', async () => {
   const { getByTestId, getByPlaceholderText, getByText } = render(<ClassesScreen navigation={{ navigate: jest.fn() }} />);
 
   fireEvent.press(getByTestId('add-class-fab'));
@@ -69,7 +69,7 @@ test('la corbeille ouvre la confirmation de suppression', () => {
 
   expect(getByText('Supprimer la classe')).toBeTruthy();
   expect(getAllByText('4e Rose').length).toBeGreaterThan(1);
-  expect(getByText('Les eleves de cette classe, leur historique et leurs archives trimestrielles seront supprimes definitivement.')).toBeTruthy();
+  expect(getByText('Les élèves de cette classe, leur historique et leurs archives trimestrielles seront supprimés définitivement.')).toBeTruthy();
 });
 
 test('Annuler ne supprime pas la classe', () => {
