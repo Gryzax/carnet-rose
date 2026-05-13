@@ -90,6 +90,7 @@ export const StudentDetailScreen = ({ route, navigation }) => {
       <FlatList
         data={history}
         keyExtractor={(item) => String(item.id)}
+        contentContainerStyle={styles.historyContent}
         ListEmptyComponent={<EmptyState icon="time-outline" title="Aucun historique" message="Les actions tick et croix apparaîtront ici." />}
         renderItem={({ item }) => (
           <Card style={styles.historyItem}>
@@ -121,6 +122,7 @@ const styles = StyleSheet.create({
   progressGroup: { gap: 8, marginBottom: 14 },
   sectionLabel: { alignSelf: 'flex-start', backgroundColor: colors.sage, borderColor: colors.border, borderWidth: 1.5, borderRadius: 999, overflow: 'hidden', paddingHorizontal: 12, paddingVertical: 5, color: colors.ink, fontFamily: 'PatrickHand_400Regular', fontSize: 16, marginBottom: 8 },
   historyItem: { padding: 12, marginBottom: 8 },
+  historyContent: { paddingBottom: 96 },
   historyRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   historyText: { fontFamily: 'PatrickHand_400Regular', color: colors.ink, fontSize: 19, flex: 1 },
   footer: { fontFamily: 'PatrickHand_400Regular', color: colors.muted, fontSize: 19, marginTop: 12 }

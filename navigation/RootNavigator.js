@@ -23,18 +23,36 @@ export const RootNavigator = () => (
   <Tabs.Navigator
     screenOptions={({ route }) => ({
       headerShown: false,
-      tabBarActiveTintColor: colors.ink,
+      tabBarActiveTintColor: colors.deepPink,
       tabBarInactiveTintColor: colors.muted,
-      tabBarLabelStyle: { fontFamily: 'PatrickHand_400Regular', fontSize: 15 },
-      tabBarStyle: { backgroundColor: colors.canvas, borderTopWidth: 0, elevation: 0, height: 64, paddingTop: 6 },
+      tabBarLabelStyle: { fontFamily: 'PatrickHand_400Regular', fontSize: 14 },
+      tabBarItemStyle: { borderRadius: 999, marginVertical: 6 },
+      tabBarStyle: {
+        position: 'absolute',
+        left: 16,
+        right: 16,
+        bottom: 12,
+        backgroundColor: colors.white,
+        borderColor: colors.softPink,
+        borderWidth: 1.5,
+        borderTopWidth: 1.5,
+        borderRadius: 999,
+        elevation: 8,
+        shadowColor: colors.deepPink,
+        shadowOpacity: 0.12,
+        shadowRadius: 12,
+        height: 64,
+        paddingTop: 6,
+        paddingBottom: 8
+      },
       tabBarIcon: ({ color, size }) => {
-        const icons = { Classes: 'basket-outline', Statistiques: 'restaurant-outline', Parametres: 'grid-outline' };
+        const icons = { Classes: 'albums-outline', Statistiques: 'bar-chart-outline', Parametres: 'settings-outline' };
         return <Ionicons name={icons[route.name]} size={size} color={color} />;
       }
     })}
   >
-    <Tabs.Screen name="Classes" component={ClassesStack} options={{ title: 'Compra' }} />
-    <Tabs.Screen name="Statistiques" component={StatisticsScreen} options={{ title: 'Recetas' }} />
-    <Tabs.Screen name="Parametres" component={SettingsScreen} options={{ title: 'Mas' }} />
+    <Tabs.Screen name="Classes" component={ClassesStack} options={{ title: 'Classes' }} />
+    <Tabs.Screen name="Statistiques" component={StatisticsScreen} options={{ title: 'Statistiques' }} />
+    <Tabs.Screen name="Parametres" component={SettingsScreen} options={{ title: 'Paramètres' }} />
   </Tabs.Navigator>
 );

@@ -1,9 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
-import { FlatList, Modal, Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
-import { useMemo, useState } from 'react';
+import { Animated, FlatList, KeyboardAvoidingView, Modal, Platform, Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { colors } from '../constants/colors';
 import { strings } from '../constants/strings';
-import { ajouterClasse, supprimerClasse } from '../controllers/classController';
+import { ajouterClasse, marquerClasseUtilisee, supprimerClasse } from '../controllers/classController';
 import { useClasses } from '../hooks/useClasses';
 import { getAllStudents } from '../models/studentModel';
 import { EmptyState } from '../components/EmptyState';
@@ -90,8 +90,14 @@ export const ClassesScreen = ({ navigation }) => {
     }
   };
 
+  const openClass = async (classe) => {
+    await marquerClasseUtilisee(classe);
+    await refresh();
+    navigation.navigate('ClassDashboard', { classe });
+  };
+
   const renderClass = ({ item }) => (
-    <Pressable onPress={() => navigation.navigate('ClassDashboard', { classe: item })} onLongPress={() => openDeleteModal(item)} style={({ pressed }) => [styles.classWrap, pressed && styles.pressed]}>
+    <Pressable onPress={() => openClass(item)} onLongPress={() => openDeleteModal(item)} style={({ pressed }) => [styles.classWrap, pressed && styles.pressed]}>
       <Card washi style={styles.classCard}>
         <View style={styles.classHeader}>
           <Text style={styles.classTitle}>{item.nom}</Text>
@@ -118,7 +124,7 @@ export const ClassesScreen = ({ navigation }) => {
       ))}
       <FlatList key={columns} data={data} numColumns={columns} keyExtractor={(item) => String(item.id)} initialNumToRender={8} getItemLayout={(_, index) => ({ length: 142, offset: 142 * index, index })} ListEmptyComponent={<EmptyState icon="basket-outline" title="Aucune classe pour l'instant" message="Appuyez sur + pour créer votre première classe" actionLabel={strings.addClass} onAction={openAddModal} />} renderItem={renderClass} />
       <Pressable accessibilityLabel={strings.addClass} testID="add-class-fab" onPress={openAddModal} style={({ pressed }) => [styles.fab, pressed && styles.pressed]}>
-        <Ionicons name="add-outline" color={colors.ink} size={32} />
+        <Ionicons name="add-outline" color={colors.white} size={32} />
       </Pressable>
       <EditClassModal visible={addModalVisible} title={strings.addClass} value={className} error={addError} saving={saving} onChange={(text) => { setClassName(text); if (addError) setAddError(''); }} onClose={closeAddModal} onSubmit={submitClass} />
       <Modal visible={!!classToDelete} transparent animationType="fade" onRequestClose={closeDeleteModal}>
@@ -139,21 +145,39 @@ export const ClassesScreen = ({ navigation }) => {
   );
 };
 
-const EditClassModal = ({ visible, title, value, error, saving, onChange, onClose, onSubmit }) => (
-  <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-    <View style={styles.sheetBackdrop}>
-      <Card style={styles.sheet} washi>
+const EditClassModal = ({ visible, title, value, error, saving, onChange, onClose, onSubmit }) => {
+  const inputRef = useRef(null);
+  const slide = useRef(new Animated.Value(24)).current;
+  const opacity = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (!visible) return;
+    slide.setValue(24);
+    opacity.setValue(0);
+    Animated.parallel([
+      Animated.timing(slide, { toValue: 0, duration: 220, useNativeDriver: true }),
+      Animated.timing(opacity, { toValue: 1, duration: 180, useNativeDriver: true })
+    ]).start();
+  }, [opacity, slide, visible]);
+
+  return (
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose} onShow={() => setTimeout(() => inputRef.current?.focus?.(), 80)}>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.sheetBackdrop}>
+        <Animated.View style={{ opacity, transform: [{ translateY: slide }] }}>
+          <Card style={styles.sheet} washi>
         <Text style={styles.modalTitle}>{title}</Text>
-        <JournalInput autoFocus placeholder="Nom de la classe" value={value} onChangeText={onChange} testID="add-class-name-input" />
+        <JournalInput ref={inputRef} placeholder="Nom de la classe" value={value} onChangeText={onChange} testID="add-class-name-input" returnKeyType="done" onSubmitEditing={onSubmit} />
         {!!error && <Text style={styles.error}>{error}</Text>}
         <View style={styles.actions}>
           <PillButton disabled={saving} onPress={onClose} variant="light" style={styles.actionButton}>Annuler</PillButton>
           <PillButton disabled={saving} onPress={onSubmit} variant="pink" style={styles.actionButton}>{saving ? 'Ajout...' : 'Ajouter'}</PillButton>
         </View>
-      </Card>
-    </View>
-  </Modal>
-);
+          </Card>
+        </Animated.View>
+      </KeyboardAvoidingView>
+    </Modal>
+  );
+};
 
 const styles = StyleSheet.create({
   search: { marginBottom: 12 },
@@ -167,10 +191,10 @@ const styles = StyleSheet.create({
   stats: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 10 },
   result: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 6 },
   resultText: { fontFamily: 'PatrickHand_400Regular', color: colors.ink, fontSize: 19 },
-  fab: { position: 'absolute', right: 20, bottom: 24, backgroundColor: colors.pink, borderColor: colors.border, borderWidth: 1.5, width: 62, height: 62, borderRadius: 31, alignItems: 'center', justifyContent: 'center' },
+  fab: { position: 'absolute', right: 20, bottom: 92, backgroundColor: colors.deepPink, borderColor: colors.softPink, borderWidth: 1.5, width: 62, height: 62, borderRadius: 31, alignItems: 'center', justifyContent: 'center' },
   pressed: { transform: [{ scale: 0.97 }] },
   backdrop: { flex: 1, backgroundColor: colors.scrim, justifyContent: 'center', padding: 20 },
-  sheetBackdrop: { flex: 1, backgroundColor: colors.scrim, justifyContent: 'flex-end', padding: 12 },
+  sheetBackdrop: { flex: 1, backgroundColor: colors.scrim, justifyContent: 'flex-end', padding: 12, paddingBottom: 24 },
   sheet: { marginBottom: 0 },
   dialog: { gap: 12 },
   modalTitle: { fontFamily: 'PatrickHand_400Regular', fontSize: 28, color: colors.ink },

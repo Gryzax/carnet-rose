@@ -13,7 +13,12 @@ jest.mock('../../controllers/studentController', () => ({
   supprimerEleve: jest.fn(() => Promise.resolve())
 }));
 
+jest.mock('../../controllers/classController', () => ({
+  marquerClasseUtilisee: jest.fn(() => Promise.resolve())
+}));
+
 import { ajouterEleve, supprimerEleve } from '../../controllers/studentController';
+import { marquerClasseUtilisee } from '../../controllers/classController';
 
 beforeEach(() => jest.clearAllMocks());
 
