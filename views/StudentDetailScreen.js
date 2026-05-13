@@ -21,11 +21,15 @@ export const StudentDetailScreen = ({ route }) => {
   const [snack, setSnack] = useState(false);
   const [snackMessage, setSnackMessage] = useState('');
   const pulse = useRef(new Animated.Value(1)).current;
+  const snackTimer = useRef(null);
   const theme = useThemeColors();
   const { history, archives, refresh } = useHistory(student);
   const load = useCallback(async () => setStudent(await getStudentById(route.params.studentId)), [route.params.studentId]);
 
   useEffect(() => { load(); }, [load]);
+  useEffect(() => () => {
+    if (snackTimer.current) clearTimeout(snackTimer.current);
+  }, []);
 
   const reasons = useMemo(() => action === 'tick' ? TICK_REASONS : CROSS_REASONS, [action]);
 
@@ -41,7 +45,8 @@ export const StudentDetailScreen = ({ route }) => {
     setAction(null);
     setSnackMessage(message);
     setSnack(true);
-    setTimeout(() => setSnack(false), 5000);
+    if (snackTimer.current) clearTimeout(snackTimer.current);
+    snackTimer.current = setTimeout(() => setSnack(false), 5000);
     if (result.meritObtenu) {
       const copy = `Felicitations a ${student.prenom} ! Eleve serieux, participatif et implique.`;
       Alert.alert('Merite obtenu !', copy, [{ text: 'Copier le message', onPress: () => Clipboard.setStringAsync(copy) }, { text: 'Fermer' }]);
