@@ -1,7 +1,6 @@
-const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || '';
-const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || '';
+export { appUrl, getSupabaseStatus, isSupabaseConfigured, supabase, supabaseAnonKey, supabaseUrl } from '../supabase/supabaseClient';
 
-export const isSupabaseConfigured = () => Boolean(supabaseUrl && supabaseAnonKey);
+import { isSupabaseConfigured, supabaseAnonKey, supabaseUrl } from '../supabase/supabaseClient';
 
 export const supabaseRequest = async (path, options = {}) => {
   if (!isSupabaseConfigured()) {

@@ -35,9 +35,13 @@ Do not commit `.env`. The anonymous key is not a server secret, but data access 
 
 ## Next Steps
 
-1. Add `@supabase/supabase-js` when auth work begins.
-2. Create Supabase tables for classes, students, events, and term archives with `user_id`.
-3. Enable RLS policies so each user only reads/writes their own rows.
-4. Configure Google OAuth and Apple Sign In in Supabase.
-5. Add account screens without blocking local mode.
-6. Implement one-way backup, then two-way sync with conflict rules based on `updatedAt` or `derniereUtilisation`.
+1. Configure `.env` from `.env.example`.
+2. Run `docs/supabase-schema.sql` manually in Supabase.
+3. Configure Google OAuth in Supabase and Google Cloud.
+4. Configure Apple OAuth in Supabase and Apple Developer.
+5. Keep local storage as the primary source while sync matures.
+6. Implement full row mapping for two-way sync with conflict rules based on `updated_at` and `deleted_at`.
+
+## Current implementation
+
+The app now includes `@supabase/supabase-js`, an optional Supabase client, OAuth service functions, and sync service boundaries. Without Supabase environment variables, Carnet Rose stays in local-only mode and remains usable offline.

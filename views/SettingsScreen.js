@@ -1,8 +1,11 @@
 import { Alert, Modal, StyleSheet, Text, View } from 'react-native';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { colors } from '../constants/colors';
 import { reinitialiserTrimestre } from '../controllers/studentController';
 import { getAllStudents } from '../models/studentModel';
+import { getCurrentUser, signInWithApple, signInWithGoogle, signOut } from '../services/auth/authService';
+import { getSupabaseStatus } from '../services/supabase/supabaseClient';
+import { getLastSyncAt, syncAll } from '../services/sync/syncService';
 import { BackButton } from '../components/BackButton';
 import { Card, InfoIcon, JournalInput, Pill, PillButton, Screen, Sparkle, Title } from '../components/Themed';
 
@@ -17,6 +20,16 @@ export const SettingsScreen = ({ navigation }) => {
   const [summary, setSummary] = useState(null);
   const [success, setSuccess] = useState(null);
   const [confirmText, setConfirmText] = useState('');
+  const [account, setAccount] = useState({ user: null, loading: true, message: '' });
+  const [syncState, setSyncState] = useState({ loading: false, message: '', lastSyncAt: getLastSyncAt() });
+  const supabaseStatus = getSupabaseStatus();
+
+  const refreshAccount = async () => {
+    const { user } = await getCurrentUser();
+    setAccount((current) => ({ ...current, user, loading: false }));
+  };
+
+  useEffect(() => { refreshAccount(); }, []);
 
   const prepare = async () => {
     const students = await getAllStudents();
@@ -31,6 +44,28 @@ export const SettingsScreen = ({ navigation }) => {
     setSuccess(res);
   };
 
+  const runAuth = async (provider) => {
+    const result = provider === 'apple' ? await signInWithApple() : await signInWithGoogle();
+    await refreshAccount();
+    setAccount((current) => ({ ...current, message: result.message || (result.error ? 'Connexion impossible.' : 'Connexion lancée.') }));
+  };
+
+  const runSignOut = async () => {
+    const result = await signOut();
+    await refreshAccount();
+    setAccount((current) => ({ ...current, message: result.message || 'Vous êtes déconnecté.' }));
+  };
+
+  const runSync = async () => {
+    setSyncState((current) => ({ ...current, loading: true, message: '' }));
+    const result = await syncAll();
+    setSyncState({ loading: false, message: result.message || 'Synchronisation terminée.', lastSyncAt: result.lastSyncAt || getLastSyncAt() });
+  };
+
+  const lastSyncLabel = syncState.lastSyncAt
+    ? new Date(syncState.lastSyncAt).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' })
+    : 'Jamais';
+
   return (
     <Screen>
       <BackButton navigation={navigation} fallbackRoute="Classes" />
@@ -43,6 +78,28 @@ export const SettingsScreen = ({ navigation }) => {
       </Section>
       <Section title="Données">
         <PillButton testID="export-data" onPress={() => Alert.alert('Exporter les données', 'Fonctionnalité bientôt disponible')} variant="light">Exporter les données</PillButton>
+      </Section>
+      <Section title="Compte">
+        <Text style={styles.strong}>Connexion optionnelle</Text>
+        <Text style={styles.muted}>Connectez-vous pour sauvegarder et synchroniser vos données.</Text>
+        <Text style={styles.muted}>L’application reste utilisable hors ligne.</Text>
+        {!supabaseStatus.configured && <Text testID="supabase-local-mode" style={styles.notice}>Mode local uniquement. Ajoutez les variables Supabase pour activer la connexion.</Text>}
+        {account.user ? (
+          <>
+            <Text testID="account-connected" style={styles.text}>Connecté : {account.user.email || account.user.user_metadata?.full_name || 'Compte Supabase'}</Text>
+            <PillButton testID="sign-out" onPress={runSignOut} variant="light">Se déconnecter</PillButton>
+          </>
+        ) : (
+          <>
+            <Text testID="account-disconnected" style={styles.text}>Non connecté</Text>
+            <PillButton testID="sign-in-google" onPress={() => runAuth('google')} variant="pink">Continuer avec Google</PillButton>
+            <PillButton testID="sign-in-apple" onPress={() => runAuth('apple')} variant="light">Continuer avec Apple</PillButton>
+          </>
+        )}
+        {!!account.message && <Text style={styles.muted}>{account.message}</Text>}
+        <PillButton testID="sync-now" onPress={runSync} variant="pink" disabled={syncState.loading}>{syncState.loading ? 'Synchronisation...' : 'Synchroniser maintenant'}</PillButton>
+        <Text testID="last-sync" style={styles.muted}>Dernière synchronisation : {lastSyncLabel}</Text>
+        {!!syncState.message && <Text style={styles.muted}>{syncState.message}</Text>}
       </Section>
       <Section title="Trimestre">
         <PillButton onPress={prepare} variant="pink">Terminer le trimestre</PillButton>
@@ -70,6 +127,7 @@ const styles = StyleSheet.create({
   strong: { color: colors.ink, fontFamily: 'PatrickHand_400Regular', fontSize: 23 },
   muted: { color: colors.muted, fontFamily: 'PatrickHand_400Regular', fontSize: 19, lineHeight: 24 },
   text: { color: colors.ink, fontFamily: 'PatrickHand_400Regular', fontSize: 19, lineHeight: 24, flex: 1 },
+  notice: { color: colors.deepPink, backgroundColor: colors.lightPink, borderColor: colors.softPink, borderWidth: 1.5, borderRadius: 8, padding: 10, fontFamily: 'PatrickHand_400Regular', fontSize: 18, lineHeight: 23 },
   success: { marginTop: 14, backgroundColor: colors.sage, borderColor: colors.border, borderWidth: 1.5, borderRadius: 16, padding: 14, flexDirection: 'row', alignItems: 'center', gap: 8 },
   backdrop: { flex: 1, justifyContent: 'center', padding: 24, backgroundColor: colors.scrim },
   dialog: { gap: 12 },

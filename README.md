@@ -36,6 +36,20 @@ npm test
 
 Objectif de couverture : 80 % minimum.
 
+## Supabase optionnel
+
+Carnet Rose reste utilisable sans Supabase et sans connexion internet. Le stockage local SQLite sur mobile et IndexedDB/localforage sur web reste la source principale.
+
+Pour activer la connexion et la synchronisation en ligne, créer un fichier `.env` local à partir de `.env.example` :
+
+```txt
+EXPO_PUBLIC_SUPABASE_URL=
+EXPO_PUBLIC_SUPABASE_ANON_KEY=
+EXPO_PUBLIC_APP_URL=https://gryzax.github.io/carnet-rose/
+```
+
+Ne jamais committer de clé service-role Supabase. Google OAuth nécessite une configuration Google Cloud. Apple OAuth nécessite une configuration Apple Developer. Les étapes détaillées sont dans `docs/supabase-setup.md`, et le schéma SQL à exécuter manuellement est dans `docs/supabase-schema.sql`.
+
 ## Utiliser l'application sur iPhone sans Expo Go
 
 Cette version utilise une PWA.
