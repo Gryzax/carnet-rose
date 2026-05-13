@@ -6,4 +6,8 @@ export const chargerClasses = async (tri = 'alpha') => {
   return classes;
 };
 
-export const ajouterClasse = async (nom) => createClass(nom.trim());
+export const ajouterClasse = async (nom) => {
+  const normalizedName = String(nom || '').trim();
+  if (!normalizedName) throw new Error('Le nom de la classe est obligatoire.');
+  return createClass(normalizedName);
+};
