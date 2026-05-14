@@ -1,9 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useMemo, useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, useColorScheme, useWindowDimensions, View } from 'react-native';
+import { useEffect, useMemo, useState } from 'react';
+import { ActivityIndicator, Platform, Pressable, StyleSheet, Text, useColorScheme, useWindowDimensions, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { colors } from '../constants/colors';
-import { signInWithApple, signInWithGoogle } from '../services/auth/authService';
+import { getCurrentUser, signInWithApple, signInWithGoogle } from '../services/auth/authService';
 import { isSupabaseConfigured } from '../services/supabase/supabaseClient';
 
 const unavailableMessage = 'La connexion n\u2019est pas encore configur\u00e9e. Veuillez contacter l\u2019administrateur.';
@@ -46,6 +46,20 @@ export const LoginScreen = ({ onAuthenticated }) => {
   const compact = width < 380;
   const supabaseReady = isSupabaseConfigured();
 
+  useEffect(() => {
+    let active = true;
+    getCurrentUser().then(({ user }) => {
+      if (!active || !user) return;
+      if (Platform.OS === 'web' && typeof window !== 'undefined') {
+        window.history.replaceState({}, document.title, window.location.pathname + window.location.search);
+      }
+      onAuthenticated?.({ user });
+    });
+    return () => {
+      active = false;
+    };
+  }, [onAuthenticated]);
+
   const runAuth = async (provider) => {
     if (!supabaseReady) {
       setMessage(unavailableMessage);
@@ -55,6 +69,9 @@ export const LoginScreen = ({ onAuthenticated }) => {
     const result = provider === 'apple' ? await signInWithApple() : await signInWithGoogle();
     setLoading('');
     if (result.user) {
+      if (Platform.OS === 'web' && typeof window !== 'undefined') {
+        window.history.replaceState({}, document.title, window.location.pathname + window.location.search);
+      }
       onAuthenticated?.({ user: result.user });
       return;
     }

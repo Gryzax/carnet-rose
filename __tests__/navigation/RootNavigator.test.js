@@ -1,6 +1,10 @@
-import { fireEvent, render, waitFor } from '@testing-library/react-native';
+import { act, fireEvent, render, waitFor } from '@testing-library/react-native';
+import { Platform } from 'react-native';
 import { RootNavigator } from '../../navigation/RootNavigator';
 import * as authService from '../../services/auth/authService';
+
+let mockAuthCallback;
+const originalPlatformOS = Platform.OS;
 
 jest.mock('@react-navigation/native-stack', () => ({
   createNativeStackNavigator: () => ({
@@ -71,14 +75,24 @@ jest.mock('../../services/supabase/supabaseClient', () => ({
 
 jest.mock('../../services/auth/authService', () => ({
   getCurrentUser: jest.fn(() => Promise.resolve({ user: null, error: null })),
-  onAuthStateChange: jest.fn(() => ({ unsubscribe: jest.fn() })),
+  onAuthStateChange: jest.fn((callback) => {
+    mockAuthCallback = callback;
+    return { unsubscribe: jest.fn() };
+  }),
+  signOut: jest.fn(() => Promise.resolve({ error: null })),
   signInWithApple: jest.fn(() => Promise.resolve({ user: null, message: 'Apple pending' })),
   signInWithGoogle: jest.fn(() => Promise.resolve({ user: null, message: 'Google pending' }))
 }));
 
 beforeEach(() => {
   jest.clearAllMocks();
+  mockAuthCallback = null;
   authService.getCurrentUser.mockResolvedValue({ user: null, error: null });
+});
+
+afterEach(() => {
+  Platform.OS = originalPlatformOS;
+  jest.restoreAllMocks();
 });
 
 test('aucun acces aux tabs sans session', async () => {
@@ -97,6 +111,39 @@ test('acces aux tabs avec utilisateur mocke', async () => {
   expect(getByText('Statistiques')).toBeTruthy();
   expect(getByText('Parametres')).toBeTruthy();
   expect(queryByText('Carnet Rose')).toBeNull();
+});
+
+test('apres login auth, les tabs principales remplacent le login', async () => {
+  const { getByText, queryByText } = render(<RootNavigator />);
+  await waitFor(() => expect(getByText('Carnet Rose')).toBeTruthy());
+
+  act(() => {
+    mockAuthCallback('SIGNED_IN', { user: { email: 'demo@example.com' } });
+  });
+
+  await waitFor(() => expect(getByText('Classes')).toBeTruthy());
+  expect(queryByText('Carnet Rose')).toBeNull();
+});
+
+test('retour navigateur simule ne declenche pas signOut si une session existe', async () => {
+  Platform.OS = 'web';
+  const originalAddEventListener = window.addEventListener;
+  const originalRemoveEventListener = window.removeEventListener;
+  let popstateHandler;
+  window.addEventListener = jest.fn((event, handler) => {
+    if (event === 'popstate') popstateHandler = handler;
+  });
+  window.removeEventListener = jest.fn();
+  authService.getCurrentUser.mockResolvedValue({ user: { email: 'demo@example.com' }, error: null });
+  const { getByText } = render(<RootNavigator />);
+  await waitFor(() => expect(getByText('Classes')).toBeTruthy());
+
+  popstateHandler();
+
+  await waitFor(() => expect(authService.getCurrentUser).toHaveBeenCalledTimes(2));
+  expect(authService.signOut).not.toHaveBeenCalled();
+  window.addEventListener = originalAddEventListener;
+  window.removeEventListener = originalRemoveEventListener;
 });
 
 test('signOut renvoie vers LoginScreen', async () => {
