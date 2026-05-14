@@ -93,9 +93,15 @@ create table if not exists public.sync_state (
 alter table public.sync_state
   add column if not exists last_used_at timestamptz;
 
+alter table public.classes
+  add column if not exists last_used_at timestamptz;
+
 alter table public.students
   add column if not exists ticks integer not null default 0,
   add column if not exists crosses integer not null default 0,
+  add column if not exists term integer not null default 1;
+
+alter table public.events
   add column if not exists term integer not null default 1;
 
 alter table public.term_archives

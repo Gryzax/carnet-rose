@@ -9,6 +9,11 @@ export const getClasses = async () => {
   `);
 };
 
+export const getClassById = async (id) => {
+  const db = await getDb();
+  return db.getFirstAsync('SELECT * FROM classes WHERE id = ?', id);
+};
+
 export const createClass = async (nom) => {
   const db = await getDb();
   return db.runAsync('INSERT INTO classes (nom, creeLe, derniereUtilisation) VALUES (?, datetime("now"), datetime("now"))', nom);

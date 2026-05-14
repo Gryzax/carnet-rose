@@ -5,21 +5,35 @@ const mockDb = {
 };
 
 jest.mock('../database/db', () => ({ getDb: jest.fn(() => Promise.resolve(mockDb)) }));
+jest.mock('../services/sync/syncService', () => ({
+  runBackgroundSync: jest.fn((callback) => callback({ user: { id: 'user-1' }, session: { accessToken: 'token' } }))
+}));
+jest.mock('../services/sync/classSyncService', () => ({
+  softDeleteClass: jest.fn(() => Promise.resolve({ error: null })),
+  upsertClass: jest.fn(() => Promise.resolve({ error: null }))
+}));
+jest.mock('../services/sync/studentSyncService', () => ({
+  softDeleteStudent: jest.fn(() => Promise.resolve({ error: null }))
+}));
 
 import { ajouterClasse, chargerClasses, marquerClasseUtilisee, supprimerClasse } from '../controllers/classController';
 import { getStatistics } from '../controllers/statisticsController';
-import { createClass, deleteClass, getClasses, touchClass } from '../models/classModel';
+import { createClass, deleteClass, getClassById, getClasses, touchClass } from '../models/classModel';
 import { archiveStudent, createEvent, getArchives, getCurrentHistory, getLastActiveEvent, markEventCancelled } from '../models/historyModel';
 import { createStudent, deleteStudent, getAllStudents, getStudentById, getStudentsByClass, resetAllStudents, updateCounters } from '../models/studentModel';
+import { softDeleteClass, upsertClass } from '../services/sync/classSyncService';
+import { softDeleteStudent } from '../services/sync/studentSyncService';
 
 beforeEach(() => jest.clearAllMocks());
 
 test('classModel exécute les requêtes', async () => {
   await getClasses();
+  await getClassById(2);
   await createClass('6e Rose');
   await deleteClass(1);
   await touchClass(1);
   expect(mockDb.getAllAsync).toHaveBeenCalledWith(expect.stringContaining('FROM classes c LEFT JOIN eleves'));
+  expect(mockDb.getFirstAsync).toHaveBeenCalledWith(expect.stringContaining('classes WHERE id'), 2);
   expect(mockDb.runAsync).toHaveBeenCalledWith(expect.stringContaining('INSERT INTO classes'), '6e Rose');
   expect(mockDb.runAsync).toHaveBeenCalledWith(expect.stringContaining('DELETE FROM evenements'), 1);
   expect(mockDb.runAsync).toHaveBeenCalledWith(expect.stringContaining('DELETE FROM archive_trimestre'), 1);
@@ -58,11 +72,14 @@ test('historyModel exécute historique et archives', async () => {
 
 test('classController trie et ajoute une classe', async () => {
   mockDb.getAllAsync.mockResolvedValueOnce([{ nom: 'B', derniereUtilisation: '2024' }, { nom: 'A', derniereUtilisation: '2026' }]);
+  mockDb.runAsync.mockResolvedValueOnce({ lastInsertRowId: 22 });
+  mockDb.getFirstAsync.mockResolvedValueOnce({ id: 22, nom: '4e Rose', creeLe: 'now', derniereUtilisation: 'now' });
   const recent = await chargerClasses('recent');
   await ajouterClasse('  4e Rose  ');
   await marquerClasseUtilisee(12);
   expect(recent[0].nom).toBe('A');
   expect(mockDb.runAsync).toHaveBeenCalledWith(expect.stringContaining('INSERT INTO classes'), '4e Rose');
+  expect(upsertClass).toHaveBeenCalledWith(expect.objectContaining({ classe: expect.objectContaining({ id: 22 }) }));
   expect(mockDb.runAsync).toHaveBeenCalledWith(expect.stringContaining('derniereUtilisation'), 12);
 });
 
@@ -72,16 +89,21 @@ test('classController refuse un nom de classe vide', async () => {
 });
 
 test('classController supprime une classe vide', async () => {
+  mockDb.getAllAsync.mockResolvedValueOnce([]);
   await supprimerClasse({ id: 10, nom: '4e Rose', nombreEleves: 0 });
   expect(mockDb.runAsync).toHaveBeenCalledWith(expect.stringContaining('DELETE FROM classes'), 10);
+  expect(softDeleteClass).toHaveBeenCalledWith(expect.objectContaining({ classId: 10 }));
 });
 
 test('classController supprime une classe avec eleves', async () => {
+  mockDb.getAllAsync.mockResolvedValueOnce([{ id: 100 }, { id: 101 }]);
   await supprimerClasse({ id: 11, nom: '3e Rose', nombreEleves: 4 });
   expect(mockDb.runAsync).toHaveBeenCalledWith(expect.stringContaining('DELETE FROM evenements'), 11);
   expect(mockDb.runAsync).toHaveBeenCalledWith(expect.stringContaining('DELETE FROM archive_trimestre'), 11);
   expect(mockDb.runAsync).toHaveBeenCalledWith(expect.stringContaining('DELETE FROM eleves'), 11);
   expect(mockDb.runAsync).toHaveBeenCalledWith(expect.stringContaining('DELETE FROM classes'), 11);
+  expect(softDeleteStudent).toHaveBeenCalledWith(expect.objectContaining({ studentId: 100 }));
+  expect(softDeleteStudent).toHaveBeenCalledWith(expect.objectContaining({ studentId: 101 }));
 });
 
 test('statisticsController calcule les tops', async () => {

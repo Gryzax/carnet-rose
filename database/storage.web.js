@@ -50,6 +50,9 @@ const createWebDb = () => ({
     if (query.includes('select * from eleves where id = ?')) {
       return state.eleves.find((student) => student.id === args[0]) || null;
     }
+    if (query.includes('select * from classes where id = ?')) {
+      return state.classes.find((classe) => classe.id === args[0]) || null;
+    }
     if (query.includes('select * from evenements where eleveid = ? and annule = 0')) {
       return state.evenements
         .filter((event) => event.eleveId === args[0] && event.annule === 0)
@@ -94,6 +97,12 @@ const createWebDb = () => ({
       return state.archive_trimestre
         .filter((archive) => archive.eleveId === args[0])
         .sort((a, b) => String(b.archiveLe).localeCompare(String(a.archiveLe)));
+    }
+    if (query.includes('select * from evenements order by creele asc')) {
+      return [...state.evenements].sort((a, b) => String(a.creeLe).localeCompare(String(b.creeLe)) || a.id - b.id);
+    }
+    if (query.includes('select * from archive_trimestre order by archivele asc')) {
+      return [...state.archive_trimestre].sort((a, b) => String(a.archiveLe).localeCompare(String(b.archiveLe)) || a.id - b.id);
     }
 
     throw new Error(`Unsupported web getAllAsync query: ${sql}`);
