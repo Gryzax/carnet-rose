@@ -109,9 +109,11 @@ test('classController supprime une classe avec eleves', async () => {
 test('statisticsController calcule les tops', async () => {
   mockDb.getAllAsync
     .mockResolvedValueOnce([{ nom: '6e', totalMerites: 2, totalRetenues: 1 }])
-    .mockResolvedValueOnce([{ id: 1, ticks: 3, merites: 0, croix: 0, retenues: 0 }, { id: 2, ticks: 0, merites: 0, croix: 3, retenues: 1 }]);
+    .mockResolvedValueOnce([{ id: 1, ticks: 3, merites: 0, croix: 0, retenues: 0 }, { id: 2, ticks: 0, merites: 0, croix: 3, retenues: 1 }])
+    .mockResolvedValueOnce([{ id: 9, eleveId: 2, type: 'croix', annule: 0 }]);
   const stats = await getStatistics();
   expect(stats.classes).toHaveLength(1);
+  expect(stats.events).toHaveLength(1);
   expect(stats.topParticipatifs[0].id).toBe(1);
   expect(stats.topSurveillance[0].id).toBe(2);
 });
