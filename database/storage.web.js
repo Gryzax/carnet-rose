@@ -36,6 +36,8 @@ const nextId = (state, table) => {
 
 const byName = (a, b) => String(a.nom).localeCompare(String(b.nom), 'fr', { sensitivity: 'base' });
 
+const isActive = (item) => !item?.deleted_at && !item?.deletedAt;
+
 const createWebDb = () => ({
   execAsync: async () => {
     const state = await loadState();
@@ -46,16 +48,16 @@ const createWebDb = () => ({
     const query = normalizeSql(sql);
     const state = await loadState();
 
-    if (query.includes('select count(*) as count from classes')) return { count: state.classes.length };
+    if (query.includes('select count(*) as count from classes')) return { count: state.classes.filter(isActive).length };
     if (query.includes('select * from eleves where id = ?')) {
-      return state.eleves.find((student) => student.id === args[0]) || null;
+      return state.eleves.find((student) => student.id === args[0] && isActive(student)) || null;
     }
     if (query.includes('select * from classes where id = ?')) {
-      return state.classes.find((classe) => classe.id === args[0]) || null;
+      return state.classes.find((classe) => classe.id === args[0] && isActive(classe)) || null;
     }
     if (query.includes('select * from evenements where eleveid = ? and annule = 0')) {
       return state.evenements
-        .filter((event) => event.eleveId === args[0] && event.annule === 0)
+        .filter((event) => event.eleveId === args[0] && event.annule === 0 && isActive(event))
         .sort((a, b) => String(b.creeLe).localeCompare(String(a.creeLe)) || b.id - a.id)[0] || null;
     }
 
@@ -67,8 +69,8 @@ const createWebDb = () => ({
     const state = await loadState();
 
     if (query.includes('from classes c left join eleves e')) {
-      return [...state.classes].sort(byName).map((classe) => {
-        const students = state.eleves.filter((student) => student.classeId === classe.id);
+      return [...state.classes].filter(isActive).sort(byName).map((classe) => {
+        const students = state.eleves.filter((student) => student.classeId === classe.id && isActive(student));
         return {
           ...classe,
           nombreEleves: students.length,
@@ -79,30 +81,33 @@ const createWebDb = () => ({
     }
     if (query.includes('select * from eleves where classeid = ?')) {
       return state.eleves
-        .filter((student) => student.classeId === args[0])
+        .filter((student) => student.classeId === args[0] && isActive(student))
         .sort((a, b) => String(a.nom).localeCompare(String(b.nom), 'fr', { sensitivity: 'base' }) || String(a.prenom).localeCompare(String(b.prenom), 'fr', { sensitivity: 'base' }));
     }
     if (query.includes('from eleves e join classes c')) {
-      return state.eleves.map((student) => ({
+      return state.eleves.filter((student) => {
+        const classe = state.classes.find((item) => item.id === student.classeId);
+        return isActive(student) && isActive(classe);
+      }).map((student) => ({
         ...student,
-        classeNom: state.classes.find((classe) => classe.id === student.classeId)?.nom || ''
+        classeNom: state.classes.find((classe) => classe.id === student.classeId && isActive(classe))?.nom || ''
       }));
     }
     if (query.includes('select * from evenements where eleveid = ? and trimestre = ?')) {
       return state.evenements
-        .filter((event) => event.eleveId === args[0] && event.trimestre === args[1])
+        .filter((event) => event.eleveId === args[0] && event.trimestre === args[1] && isActive(event))
         .sort((a, b) => String(b.creeLe).localeCompare(String(a.creeLe)));
     }
     if (query.includes('select * from archive_trimestre where eleveid = ?')) {
       return state.archive_trimestre
-        .filter((archive) => archive.eleveId === args[0])
+        .filter((archive) => archive.eleveId === args[0] && isActive(archive))
         .sort((a, b) => String(b.archiveLe).localeCompare(String(a.archiveLe)));
     }
     if (query.includes('select * from evenements order by creele asc')) {
-      return [...state.evenements].sort((a, b) => String(a.creeLe).localeCompare(String(b.creeLe)) || a.id - b.id);
+      return [...state.evenements].filter(isActive).sort((a, b) => String(a.creeLe).localeCompare(String(b.creeLe)) || a.id - b.id);
     }
     if (query.includes('select * from archive_trimestre order by archivele asc')) {
-      return [...state.archive_trimestre].sort((a, b) => String(a.archiveLe).localeCompare(String(b.archiveLe)) || a.id - b.id);
+      return [...state.archive_trimestre].filter(isActive).sort((a, b) => String(a.archiveLe).localeCompare(String(b.archiveLe)) || a.id - b.id);
     }
 
     throw new Error(`Unsupported web getAllAsync query: ${sql}`);

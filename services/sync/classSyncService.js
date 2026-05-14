@@ -2,6 +2,7 @@ import { getClasses } from '../../models/classModel';
 import { supabaseRequest } from '../supabase/supabaseClient';
 
 const isoOrNow = (value) => value || new Date().toISOString();
+const isActive = (item) => !item?.deleted_at && !item?.deletedAt;
 
 export const mapClassToSupabase = (classe, userId) => ({
   user_id: userId,
@@ -38,7 +39,7 @@ export const softDeleteClass = async ({ classId, user, session }) => {
 
 export const syncClasses = async ({ user, session } = {}) => {
   if (!user?.id || !session?.accessToken) return { synced: false, reason: 'not-authenticated' };
-  const classes = await getClasses();
+  const classes = (await getClasses()).filter(isActive);
   const results = [];
   for (const classe of classes) {
     results.push(await upsertClass({ classe, user, session }));

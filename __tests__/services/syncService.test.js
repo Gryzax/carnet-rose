@@ -22,6 +22,7 @@ jest.mock('../../models/historyModel', () => ({
 }));
 
 import { getCurrentUser } from '../../services/auth/authService';
+import { getClasses } from '../../models/classModel';
 import { supabaseRequest } from '../../services/supabase/supabaseClient';
 import { softDeleteClass, upsertClass } from '../../services/sync/classSyncService';
 import { upsertEvent } from '../../services/sync/historySyncService';
@@ -110,6 +111,20 @@ test('syncAll avec utilisateur pousse les donnees locales', async () => {
   expect(supabaseRequest).toHaveBeenCalledWith('/rest/v1/events?on_conflict=user_id,local_id', expect.any(Object));
   expect(supabaseRequest).toHaveBeenCalledWith('/rest/v1/term_archives?on_conflict=user_id,local_id', expect.any(Object));
   expect(supabaseRequest).toHaveBeenCalledWith('/rest/v1/sync_state?on_conflict=user_id,local_id', expect.any(Object));
+});
+
+test('syncAll ignore les donnees locales marquees deleted_at', async () => {
+  getClasses.mockResolvedValueOnce([
+    { id: 1, nom: '6e Rose', deleted_at: '2026-01-01T00:00:00.000Z' },
+    { id: 2, nom: '4e Rose', creeLe: '2026-01-01T00:00:00.000Z' }
+  ]);
+
+  await syncAll();
+
+  const classBodies = supabaseRequest.mock.calls
+    .filter(([path]) => path === '/rest/v1/classes?on_conflict=user_id,local_id')
+    .map(([, options]) => JSON.parse(options.body));
+  expect(classBodies).toEqual([expect.objectContaining({ local_id: '2', name: '4e Rose' })]);
 });
 
 test('erreur Supabase retourne une erreur non bloquante', async () => {

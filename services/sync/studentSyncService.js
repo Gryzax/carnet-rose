@@ -5,6 +5,7 @@ const splitName = (student) => ({
   firstName: student.prenom || student.first_name || '',
   lastName: student.nom || student.last_name || ''
 });
+const isActive = (item) => !item?.deleted_at && !item?.deletedAt;
 
 export const mapStudentToSupabase = (student, userId) => {
   const { firstName, lastName } = splitName(student);
@@ -50,7 +51,7 @@ export const softDeleteStudent = async ({ studentId, user, session }) => {
 
 export const syncStudents = async ({ user, session } = {}) => {
   if (!user?.id || !session?.accessToken) return { synced: false, reason: 'not-authenticated' };
-  const students = await getAllStudents();
+  const students = (await getAllStudents()).filter(isActive);
   const results = [];
   for (const student of students) {
     results.push(await upsertStudent({ student, user, session }));

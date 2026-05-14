@@ -1,6 +1,8 @@
 import { getAllArchives, getAllEvents } from '../../models/historyModel';
 import { supabaseRequest } from '../supabase/supabaseClient';
 
+const isActive = (item) => !item?.deleted_at && !item?.deletedAt;
+
 export const mapEventToSupabase = (event, userId) => ({
   user_id: userId,
   local_id: String(event.id),
@@ -61,8 +63,8 @@ export const upsertTermArchive = async ({ archive, user, session }) => {
 
 export const syncHistory = async ({ user, session } = {}) => {
   if (!user?.id || !session?.accessToken) return { synced: false, reason: 'not-authenticated' };
-  const events = await getAllEvents();
-  const archives = await getAllArchives();
+  const events = (await getAllEvents()).filter(isActive);
+  const archives = (await getAllArchives()).filter(isActive);
   const results = [];
   for (const event of events) results.push(await upsertEvent({ event, user, session }));
   for (const archive of archives) results.push(await upsertTermArchive({ archive, user, session }));
