@@ -42,8 +42,10 @@ test("le FAB ouvre la modale d'ajout de classe", () => {
 });
 
 test('base vide affiche un EmptyState propre sans classes demo', () => {
-  const { getByText, queryByText } = render(<ClassesScreen navigation={{ navigate: jest.fn() }} />);
+  const { getByTestId, getByText, queryByText } = render(<ClassesScreen navigation={{ navigate: jest.fn() }} />);
 
+  expect(getByTestId('classes-list')).toBeTruthy();
+  expect(getByTestId('classes-list').props.contentContainerStyle).toEqual(expect.objectContaining({ flexGrow: 1, paddingBottom: 128 }));
   expect(getByText("Aucune classe pour l'instant")).toBeTruthy();
   expect(queryByText('5e Pivoine')).toBeNull();
   expect(queryByText('6e Rose')).toBeNull();

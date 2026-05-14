@@ -1,4 +1,4 @@
-import { Alert, Modal, StyleSheet, Text, View } from 'react-native';
+import { Alert, Modal, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useEffect, useState } from 'react';
 import { colors } from '../constants/colors';
 import { reinitialiserTrimestre } from '../controllers/studentController';
@@ -61,26 +61,28 @@ export const SettingsScreen = ({ navigation, onSignedOut }) => {
 
   return (
     <Screen>
-      <BackButton navigation={navigation} fallbackRoute="Classes" />
-      <Title>Parametres</Title>
-      <Section title="Compte">
-        <Text testID="account-user" style={styles.strong}>{user?.email || user?.user_metadata?.name || 'Utilisateur connecte'}</Text>
-        <PillButton testID="sync-now" onPress={synchronizeNow} variant="light">Synchroniser maintenant</PillButton>
-        <PillButton testID="sign-out" onPress={disconnect} variant="pink">Se deconnecter</PillButton>
-      </Section>
-      <Section title="A propos">
-        <View style={styles.infoRow}><InfoIcon /><Text style={styles.strong}>Carnet Rose</Text></View>
-        <Text style={styles.muted}>Suivi hors ligne des eleves</Text>
-        <Text style={styles.muted}>fourkane ahmerelain</Text>
-        <Text style={styles.muted}>v1.0.0</Text>
-      </Section>
-      <Section title="Donnees">
-        <PillButton testID="export-data" onPress={() => Alert.alert('Exporter les donnees', 'Fonctionnalite bientot disponible')} variant="light">Exporter les donnees</PillButton>
-      </Section>
-      <Section title="Trimestre">
-        <PillButton onPress={prepare} variant="pink">Terminer le trimestre</PillButton>
-        {success && <View style={styles.success}><Sparkle /><Text style={styles.text}>Trimestre archive : {success.totalEleves} eleves, {success.totalMerites} merites, {success.totalRetenues} retenues.</Text></View>}
-      </Section>
+      <ScrollView testID="settings-scroll" showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" contentContainerStyle={styles.scrollContent}>
+        <BackButton navigation={navigation} fallbackRoute="Classes" />
+        <Title>Parametres</Title>
+        <Section title="Compte">
+          <Text testID="account-user" style={styles.strong}>{user?.email || user?.user_metadata?.name || 'Utilisateur connecte'}</Text>
+          <PillButton testID="sync-now" onPress={synchronizeNow} variant="light">Synchroniser maintenant</PillButton>
+          <PillButton testID="sign-out" onPress={disconnect} variant="pink">Se deconnecter</PillButton>
+        </Section>
+        <Section title="A propos">
+          <View style={styles.infoRow}><InfoIcon /><Text style={styles.strong}>Carnet Rose</Text></View>
+          <Text style={styles.muted}>Suivi hors ligne des eleves</Text>
+          <Text style={styles.muted}>fourkane ahmerelain</Text>
+          <Text style={styles.muted}>v1.0.0</Text>
+        </Section>
+        <Section title="Donnees">
+          <PillButton testID="export-data" onPress={() => Alert.alert('Exporter les donnees', 'Fonctionnalite bientot disponible')} variant="light">Exporter les donnees</PillButton>
+        </Section>
+        <Section title="Trimestre">
+          <PillButton onPress={prepare} variant="pink">Terminer le trimestre</PillButton>
+          {success && <View style={styles.success}><Sparkle /><Text style={styles.text}>Trimestre archive : {success.totalEleves} eleves, {success.totalMerites} merites, {success.totalRetenues} retenues.</Text></View>}
+        </Section>
+      </ScrollView>
       <Modal transparent visible={Boolean(summary)} onRequestClose={() => setSummary(null)}>
         <View style={styles.backdrop}>
           <Card style={styles.dialog} washi>
@@ -98,6 +100,7 @@ export const SettingsScreen = ({ navigation, onSignedOut }) => {
 };
 
 const styles = StyleSheet.create({
+  scrollContent: { flexGrow: 1, paddingBottom: 116 },
   sectionBody: { marginTop: 12, gap: 8 },
   infoRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   strong: { color: colors.ink, fontFamily: 'PatrickHand_400Regular', fontSize: 23 },

@@ -112,8 +112,8 @@ export const ClassesScreen = ({ navigation }) => {
     </Pressable>
   );
 
-  return (
-    <Screen>
+  const listHeader = (
+    <>
       <Title>{strings.classesTitle}</Title>
       <JournalInput placeholder="Rechercher un élève" value={query} onChangeText={search} style={styles.search} />
       <SegmentedControl value={sort} onChange={setSort} options={[{ value: 'alpha', label: 'A-Z' }, { value: 'recent', label: 'Récent' }]} style={styles.segmented} />
@@ -122,7 +122,12 @@ export const ClassesScreen = ({ navigation }) => {
           <Sparkle /><Text style={styles.resultText}>{s.prenom} {s.nom} - {s.classeNom}</Text>
         </Pressable>
       ))}
-      <FlatList key={columns} data={data} numColumns={columns} keyExtractor={(item) => String(item.id)} initialNumToRender={8} getItemLayout={(_, index) => ({ length: 142, offset: 142 * index, index })} ListEmptyComponent={<EmptyState icon="basket-outline" title="Aucune classe pour l'instant" message="Appuyez sur + pour créer votre première classe" actionLabel={strings.addClass} onAction={openAddModal} />} renderItem={renderClass} />
+    </>
+  );
+
+  return (
+    <Screen>
+      <FlatList testID="classes-list" key={columns} data={data} numColumns={columns} keyExtractor={(item) => String(item.id)} contentContainerStyle={styles.listContent} initialNumToRender={8} getItemLayout={(_, index) => ({ length: 142, offset: 142 * index, index })} ListHeaderComponent={listHeader} ListEmptyComponent={<EmptyState icon="basket-outline" title="Aucune classe pour l'instant" message="Appuyez sur + pour créer votre première classe" actionLabel={strings.addClass} onAction={openAddModal} />} renderItem={renderClass} />
       <Pressable accessibilityLabel={strings.addClass} testID="add-class-fab" onPress={openAddModal} style={({ pressed }) => [styles.fab, pressed && styles.pressed]}>
         <Ionicons name="add-outline" color={colors.white} size={32} />
       </Pressable>
@@ -180,6 +185,7 @@ const EditClassModal = ({ visible, title, value, error, saving, onChange, onClos
 };
 
 const styles = StyleSheet.create({
+  listContent: { flexGrow: 1, paddingBottom: 128 },
   search: { marginBottom: 12 },
   segmented: { marginBottom: 12 },
   classWrap: { flex: 1 },

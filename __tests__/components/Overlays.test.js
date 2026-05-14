@@ -7,6 +7,7 @@ test('ouverture et fermeture des modales', () => {
   const onClose = jest.fn();
   const { getByText, getByTestId } = render(<ReasonSheet visible reasons={['Participation']} onSelect={jest.fn()} onClose={onClose} />);
   expect(getByText('Choisir une raison')).toBeTruthy();
+  expect(getByTestId('reason-sheet-scroll')).toBeTruthy();
   fireEvent.press(getByTestId('sheet-backdrop'));
   expect(onClose).toHaveBeenCalled();
 });

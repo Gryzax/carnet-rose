@@ -44,8 +44,9 @@ import { ajouterTick } from '../../controllers/studentController';
 beforeEach(() => jest.clearAllMocks());
 
 test('détail élève affiche le toast après tick', async () => {
-  const { getByText } = render(<StudentDetailScreen route={{ params: { studentId: 1 } }} navigation={{ navigate: jest.fn(), canGoBack: jest.fn(() => false) }} />);
+  const { getByTestId, getByText } = render(<StudentDetailScreen route={{ params: { studentId: 1 } }} navigation={{ navigate: jest.fn(), canGoBack: jest.fn(() => false) }} />);
   await waitFor(() => expect(getByText('Emma Martin')).toBeTruthy());
+  expect(getByTestId('student-detail-list').props.contentContainerStyle).toEqual(expect.objectContaining({ flexGrow: 1, paddingBottom: 116 }));
   fireEvent.press(getByText('TICK'));
   await waitFor(() => expect(getByText('Participation')).toBeTruthy());
   await act(async () => {
