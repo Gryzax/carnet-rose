@@ -1,6 +1,9 @@
 -- Carnet Rose Supabase schema.
 -- Copy this file into Supabase SQL Editor and run it manually.
+-- Safe to run multiple times. It does not delete tables or data.
 -- Do not commit real credentials.
+
+create extension if not exists pgcrypto;
 
 create table if not exists public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
@@ -87,6 +90,18 @@ create table if not exists public.sync_state (
   unique (user_id, local_id)
 );
 
+alter table public.sync_state
+  add column if not exists last_used_at timestamptz;
+
+alter table public.students
+  add column if not exists ticks integer not null default 0,
+  add column if not exists crosses integer not null default 0,
+  add column if not exists term integer not null default 1;
+
+alter table public.term_archives
+  add column if not exists total_ticks integer not null default 0,
+  add column if not exists total_crosses integer not null default 0;
+
 create index if not exists classes_user_id_idx on public.classes(user_id);
 create index if not exists students_user_id_idx on public.students(user_id);
 create index if not exists students_class_id_idx on public.students(class_id);
@@ -101,6 +116,36 @@ alter table public.students enable row level security;
 alter table public.events enable row level security;
 alter table public.term_archives enable row level security;
 alter table public.sync_state enable row level security;
+
+drop policy if exists "profiles select own" on public.profiles;
+drop policy if exists "profiles insert own" on public.profiles;
+drop policy if exists "profiles update own" on public.profiles;
+drop policy if exists "profiles delete own" on public.profiles;
+
+drop policy if exists "classes select own" on public.classes;
+drop policy if exists "classes insert own" on public.classes;
+drop policy if exists "classes update own" on public.classes;
+drop policy if exists "classes delete own" on public.classes;
+
+drop policy if exists "students select own" on public.students;
+drop policy if exists "students insert own" on public.students;
+drop policy if exists "students update own" on public.students;
+drop policy if exists "students delete own" on public.students;
+
+drop policy if exists "events select own" on public.events;
+drop policy if exists "events insert own" on public.events;
+drop policy if exists "events update own" on public.events;
+drop policy if exists "events delete own" on public.events;
+
+drop policy if exists "term_archives select own" on public.term_archives;
+drop policy if exists "term_archives insert own" on public.term_archives;
+drop policy if exists "term_archives update own" on public.term_archives;
+drop policy if exists "term_archives delete own" on public.term_archives;
+
+drop policy if exists "sync_state select own" on public.sync_state;
+drop policy if exists "sync_state insert own" on public.sync_state;
+drop policy if exists "sync_state update own" on public.sync_state;
+drop policy if exists "sync_state delete own" on public.sync_state;
 
 create policy "profiles select own" on public.profiles for select using (auth.uid() = id);
 create policy "profiles insert own" on public.profiles for insert with check (auth.uid() = id);
