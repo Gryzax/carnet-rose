@@ -8,9 +8,15 @@ jest.mock('../../services/supabase/supabaseClient', () => ({
 }));
 
 jest.mock('../../services/auth/authService', () => ({
+  getCurrentUser: jest.fn(() => Promise.resolve({ user: null, error: null })),
   signInWithApple: jest.fn(() => Promise.resolve({ user: null, message: 'Apple pending' })),
   signInWithGoogle: jest.fn(() => Promise.resolve({ user: null, message: 'Google pending' }))
 }));
+
+beforeEach(() => {
+  jest.clearAllMocks();
+  authService.getCurrentUser.mockResolvedValue({ user: null, error: null });
+});
 
 test('Supabase absent bloque proprement le login', () => {
   const onAuthenticated = jest.fn();
@@ -43,6 +49,17 @@ test('Google appelle signInWithGoogle quand Supabase est configure', async () =>
   fireEvent.press(getByTestId('login-google'));
 
   await waitFor(() => expect(authService.signInWithGoogle).toHaveBeenCalled());
+});
+
+test('LoginScreen redirige si une session utilisateur existe deja', async () => {
+  isSupabaseConfigured.mockReturnValueOnce(true);
+  authService.getCurrentUser.mockResolvedValueOnce({ user: { email: 'demo@example.com' }, error: null });
+  const onAuthenticated = jest.fn();
+
+  render(<LoginScreen onAuthenticated={onAuthenticated} />);
+
+  await waitFor(() => expect(onAuthenticated).toHaveBeenCalledWith({ user: { email: 'demo@example.com' } }));
+  expect(authService.signInWithGoogle).not.toHaveBeenCalled();
 });
 
 test('Apple appelle signInWithApple quand Supabase est configure', async () => {

@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, View } from 'react-native';
+import { ActivityIndicator, Platform, View } from 'react-native';
 import { colors } from '../constants/colors';
 import { ClassesScreen } from '../views/ClassesScreen';
 import { ClassDashboardScreen } from '../views/ClassDashboardScreen';
@@ -77,16 +77,27 @@ export const RootNavigator = () => {
 
   useEffect(() => {
     let active = true;
-    getCurrentUser().then(({ user }) => {
+    const syncUserFromSession = () => getCurrentUser().then(({ user }) => {
       if (!active) return;
-      setUser(user);
+      if (user) setUser(user);
+      else setUser(null);
       setCheckingSession(false);
     });
+    syncUserFromSession();
     const subscription = onAuthStateChange((_event, session) => {
       setUser(session?.user || null);
     });
+    const handleBrowserBack = () => {
+      syncUserFromSession();
+    };
+    if (Platform.OS === 'web' && typeof window !== 'undefined' && window.addEventListener) {
+      window.addEventListener('popstate', handleBrowserBack);
+    }
     return () => {
       active = false;
+      if (Platform.OS === 'web' && typeof window !== 'undefined' && window.removeEventListener) {
+        window.removeEventListener('popstate', handleBrowserBack);
+      }
       subscription?.unsubscribe?.();
     };
   }, []);
