@@ -4,10 +4,11 @@ import { Animated, PanResponder, Pressable, StyleSheet, View } from 'react-nativ
 import * as Haptics from 'expo-haptics';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, radii, spacing } from '../constants/colors';
+import { USE_NATIVE_DRIVER } from '../utils/animation';
 
 const DELETE_WIDTH = 72;
-// A swipe that travels past this fraction of the row width deletes outright,
-// no confirmation — the gesture itself is the intent.
+// A swipe that travels past this fraction of the row width triggers a delete,
+// same as tapping the revealed trash button.
 const FULL_SWIPE_RATIO = 0.5;
 // The list lives inside a screen with `spacing.md` horizontal padding. We bleed
 // the row out to the screen edges so the swipe reveal isn't clipped by that
@@ -15,17 +16,15 @@ const FULL_SWIPE_RATIO = 0.5;
 const GUTTER = spacing.md;
 
 interface SwipeableHistoryItemProps {
-  // Tapping the revealed trash button — kept behind a confirmation upstream.
+  // Triggered both by tapping the revealed trash button and by a long
+  // swipe-away — kept behind a confirmation upstream in both cases.
   onDelete: () => void;
-  // A long swipe-away — deletes immediately, no confirmation.
-  onSwipeAwayDelete: () => void;
   deleteLabel: string;
   children: ReactNode;
 }
 
 export const SwipeableHistoryItem = ({
   onDelete,
-  onSwipeAwayDelete,
   deleteLabel,
   children
 }: SwipeableHistoryItemProps) => {
@@ -35,16 +34,15 @@ export const SwipeableHistoryItem = ({
 
   const settle = (toValue: number) => {
     offset.current = toValue;
-    Animated.spring(translateX, { toValue, useNativeDriver: true, bounciness: 0 }).start();
+    Animated.spring(translateX, { toValue, useNativeDriver: USE_NATIVE_DRIVER, bounciness: 0 }).start();
   };
 
   const swipeAway = () => {
-    const target = -(widthRef.current || DELETE_WIDTH);
-    offset.current = target;
+    // Settle the row back to rest while the confirmation dialog is shown — if
+    // the user cancels, the row is already where it should be.
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    Animated.timing(translateX, { toValue: target, duration: 160, useNativeDriver: true }).start(
-      () => onSwipeAwayDelete()
-    );
+    settle(0);
+    onDelete();
   };
 
   const panResponder = useRef(
@@ -78,7 +76,7 @@ export const SwipeableHistoryItem = ({
       {/* A full-width red bed sits behind the card; the trash button is pinned
           to its right edge so a short swipe reveals just the button while a
           long swipe drags the whole card across the red. */}
-      <View style={styles.deleteLayer} pointerEvents="box-none">
+      <View style={styles.deleteLayer}>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={deleteLabel}
@@ -120,7 +118,8 @@ const styles = StyleSheet.create({
     borderRadius: radii.md,
     alignItems: 'flex-end',
     justifyContent: 'center',
-    paddingRight: (DELETE_WIDTH - 44) / 2
+    paddingRight: (DELETE_WIDTH - 44) / 2,
+    pointerEvents: 'box-none'
   },
   deleteButton: {
     width: 44,

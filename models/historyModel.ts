@@ -3,6 +3,14 @@ import type { ArchiveRow, EventRow } from '../types/domain';
 
 // Event & archive accessors over the local cache.
 
+// `previousForgets` / `newForgets` were added after launch — default them for
+// events cached before then so undo can restore the counter safely.
+const normalizeEvent = (event: EventRow): EventRow => ({
+  ...event,
+  previousForgets: event.previousForgets ?? 0,
+  newForgets: event.newForgets ?? 0
+});
+
 export const getCurrentHistory = async (
   studentId: string,
   trimester: number
@@ -11,6 +19,7 @@ export const getCurrentHistory = async (
   const events = await store.all<EventRow>('events');
   return events
     .filter((event) => event.studentId === studentId && event.trimester === trimester)
+    .map(normalizeEvent)
     .sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)));
 };
 
@@ -20,6 +29,7 @@ export const getLastActiveEvent = async (studentId: string): Promise<EventRow | 
   return (
     events
       .filter((event) => event.studentId === studentId && event.cancelled === 0)
+      .map(normalizeEvent)
       .sort(
         (a, b) =>
           String(b.createdAt).localeCompare(String(a.createdAt)) ||
@@ -31,7 +41,9 @@ export const getLastActiveEvent = async (studentId: string): Promise<EventRow | 
 export const getAllEvents = async (): Promise<EventRow[]> => {
   const store = await getStore();
   const events = await store.all<EventRow>('events');
-  return events.sort((a, b) => String(a.createdAt).localeCompare(String(b.createdAt)));
+  return events
+    .map(normalizeEvent)
+    .sort((a, b) => String(a.createdAt).localeCompare(String(b.createdAt)));
 };
 
 export const putEvent = async (event: EventRow): Promise<void> => {

@@ -1,8 +1,8 @@
-import { fireEvent, render, waitFor } from '@testing-library/react-native';
-import { StatisticsScreen } from '../../views/StatisticsScreen';
-import { getClassroomStatistics } from '../../controllers/statisticsController';
+import { fireEvent, render, waitFor } from '../../test-utils/render';
+import { StatisticsScreen } from '../../screens/StatisticsScreen';
+import { getClassroomStatistics } from '../../domain/statisticsController';
 
-jest.mock('../../controllers/statisticsController', () => ({
+jest.mock('../../domain/statisticsController', () => ({
   getClassroomStatistics: jest.fn()
 }));
 
@@ -111,14 +111,4 @@ test('affiche un état vide sans données', async () => {
   const { getByText } = render(<StatisticsScreen navigation={makeNavigation()} />);
 
   await waitFor(() => expect(getByText('No statistics yet')).toBeTruthy());
-});
-
-test("affiche une flèche retour vers l'accueil", async () => {
-  const navigation = makeNavigation();
-  const { getByTestId } = render(<StatisticsScreen navigation={navigation} />);
-  await waitFor(() => expect(getByTestId('back-button')).toBeTruthy());
-
-  fireEvent.press(getByTestId('back-button'));
-
-  expect(navigation.navigate).toHaveBeenCalledWith('Classes');
 });

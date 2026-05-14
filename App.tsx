@@ -1,4 +1,3 @@
-import { NavigationContainer } from '@react-navigation/native';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Platform, View } from 'react-native';
 import { useFonts } from 'expo-font';
@@ -6,7 +5,7 @@ import { PatrickHand_400Regular } from '@expo-google-fonts/patrick-hand';
 import { initDatabase } from './database/db';
 import { RootNavigator } from './navigation/RootNavigator';
 import { colors } from './constants/colors';
-import { LanguageProvider } from './utils/i18n';
+import { AppProviders } from './providers/AppProviders';
 import { getSupabaseUrl } from './services/supabase/supabaseClient';
 import { startSyncManager } from './sync/syncManager';
 
@@ -20,10 +19,6 @@ export default function App() {
       startSyncManager();
     });
     if (Platform.OS === 'web') {
-      const baseUrl = window.location.pathname.endsWith('/')
-        ? window.location.pathname
-        : window.location.pathname.replace(/\/[^/]*$/, '/');
-
       // Content-Security-Policy: reduce the blast radius of any XSS (e.g. a
       // compromised dependency) that could otherwise read the stored session.
       if (!document.querySelector('meta[http-equiv="Content-Security-Policy"]')) {
@@ -51,35 +46,16 @@ export default function App() {
           "style-src 'self' 'unsafe-inline'",
           scriptSrc,
           "object-src 'none'",
-          "base-uri 'self'",
-          "frame-ancestors 'none'"
+          "base-uri 'self'"
+          // Note: `frame-ancestors` is intentionally omitted — it is ignored
+          // when delivered via <meta> and must be set as an HTTP header by the
+          // host (alongside X-Frame-Options) to actually prevent framing.
         ].join('; ');
         document.head.appendChild(csp);
       }
-
-      const manifest = document.createElement('link');
-      manifest.rel = 'manifest';
-      manifest.href = `${baseUrl}manifest.json`;
-      document.head.appendChild(manifest);
-
-      const appleCapable = document.createElement('meta');
-      appleCapable.name = 'apple-mobile-web-app-capable';
-      appleCapable.content = 'yes';
-      document.head.appendChild(appleCapable);
-
-      const appleTitle = document.createElement('meta');
-      appleTitle.name = 'apple-mobile-web-app-title';
-      appleTitle.content = 'Carnet Rose';
-      document.head.appendChild(appleTitle);
-
-      const themeColor = document.createElement('meta');
-      themeColor.name = 'theme-color';
-      themeColor.content = colors.canvas;
-      document.head.appendChild(themeColor);
-
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register(`${baseUrl}sw.js`).catch(() => {});
-      }
+      // The manifest link, theme-color, apple-* meta tags and the service
+      // worker registration now live in the static public/index.html so they
+      // are present on first paint instead of after the bundle runs.
     }
   }, []);
   if (!ready || !fontsLoaded) {
@@ -90,10 +66,8 @@ export default function App() {
     );
   }
   return (
-    <LanguageProvider>
-      <NavigationContainer>
-        <RootNavigator />
-      </NavigationContainer>
-    </LanguageProvider>
+    <AppProviders>
+      <RootNavigator />
+    </AppProviders>
   );
 }

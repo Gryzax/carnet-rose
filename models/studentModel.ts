@@ -7,15 +7,25 @@ const byName = (a: StudentRow, b: StudentRow): number =>
   String(a.lastName).localeCompare(String(b.lastName), 'fr', { sensitivity: 'base' }) ||
   String(a.firstName).localeCompare(String(b.firstName), 'fr', { sensitivity: 'base' });
 
+// `forgets` was added after launch — default it for rows cached before then.
+const normalize = (student: StudentRow): StudentRow => ({
+  ...student,
+  forgets: student.forgets ?? 0
+});
+
 export const getStudentsByClass = async (classId: string): Promise<StudentRow[]> => {
   const store = await getStore();
   const students = await store.all<StudentRow>('students');
-  return students.filter((student) => student.classId === classId).sort(byName);
+  return students
+    .filter((student) => student.classId === classId)
+    .map(normalize)
+    .sort(byName);
 };
 
 export const getStudentById = async (id: string): Promise<StudentRow | null> => {
   const store = await getStore();
-  return store.get<StudentRow>('students', id);
+  const student = await store.get<StudentRow>('students', id);
+  return student ? normalize(student) : null;
 };
 
 export const getAllStudents = async (): Promise<StudentWithClass[]> => {
@@ -26,7 +36,7 @@ export const getAllStudents = async (): Promise<StudentWithClass[]> => {
   ]);
   const classNameOf = new Map(classes.map((classRow) => [classRow.id, classRow.name]));
   return students.map((student) => ({
-    ...student,
+    ...normalize(student),
     className: classNameOf.get(student.classId) || ''
   }));
 };

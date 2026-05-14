@@ -12,7 +12,7 @@ import {
   pushEvent,
   softDeleteEventRemote
 } from '../services/remote/historyRemote';
-import { invalidate } from '../store/dataStore';
+import { invalidate } from '../lib/queryClient';
 import { flushThenPull, pushOrQueue } from './shared';
 import type { ArchiveRow, EventRow } from '../types/domain';
 

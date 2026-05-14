@@ -13,6 +13,7 @@ interface SupabaseStudent {
   crosses: number | null;
   merits: number | null;
   detentions: number | null;
+  forgets: number | null;
   current_term: number | null;
   deleted_at: string | null;
 }
@@ -27,6 +28,7 @@ export const mapStudentToSupabase = (student: StudentRow, userId: string) => ({
   crosses: student.crosses || 0,
   merits: student.merits || 0,
   detentions: student.detentions || 0,
+  forgets: student.forgets || 0,
   current_term: student.currentTrimester || 1,
   term: student.currentTrimester || 1,
   updated_at: nowIso(),
@@ -42,12 +44,13 @@ export const mapStudentFromSupabase = (row: SupabaseStudent): StudentRow => ({
   crosses: row.crosses || 0,
   merits: row.merits || 0,
   detentions: row.detentions || 0,
+  forgets: row.forgets || 0,
   currentTrimester: row.current_term || 1
 });
 
 export const fetchStudents = async (ctx: ReadyRemoteContext): Promise<StudentRow[]> => {
   const rows = await remoteRequest<SupabaseStudent[]>(
-    `/rest/v1/students?user_id=eq.${encodeURIComponent(ctx.user.id)}&deleted_at=is.null&select=local_id,class_local_id,first_name,last_name,ticks,crosses,merits,detentions,current_term,deleted_at`,
+    `/rest/v1/students?user_id=eq.${encodeURIComponent(ctx.user.id)}&deleted_at=is.null&select=local_id,class_local_id,first_name,last_name,ticks,crosses,merits,detentions,forgets,current_term,deleted_at`,
     { accessToken: ctx.session.accessToken }
   );
   return (rows || []).map(mapStudentFromSupabase);

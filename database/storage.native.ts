@@ -80,6 +80,13 @@ const store: CacheStore = {
         JSON.stringify(row)
       );
     }
+  },
+
+  async clear(): Promise<void> {
+    const conn = await getConn();
+    for (const table of TABLES) {
+      await conn.runAsync(`DELETE FROM ${table}`);
+    }
   }
 };
 

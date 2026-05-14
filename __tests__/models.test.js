@@ -1,7 +1,7 @@
 import { createMemStore } from '../test-utils/memStore';
 
-let store;
-jest.mock('../database/db', () => ({ getStore: jest.fn(() => Promise.resolve(store)) }));
+let mockStore;
+jest.mock('../database/db', () => ({ getStore: jest.fn(() => Promise.resolve(mockStore)) }));
 
 import { deleteClassCascade, getClassById, getClasses, putClass, replaceAllClasses } from '../models/classModel';
 import {
@@ -42,7 +42,7 @@ const seed = () => ({
 });
 
 beforeEach(() => {
-  store = createMemStore(seed());
+  mockStore = createMemStore(seed());
 });
 
 test('getClasses agrège les compteurs par classe et trie par nom', async () => {
@@ -60,15 +60,15 @@ test('getClassById et putClass lisent/écrivent le cache', async () => {
 
 test('deleteClassCascade supprime la classe, ses élèves, événements et archives', async () => {
   await deleteClassCascade('c1');
-  expect(store.tables.classes.map((c) => c.id)).toEqual(['c2']);
-  expect(store.tables.students.map((s) => s.id)).toEqual(['s3']);
-  expect(store.tables.events).toHaveLength(0);
-  expect(store.tables.term_archives).toHaveLength(0);
+  expect(mockStore.tables.classes.map((c) => c.id)).toEqual(['c2']);
+  expect(mockStore.tables.students.map((s) => s.id)).toEqual(['s3']);
+  expect(mockStore.tables.events).toHaveLength(0);
+  expect(mockStore.tables.term_archives).toHaveLength(0);
 });
 
 test('replaceAllClasses remplace tout le contenu', async () => {
   await replaceAllClasses([{ id: 'c9', name: 'Neuve', createdAt: 'z', lastUsedAt: 'z' }]);
-  expect(store.tables.classes.map((c) => c.id)).toEqual(['c9']);
+  expect(mockStore.tables.classes.map((c) => c.id)).toEqual(['c9']);
 });
 
 test('getStudentsByClass filtre et trie par nom de famille', async () => {
@@ -86,14 +86,14 @@ test('getStudentById / putStudent / replaceAllStudents', async () => {
   await putStudent({ ...(await getStudentById('s3')), ticks: 5 });
   expect((await getStudentById('s3')).ticks).toBe(5);
   await replaceAllStudents([]);
-  expect(store.tables.students).toHaveLength(0);
+  expect(mockStore.tables.students).toHaveLength(0);
 });
 
 test('deleteStudentCascade supprime l’élève et son historique', async () => {
   await deleteStudentCascade('s1');
-  expect(store.tables.students.map((s) => s.id)).toEqual(['s2', 's3']);
-  expect(store.tables.events).toHaveLength(0);
-  expect(store.tables.term_archives).toHaveLength(0);
+  expect(mockStore.tables.students.map((s) => s.id)).toEqual(['s2', 's3']);
+  expect(mockStore.tables.events).toHaveLength(0);
+  expect(mockStore.tables.term_archives).toHaveLength(0);
 });
 
 test('getCurrentHistory renvoie les événements du trimestre, plus récent d’abord', async () => {
@@ -108,9 +108,9 @@ test('getLastActiveEvent ignore les événements annulés', async () => {
 
 test('putEvent et deleteEvent modifient le cache', async () => {
   await putEvent({ id: 'e3', studentId: 's2', type: 'tick', reason: '', trimester: 1, createdAt: '2026-02-01', previousTicks: 0, previousCrosses: 0, newTicks: 1, newCrosses: 0, cancelled: 0 });
-  expect(store.tables.events).toHaveLength(3);
+  expect(mockStore.tables.events).toHaveLength(3);
   await deleteEvent('e1');
-  expect(store.tables.events.map((e) => e.id)).toEqual(['e2', 'e3']);
+  expect(mockStore.tables.events.map((e) => e.id)).toEqual(['e2', 'e3']);
 });
 
 test('getArchives / getAllArchives / putArchive', async () => {

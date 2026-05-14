@@ -104,17 +104,16 @@ export const LoginScreen = ({ onAuthenticated }: LoginScreenProps) => {
 
   return (
     <SafeAreaView style={styles.screen}>
-      <View pointerEvents="none" style={styles.washi} />
+      <View style={styles.washi} />
       <View style={styles.wrap}>
         <View style={[styles.card, compact && styles.cardCompact]}>
           <View style={styles.logo}>
-            <Ionicons name="heart" size={30} color={colors.pink} />
+            <Ionicons name="heart" size={26} color={colors.pink} />
           </View>
-          <Text accessibilityRole="header" style={styles.title}>
-            {t('appName')}
+          <Text style={styles.brand}>{t('appName')}</Text>
+          <Text accessibilityRole="header" style={styles.prompt}>
+            {t('loginPrompt')}
           </Text>
-          <Text style={styles.subtitle}>{t('appTagline')}</Text>
-          <Text style={styles.reassure}>{t('reassure')}</Text>
           {!supabaseReady && (
             <View testID="auth-unavailable-notice" style={styles.notice}>
               <Text style={styles.noticeTitle}>{t('connectionUnavailable')}</Text>
@@ -154,14 +153,13 @@ const baseText = { fontFamily: 'PatrickHand_400Regular', color: colors.ink, lett
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.canvas },
-  washi: { position: 'absolute', top: 64, right: -22, width: 148, height: 30, borderRadius: 3, backgroundColor: colors.orange, opacity: 0.28, transform: [{ rotate: '-8deg' }] },
+  washi: { position: 'absolute', top: 64, right: -22, width: 148, height: 30, borderRadius: 3, backgroundColor: colors.orange, opacity: 0.28, transform: [{ rotate: '-8deg' }], pointerEvents: 'none' },
   wrap: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 16 },
   card: { width: '100%', maxWidth: 460, backgroundColor: colors.card, borderColor: colors.border, borderWidth: 1.5, borderRadius: 20, padding: 20, gap: 12 },
   cardCompact: { padding: 14 },
-  logo: { alignSelf: 'center', width: 58, height: 58, borderRadius: 29, backgroundColor: colors.card, alignItems: 'center', justifyContent: 'center', borderColor: colors.border, borderWidth: 1.5 },
-  title: { ...baseText, fontSize: 42, lineHeight: 48, textAlign: 'center' },
-  subtitle: { ...baseText, fontSize: 24, textAlign: 'center' },
-  reassure: { ...baseText, color: colors.muted, fontSize: 19, lineHeight: 24, textAlign: 'center' },
+  logo: { alignSelf: 'center', width: 48, height: 48, borderRadius: 24, backgroundColor: colors.card, alignItems: 'center', justifyContent: 'center', borderColor: colors.border, borderWidth: 1.5 },
+  brand: { ...baseText, fontSize: 30, lineHeight: 34, textAlign: 'center', color: colors.pink },
+  prompt: { ...baseText, fontSize: 24, lineHeight: 28, textAlign: 'center' },
   notice: { backgroundColor: colors.lightPink, borderColor: colors.border, borderWidth: 1.5, borderRadius: 8, padding: 12, gap: 4 },
   noticeTitle: { ...baseText, fontSize: 21 },
   noticeText: { ...baseText, color: colors.muted, fontSize: 18, lineHeight: 23 },

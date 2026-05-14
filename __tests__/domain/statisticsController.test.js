@@ -2,7 +2,7 @@ jest.mock('../../models/classModel', () => ({ getClasses: jest.fn() }));
 jest.mock('../../models/studentModel', () => ({ getAllStudents: jest.fn() }));
 jest.mock('../../models/historyModel', () => ({ getAllEvents: jest.fn(), getAllArchives: jest.fn() }));
 
-import { getClassroomStatistics } from '../../controllers/statisticsController';
+import { getClassroomStatistics } from '../../domain/statisticsController';
 import { getClasses } from '../../models/classModel';
 import { getAllStudents } from '../../models/studentModel';
 import { getAllArchives, getAllEvents } from '../../models/historyModel';

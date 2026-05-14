@@ -151,7 +151,17 @@ const signInWithProvider = async (provider: string): Promise<AuthResult> => {
   const redirectTo = getAppUrl();
   const authUrl = getSupabaseAuthUrl(provider, redirectTo);
   try {
-    if (authUrl) await Linking.openURL(authUrl);
+    if (authUrl) {
+      // On web, navigate the current tab: Linking.openURL falls back to
+      // window.open (a new tab), but the OAuth redirect carries the token
+      // back in the URL hash and extractWebSession only sees it in the tab
+      // that started the flow. A same-tab redirect keeps that loop intact.
+      if (Platform.OS === 'web' && typeof window !== 'undefined') {
+        window.location.assign(authUrl);
+      } else {
+        await Linking.openURL(authUrl);
+      }
+    }
     return { user: null, error: null, message: 'Redirection vers Supabase en cours.' };
   } catch (error) {
     return {
@@ -199,5 +209,26 @@ export const signOut = async (): Promise<{ error: Error | null }> => {
   currentUser = null;
   storeSession(null);
   emitAuthChange();
+  return { error: null };
+};
+
+// Permanently deletes the signed-in user. The `delete_account` RPC is a
+// security-definer function on Supabase that removes the row from
+// `auth.users`; the schema's ON DELETE CASCADE clears all the user's data.
+// On success we sign out locally so the app drops to the login screen.
+export const deleteAccount = async (): Promise<{ error: Error | null }> => {
+  const session = extractWebSession() || getStoredSession();
+  if (!session?.accessToken) {
+    // No remote session to delete — just clear local state.
+    await signOut();
+    return { error: null };
+  }
+  const { error } = await supabaseRequest('/rest/v1/rpc/delete_account', {
+    method: 'POST',
+    accessToken: session.accessToken,
+    body: JSON.stringify({})
+  });
+  if (error) return { error };
+  await signOut();
   return { error: null };
 };

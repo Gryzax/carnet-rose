@@ -3,15 +3,11 @@ import * as Haptics from 'expo-haptics';
 import { Alert, Animated, FlatList, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { Ionicons } from '@expo/vector-icons';
 import { colors } from '../constants/colors';
 import { CROSSES_FOR_DETENTION, TICKS_FOR_MERIT } from '../constants/config';
 import { useT } from '../utils/i18n';
-import {
-  addCross,
-  addTick,
-  undoLastAction,
-  deleteEvent
-} from '../controllers/studentController';
+import { USE_NATIVE_DRIVER } from '../utils/animation';
 import { EmptyState } from '../components/EmptyState';
 import { SwipeableHistoryItem } from '../components/SwipeableHistoryItem';
 import { BackButton } from '../components/BackButton';
@@ -22,6 +18,7 @@ import { StudentAvatar } from '../components/StudentAvatar';
 import { UndoSnackbar } from '../components/UndoSnackbar';
 import { useHistory } from '../hooks/useHistory';
 import { useStudent } from '../hooks/useStudents';
+import { useHistoryMutations } from '../hooks/useHistoryMutations';
 import type { ClassesStackParamList } from '../navigation/types';
 
 type Props = NativeStackScreenProps<ClassesStackParamList, 'StudentDetail'>;
@@ -38,6 +35,7 @@ export const StudentDetailScreen = ({ route, navigation }: Props) => {
   const snackTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { student } = useStudent(route.params.studentId);
   const { history, archives } = useHistory(student);
+  const { tick, cross, forgot, undo, removeEvent } = useHistoryMutations();
 
   useEffect(
     () => () => {
@@ -54,9 +52,11 @@ export const StudentDetailScreen = ({ route, navigation }: Props) => {
   const runAction = async (reason: string) => {
     if (!student) return;
     const result =
-      action === 'tick' ? await addTick(student, reason) : await addCross(student, reason);
+      action === 'tick'
+        ? await tick.mutateAsync({ student, reason })
+        : await cross.mutateAsync({ student, reason });
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    Animated.spring(pulse, { toValue: 1.03, friction: 4, useNativeDriver: true }).start(() =>
+    Animated.spring(pulse, { toValue: 1.03, friction: 4, useNativeDriver: USE_NATIVE_DRIVER }).start(() =>
       pulse.setValue(1)
     );
     const compensated = action === 'tick' ? student.crosses > 0 : student.ticks > 0;
@@ -90,6 +90,22 @@ export const StudentDetailScreen = ({ route, navigation }: Props) => {
     }
   };
 
+  // Forgetting a notebook needs no reason, so it skips the reason sheet and is
+  // recorded straight away.
+  const runForgot = async () => {
+    if (!student) return;
+    await forgot.mutateAsync({ student });
+    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    Animated.spring(pulse, { toValue: 1.03, friction: 4, useNativeDriver: USE_NATIVE_DRIVER }).start(() =>
+      pulse.setValue(1)
+    );
+    setSnackMessage(t('snackForgotAdded', { name: student.firstName }) as string);
+    setSnack(true);
+    if (snackTimer.current) clearTimeout(snackTimer.current);
+    snackTimer.current = setTimeout(() => setSnack(false), 5000);
+    if (snackTimer.current?.unref) snackTimer.current.unref();
+  };
+
   if (!student) {
     return (
       <Screen>
@@ -117,6 +133,7 @@ export const StudentDetailScreen = ({ route, navigation }: Props) => {
           <Pill tone="pink">{t('crossesPill', { value: student.crosses, max: 4 })}</Pill>
           <Pill tone="orange">{t('meritsPlainPill', { count: student.merits })}</Pill>
           <Pill>{t('detentionsPlainPill', { count: student.detentions })}</Pill>
+          <Pill tone="orange">{t('forgetsPill', { count: student.forgets })}</Pill>
         </View>
       </Card>
       <Animated.View style={[styles.actions, { transform: [{ scale: pulse }] }]}>
@@ -137,9 +154,28 @@ export const StudentDetailScreen = ({ route, navigation }: Props) => {
           <Text style={[styles.actionText, styles.actionTextOnPink]}>{t('crossAction')}</Text>
         </Pressable>
       </Animated.View>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={t('forgotAction') as string}
+        onPress={runForgot}
+        style={({ pressed }) => [styles.forgotAction, pressed && styles.pressed]}
+      >
+        <Ionicons name="book-outline" size={16} color={colors.ink} />
+        <Text style={styles.forgotActionText}>{t('forgotAction')}</Text>
+      </Pressable>
       <View style={styles.progressGroup}>
-        <ProgressBar value={student.ticks} max={4} color={colors.successGreen} />
-        <ProgressBar value={student.crosses} max={4} color={colors.dangerRed} />
+        <ProgressBar
+          value={student.ticks}
+          max={4}
+          color={colors.successGreen}
+          label={`${t('ticksLabel')} ${student.ticks}/4`}
+        />
+        <ProgressBar
+          value={student.crosses}
+          max={4}
+          color={colors.dangerRed}
+          label={`${t('crossesLabel')} ${student.crosses}/4`}
+        />
         <Text style={styles.legend}>
           {t('counterLegend', { ticks: TICKS_FOR_MERIT, crosses: CROSSES_FOR_DETENTION })}
         </Text>
@@ -169,13 +205,17 @@ export const StudentDetailScreen = ({ route, navigation }: Props) => {
           <SwipeableHistoryItem
             deleteLabel={t('delete') as string}
             onDelete={() => setEventToDelete(item.id)}
-            onSwipeAwayDelete={() => deleteEvent(item.id)}
           >
             <Card style={styles.historyItem} mascot={false}>
               <View style={styles.historyRow}>
                 <Sparkle />
                 <Text style={styles.historyText}>
-                  {item.type === 'tick' ? t('typeTick') : t('typeCross')} - {item.reason}{' '}
+                  {item.type === 'tick'
+                    ? t('typeTick')
+                    : item.type === 'forgot'
+                      ? t('typeForgot')
+                      : t('typeCross')}
+                  {item.reason ? ` - ${item.reason}` : ''}{' '}
                   {item.cancelled ? t('historyCancelled') : ''}
                 </Text>
               </View>
@@ -196,7 +236,7 @@ export const StudentDetailScreen = ({ route, navigation }: Props) => {
         visible={snack}
         message={snackMessage}
         onUndo={async () => {
-          await undoLastAction(student.id);
+          await undo.mutateAsync(student.id);
           setSnack(false);
         }}
       />
@@ -220,7 +260,7 @@ export const StudentDetailScreen = ({ route, navigation }: Props) => {
               </PillButton>
               <PillButton
                 onPress={() => {
-                  if (eventToDelete !== null) deleteEvent(eventToDelete);
+                  if (eventToDelete !== null) removeEvent.mutate(eventToDelete);
                   setEventToDelete(null);
                 }}
                 variant="pink"
@@ -249,6 +289,24 @@ const styles = StyleSheet.create({
   bigAction: { flex: 1, borderColor: colors.border, borderWidth: 1.5, borderRadius: 8, padding: 18, alignItems: 'center' },
   tick: { backgroundColor: colors.sage },
   cross: { backgroundColor: colors.pink },
+  forgotAction: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    gap: 6,
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    marginBottom: 14,
+    backgroundColor: colors.orangeSoft,
+    borderColor: colors.border,
+    borderWidth: 1.5,
+    borderRadius: 999
+  },
+  forgotActionText: {
+    fontFamily: 'PatrickHand_400Regular',
+    color: colors.ink,
+    fontSize: 18
+  },
   pressed: { transform: [{ scale: 0.97 }] },
   actionText: { fontFamily: 'PatrickHand_400Regular', color: colors.ink, fontSize: 26 },
   actionTextOnPink: { color: colors.onPrimary },
@@ -256,7 +314,7 @@ const styles = StyleSheet.create({
   legend: { fontFamily: 'PatrickHand_400Regular', color: colors.muted, fontSize: 16, marginTop: 2 },
   sectionLabel: { marginBottom: 8 },
   historyItem: { padding: 12, marginBottom: 0 },
-  historyContent: { flexGrow: 1, paddingTop: 76, paddingBottom: 148, paddingHorizontal: 16 },
+  historyContent: { flexGrow: 1, paddingTop: 76, paddingBottom: 96, paddingHorizontal: 16 },
   historyRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   historyText: { fontFamily: 'PatrickHand_400Regular', color: colors.ink, fontSize: 19, flex: 1 },
   footer: { fontFamily: 'PatrickHand_400Regular', color: colors.muted, fontSize: 19, marginTop: 12 },

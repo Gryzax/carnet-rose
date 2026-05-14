@@ -1,5 +1,5 @@
 import { fireEvent, render, waitFor } from '@testing-library/react-native';
-import { LoginScreen } from '../../views/LoginScreen';
+import { LoginScreen } from '../../screens/LoginScreen';
 import * as authService from '../../services/auth/authService';
 import { isSupabaseConfigured } from '../../services/supabase/supabaseClient';
 

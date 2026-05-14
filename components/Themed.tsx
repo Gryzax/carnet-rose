@@ -44,7 +44,7 @@ export const Screen = ({ children, style }: { children: ReactNode; style?: Style
 // Decorative top-right washi tape. Lives inside the scroll content (not Screen)
 // so it scrolls away with the page — only the back button stays pinned.
 export const WashiTape = ({ style }: { style?: StyleProp<ViewStyle> }) => (
-  <View pointerEvents="none" style={[styles.washi, styles.washiTop, style]} />
+  <View style={[styles.washi, styles.washiTop, style]} />
 );
 
 export const Title = ({
@@ -70,7 +70,7 @@ export const Card = ({
   mascot?: boolean;
 } & ViewProps) => (
   <View style={[styles.card, style]} {...props}>
-    {washi && <View pointerEvents="none" style={styles.cardWashi} />}
+    {washi && <View style={styles.cardWashi} />}
     {mascot && <CatMascot />}
     {children}
   </View>
@@ -108,7 +108,7 @@ export const Sparkle = ({ style }: { style?: StyleProp<TextStyle> }) => (
   <Text style={[styles.sparkle, style]}>✦</Text>
 );
 
-export type PillButtonVariant = 'sage' | 'pink' | 'light';
+export type PillButtonVariant = 'sage' | 'pink' | 'light' | 'orange' | 'danger';
 
 export const PillButton = ({
   children,
@@ -135,12 +135,21 @@ export const PillButton = ({
       styles.button,
       variant === 'pink' && styles.buttonPink,
       variant === 'light' && styles.buttonLight,
+      variant === 'orange' && styles.buttonOrange,
+      variant === 'danger' && styles.buttonDanger,
       disabled && styles.disabled,
       pressed && !disabled && styles.pressed,
       style
     ]}
   >
-    <Text style={[styles.buttonText, variant === 'pink' && styles.buttonTextOnPink]}>{children}</Text>
+    <Text
+      style={[
+        styles.buttonText,
+        (variant === 'pink' || variant === 'orange' || variant === 'danger') && styles.buttonTextOnPink
+      ]}
+    >
+      {children}
+    </Text>
   </Pressable>
 );
 
@@ -250,7 +259,7 @@ export const InfoIcon = () => (
 );
 
 export const CatMascot = () => (
-  <View pointerEvents="none" style={styles.cat}>
+  <View style={styles.cat}>
     <View style={[styles.catEar, styles.catEarLeft]} />
     <View style={[styles.catEar, styles.catEarRight]} />
     <View style={styles.catHead}>
@@ -277,11 +286,11 @@ const styles = StyleSheet.create({
   // No horizontal padding here: screens add it on their own scroll content so
   // that full-bleed rows (e.g. swipe-to-delete) can reach the screen edges.
   screen: { flex: 1, backgroundColor: colors.canvas, paddingBottom: spacing.md },
-  washi: { position: 'absolute', backgroundColor: colors.orange, opacity: 0.28, transform: [{ rotate: '-8deg' }] },
+  washi: { position: 'absolute', backgroundColor: colors.orange, opacity: 0.28, transform: [{ rotate: '-8deg' }], pointerEvents: 'none' },
   washiTop: { width: 132, height: 28, top: 14, right: -18 },
   title: { ...baseText, fontSize: 34, lineHeight: 40, marginBottom: spacing.md },
   card: { backgroundColor: colors.card, borderRadius: radii.md, padding: spacing.md, marginBottom: spacing.md, ...bordered },
-  cardWashi: { position: 'absolute', top: -10, alignSelf: 'center', width: 86, height: 24, borderRadius: 3, backgroundColor: colors.orange, opacity: 0.84, transform: [{ rotate: '-4deg' }] },
+  cardWashi: { position: 'absolute', top: -10, alignSelf: 'center', width: 86, height: 24, borderRadius: 3, backgroundColor: colors.orange, opacity: 0.84, transform: [{ rotate: '-4deg' }], pointerEvents: 'none' },
   pill: { ...baseText, alignSelf: 'flex-start', overflow: 'hidden', borderRadius: radii.full, backgroundColor: colors.sage, paddingHorizontal: 12, paddingVertical: 5, fontSize: 15, textTransform: 'uppercase', ...bordered },
   pillPink: { backgroundColor: colors.pink, color: colors.white },
   pillOrange: { backgroundColor: colors.orangeSoft },
@@ -289,6 +298,8 @@ const styles = StyleSheet.create({
   button: { minHeight: 48, borderRadius: radii.sm, backgroundColor: colors.sage, alignItems: 'center', justifyContent: 'center', paddingHorizontal: spacing.md, paddingVertical: 12, ...bordered },
   buttonPink: { backgroundColor: colors.pink },
   buttonLight: { backgroundColor: colors.card },
+  buttonOrange: { backgroundColor: colors.orange },
+  buttonDanger: { backgroundColor: colors.dangerRed },
   buttonText: { ...baseText, fontSize: 20, textAlign: 'center' },
   buttonTextOnPink: { color: colors.white },
   disabled: { opacity: 0.55 },
@@ -315,7 +326,7 @@ const styles = StyleSheet.create({
   },
   infoIcon: { width: 28, height: 28, borderRadius: 14, borderWidth: 1.5, borderColor: colors.border, backgroundColor: colors.orangeSoft, alignItems: 'center', justifyContent: 'center' },
   infoText: { ...baseText, fontSize: 19, lineHeight: 22 },
-  cat: { position: 'absolute', right: 12, top: -19, width: 42, height: 34, alignItems: 'center', zIndex: 5 },
+  cat: { position: 'absolute', right: 12, top: -19, width: 42, height: 34, alignItems: 'center', zIndex: 5, pointerEvents: 'none' },
   catEar: { position: 'absolute', top: 1, width: 14, height: 14, backgroundColor: colors.card, borderColor: colors.border, borderWidth: 1.5, transform: [{ rotate: '45deg' }] },
   catEarLeft: { left: 5 },
   catEarRight: { right: 5 },

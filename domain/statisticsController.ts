@@ -45,8 +45,11 @@ const startOfToday = (): Date => {
   return date;
 };
 
-const isForgottenNotebook = (reason: string | null | undefined): boolean =>
-  /carnet/i.test(String(reason || ''));
+// A forgotten notebook is now its own 'forgot' event type. Older data recorded
+// it as a cross with a "carnet" reason, so keep matching that too.
+const isForgottenNotebook = (event: EventRow): boolean =>
+  event.type === 'forgot' ||
+  (event.type === 'cross' && /carnet/i.test(String(event.reason || '')));
 
 const computeClimate = ({
   ticks,
@@ -114,9 +117,7 @@ export const getClassroomStatistics = async ({
   // Today snapshot.
   const todayTicks = countType(todayEvents, 'tick');
   const todayCrosses = countType(todayEvents, 'cross');
-  const todayForgotten = todayEvents.filter(
-    (event) => event.type === 'cross' && isForgottenNotebook(event.reason)
-  ).length;
+  const todayForgotten = todayEvents.filter(isForgottenNotebook).length;
 
   // Students to keep an eye on (live counters, not period-bound).
   const toWatch = scopedStudents
@@ -130,9 +131,7 @@ export const getClassroomStatistics = async ({
 
   // Students linked to a forgotten-notebook cross during the period.
   const forgottenIds = new Set(
-    periodEvents
-      .filter((event) => event.type === 'cross' && isForgottenNotebook(event.reason))
-      .map((e) => e.studentId)
+    periodEvents.filter(isForgottenNotebook).map((e) => e.studentId)
   );
   const forgottenNotebooks = scopedStudents
     .filter((student) => forgottenIds.has(student.id))

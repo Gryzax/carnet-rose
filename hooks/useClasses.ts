@@ -1,16 +1,18 @@
-import { useCallback, useEffect } from 'react';
-import { loadClasses, type ClassSort } from '../controllers/classController';
+import { useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { loadClasses, type ClassSort } from '../domain/classController';
 import { refreshClasses } from '../repositories/classRepository';
 import { refreshStudents } from '../repositories/studentRepository';
-import { useQuery, type StoreKey } from '../store/dataStore';
-import type { ClassWithStats } from '../types/domain';
-
-// The class list aggregates per-student counters, so it also depends on `students`.
-const KEYS: StoreKey[] = ['classes', 'students'];
+import { queryKeys } from '../lib/queryClient';
 
 export const useClasses = (sort: ClassSort = 'alpha') => {
-  const fetcher = useCallback(() => loadClasses(sort), [sort]);
-  const { data, loading, refresh } = useQuery<ClassWithStats[]>(KEYS, fetcher);
+  // The query reads the local SQLite cache. The class list aggregates
+  // per-student counters, so student writes invalidate `classes` too (see the
+  // student repository) — TanStack matches that against the `classes` prefix.
+  const { data, isLoading, refetch } = useQuery({
+    queryKey: queryKeys.classes(sort),
+    queryFn: () => loadClasses(sort)
+  });
 
   // Cache-first: the query above shows the local cache immediately; this pulls
   // the authoritative rows from Supabase in the background and invalidates.
@@ -19,5 +21,5 @@ export const useClasses = (sort: ClassSort = 'alpha') => {
     void refreshStudents();
   }, []);
 
-  return { classes: data ?? [], loading, refresh };
+  return { classes: data ?? [], loading: isLoading, refresh: refetch };
 };

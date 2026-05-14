@@ -1,13 +1,13 @@
 import { Alert } from 'react-native';
 import { fireEvent, render, waitFor } from '@testing-library/react-native';
-import { SettingsScreen } from '../../views/SettingsScreen';
+import { SettingsScreen } from '../../screens/SettingsScreen';
 import * as authService from '../../services/auth/authService';
 
 jest.mock('../../models/studentModel', () => ({
   getAllStudents: jest.fn(() => Promise.resolve([{ id: 1, merites: 2, retenues: 1, trimestreActuel: 1 }]))
 }));
 
-jest.mock('../../controllers/studentController', () => ({
+jest.mock('../../domain/studentController', () => ({
   reinitialiserTrimestre: jest.fn(() => Promise.resolve({ totalEleves: 1, totalMerites: 2, totalRetenues: 1 }))
 }));
 
@@ -19,12 +19,12 @@ jest.mock('../../services/auth/authService', () => ({
 test('parametres affiche les sections enrichies', async () => {
   const { getByTestId, getByText } = render(<SettingsScreen navigation={{ navigate: jest.fn(), canGoBack: jest.fn(() => false) }} />);
   await waitFor(() => expect(getByText('demo@example.com')).toBeTruthy());
-  expect(getByTestId('settings-scroll').props.contentContainerStyle).toEqual(expect.objectContaining({ flexGrow: 1, paddingBottom: 148 }));
-  expect(getByText('About')).toBeTruthy();
+  expect(getByTestId('settings-scroll').props.contentContainerStyle).toEqual(expect.objectContaining({ flexGrow: 1, paddingBottom: 96 }));
   expect(getByText('Carnet Rose')).toBeTruthy();
-  expect(getByText('Data')).toBeTruthy();
-  expect(getByText('Term')).toBeTruthy();
   expect(getByText('Account')).toBeTruthy();
+  expect(getByText('Preferences')).toBeTruthy();
+  expect(getByText('Data')).toBeTruthy();
+  expect(getByText('Danger zone')).toBeTruthy();
 });
 
 test('export affiche bientot disponible', async () => {
@@ -33,16 +33,6 @@ test('export affiche bientot disponible', async () => {
   await waitFor(() => expect(getByText('demo@example.com')).toBeTruthy());
   fireEvent.press(getByTestId('export-data'));
   expect(Alert.alert).toHaveBeenCalledWith('Export my data', 'Coming soon — stay tuned!');
-});
-
-test("parametres affiche une fleche retour vers l'accueil", async () => {
-  const navigation = { navigate: jest.fn(), canGoBack: jest.fn(() => false), goBack: jest.fn() };
-  const { getByTestId, getByText } = render(<SettingsScreen navigation={navigation} />);
-  await waitFor(() => expect(getByText('demo@example.com')).toBeTruthy());
-
-  fireEvent.press(getByTestId('back-button'));
-
-  expect(navigation.navigate).toHaveBeenCalledWith('Classes');
 });
 
 test('se deconnecter revient au login via le callback', async () => {

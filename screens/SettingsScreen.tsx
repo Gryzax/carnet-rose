@@ -3,11 +3,12 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { colors } from '../constants/colors';
-import { resetTrimester, type ResetTrimesterResult } from '../controllers/studentController';
+import { resetTrimester, type ResetTrimesterResult } from '../domain/studentController';
 import { getAllStudents } from '../models/studentModel';
-import { BackButton } from '../components/BackButton';
 import { Card, InfoIcon, JournalInput, Pill, PillButton, Screen, Sparkle, Title, WashiTape } from '../components/Themed';
-import { getCurrentUser, signOut } from '../services/auth/authService';
+import { deleteAccount, getCurrentUser, signOut } from '../services/auth/authService';
+import { clearLocalData } from '../database/db';
+import { invalidate } from '../lib/queryClient';
 import { useT } from '../utils/i18n';
 import { LANGUAGE_LABELS, SUPPORTED_LANGUAGES } from '../constants/i18n';
 import type { AppTabsParamList } from '../navigation/types';
@@ -32,13 +33,16 @@ const Section = ({ title, children }: { title: ReactNode; children: ReactNode })
   </Card>
 );
 
-export const SettingsScreen = ({ navigation, onSignedOut }: SettingsScreenProps) => {
+export const SettingsScreen = ({ onSignedOut }: SettingsScreenProps) => {
   const { t, lang, setLang } = useT();
   const [summary, setSummary] = useState<TrimesterSummary | null>(null);
   const [success, setSuccess] = useState<ResetTrimesterResult | null>(null);
   const [confirmText, setConfirmText] = useState('');
   const [user, setUser] = useState<AuthUser | null>(null);
   const [langOpen, setLangOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleteText, setDeleteText] = useState('');
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -76,6 +80,30 @@ export const SettingsScreen = ({ navigation, onSignedOut }: SettingsScreenProps)
     onSignedOut?.();
   };
 
+  const deleteWord = t('deleteAccountWord') as string;
+
+  const openDelete = () => {
+    setDeleteText('');
+    setDeleteError(null);
+    setDeleteOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (deleteText !== deleteWord) return;
+    const { error } = await deleteAccount();
+    if (error) {
+      setDeleteError(t('deleteAccountError') as string);
+      return;
+    }
+    // Account is gone remotely — wipe the local cache so nothing lingers
+    // on the device, then refresh every screen's data.
+    await clearLocalData();
+    invalidate('classes', 'students', 'events');
+    setDeleteOpen(false);
+    setUser(null);
+    onSignedOut?.();
+  };
+
   const userName = (user?.user_metadata as { name?: string } | undefined)?.name;
 
   return (
@@ -92,11 +120,11 @@ export const SettingsScreen = ({ navigation, onSignedOut }: SettingsScreenProps)
           <Text testID="account-user" style={styles.strong}>
             {user?.email || userName || t('connectedUser')}
           </Text>
-          <PillButton testID="sign-out" onPress={disconnect} variant="pink">
+          <PillButton testID="sign-out" onPress={disconnect} variant="sage">
             {t('signOut')}
           </PillButton>
         </Section>
-        <Section title={t('sectionLanguage')}>
+        <Section title={t('sectionPreferences')}>
           <Text style={styles.muted}>{t('languageHint')}</Text>
           <Pressable
             testID="language-dropdown"
@@ -140,15 +168,6 @@ export const SettingsScreen = ({ navigation, onSignedOut }: SettingsScreenProps)
             </View>
           )}
         </Section>
-        <Section title={t('sectionAbout')}>
-          <View style={styles.infoRow}>
-            <InfoIcon />
-            <Text style={styles.strong}>{t('appName')}</Text>
-          </View>
-          <Text style={styles.muted}>{t('aboutTagline')}</Text>
-          <Text style={styles.muted}>fourkane ahmerelain</Text>
-          <Text style={styles.muted}>v1.0.0</Text>
-        </Section>
         <Section title={t('sectionData')}>
           <PillButton
             testID="export-data"
@@ -157,9 +176,7 @@ export const SettingsScreen = ({ navigation, onSignedOut }: SettingsScreenProps)
           >
             {t('exportData')}
           </PillButton>
-        </Section>
-        <Section title={t('sectionTrimester')}>
-          <PillButton onPress={prepare} variant="pink">
+          <PillButton onPress={prepare} variant="orange">
             {t('endTrimester')}
           </PillButton>
           {success && (
@@ -175,6 +192,19 @@ export const SettingsScreen = ({ navigation, onSignedOut }: SettingsScreenProps)
             </View>
           )}
         </Section>
+        <Section title={t('sectionDangerZone')}>
+          <PillButton testID="delete-account" onPress={openDelete} variant="danger">
+            {t('deleteAccount')}
+          </PillButton>
+        </Section>
+        <View style={styles.about}>
+          <View style={styles.infoRow}>
+            <InfoIcon />
+            <Text style={styles.strong}>{t('appName')}</Text>
+          </View>
+          <Text style={styles.aboutText}>{t('aboutTagline')}</Text>
+          <Text style={styles.aboutText}>Fourkane Ahmer-Elain · v1.0.0</Text>
+        </View>
       </ScrollView>
       <Modal transparent visible={Boolean(summary)} onRequestClose={() => setSummary(null)}>
         <View style={styles.backdrop}>
@@ -194,7 +224,7 @@ export const SettingsScreen = ({ navigation, onSignedOut }: SettingsScreenProps)
               onChangeText={setConfirmText}
               autoCapitalize="characters"
             />
-            <PillButton onPress={confirm} variant="pink" disabled={confirmText !== confirmWord}>
+            <PillButton onPress={confirm} variant="orange" disabled={confirmText !== confirmWord}>
               {t('iConfirm')}
             </PillButton>
             <PillButton onPress={() => setSummary(null)} variant="light">
@@ -203,15 +233,43 @@ export const SettingsScreen = ({ navigation, onSignedOut }: SettingsScreenProps)
           </Card>
         </View>
       </Modal>
-      <BackButton floating navigation={navigation} fallbackRoute="Classes" />
+      <Modal transparent visible={deleteOpen} onRequestClose={() => setDeleteOpen(false)}>
+        <View style={styles.backdrop}>
+          <Card style={styles.dialog} washi>
+            <Text style={styles.modalTitle}>{t('deleteAccountTitle')}</Text>
+            <Text style={styles.muted}>{t('deleteAccountWarning')}</Text>
+            <Text style={styles.text}>{t('typeConfirmToContinue', { word: deleteWord })}</Text>
+            <JournalInput
+              testID="delete-account-input"
+              value={deleteText}
+              onChangeText={setDeleteText}
+              autoCapitalize="characters"
+            />
+            {deleteError && <Text style={styles.muted}>{deleteError}</Text>}
+            <PillButton
+              testID="delete-account-confirm"
+              onPress={confirmDelete}
+              variant="danger"
+              disabled={deleteText !== deleteWord}
+            >
+              {t('deleteAccountConfirm')}
+            </PillButton>
+            <PillButton onPress={() => setDeleteOpen(false)} variant="light">
+              {t('cancel')}
+            </PillButton>
+          </Card>
+        </View>
+      </Modal>
     </Screen>
   );
 };
 
 const styles = StyleSheet.create({
-  scrollContent: { flexGrow: 1, paddingTop: 76, paddingBottom: 148, paddingHorizontal: 16 },
+  scrollContent: { flexGrow: 1, paddingTop: 16, paddingBottom: 96, paddingHorizontal: 16 },
   sectionBody: { marginTop: 12, gap: 8 },
   infoRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  about: { marginTop: 24, alignItems: 'center', gap: 4 },
+  aboutText: { color: colors.muted, fontFamily: 'PatrickHand_400Regular', fontSize: 17, textAlign: 'center' },
   strong: { color: colors.ink, fontFamily: 'PatrickHand_400Regular', fontSize: 23 },
   muted: { color: colors.muted, fontFamily: 'PatrickHand_400Regular', fontSize: 19, lineHeight: 24 },
   text: { color: colors.ink, fontFamily: 'PatrickHand_400Regular', fontSize: 19, lineHeight: 24, flex: 1 },

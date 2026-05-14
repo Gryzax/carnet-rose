@@ -1,6 +1,11 @@
 import { act, fireEvent, render, waitFor } from '@testing-library/react-native';
 import { Platform } from 'react-native';
 import { RootNavigator } from '../../navigation/RootNavigator';
+import { AuthProvider } from '../../providers/AuthContext';
+
+// RootNavigator now reads the session from AuthContext, so every render needs
+// the provider. It doesn't need QueryClient — the screens it routes to are mocked.
+const renderNav = () => render(<RootNavigator />, { wrapper: AuthProvider });
 import * as authService from '../../services/auth/authService';
 
 let mockAuthCallback;
@@ -34,35 +39,42 @@ jest.mock('@react-navigation/bottom-tabs', () => ({
   })
 }));
 
-jest.mock('../../views/ClassesScreen', () => ({
+jest.mock('../../screens/LandingScreen', () => ({
+  LandingScreen: () => {
+    const { Text } = require('react-native');
+    return <Text>Landing screen</Text>;
+  }
+}));
+
+jest.mock('../../screens/ClassesScreen', () => ({
   ClassesScreen: () => {
     const { Text } = require('react-native');
     return <Text>Classes screen</Text>;
   }
 }));
 
-jest.mock('../../views/ClassDashboardScreen', () => ({
+jest.mock('../../screens/ClassDashboardScreen', () => ({
   ClassDashboardScreen: () => {
     const { Text } = require('react-native');
     return <Text>Class dashboard</Text>;
   }
 }));
 
-jest.mock('../../views/StudentDetailScreen', () => ({
+jest.mock('../../screens/StudentDetailScreen', () => ({
   StudentDetailScreen: () => {
     const { Text } = require('react-native');
     return <Text>Student detail</Text>;
   }
 }));
 
-jest.mock('../../views/StatisticsScreen', () => ({
+jest.mock('../../screens/StatisticsScreen', () => ({
   StatisticsScreen: () => {
     const { Text } = require('react-native');
     return <Text>Statistics screen</Text>;
   }
 }));
 
-jest.mock('../../views/SettingsScreen', () => ({
+jest.mock('../../screens/SettingsScreen', () => ({
   SettingsScreen: ({ onSignedOut }) => {
     const { Text } = require('react-native');
     return <Text onPress={onSignedOut}>Settings screen</Text>;
@@ -97,7 +109,7 @@ afterEach(() => {
 });
 
 test('aucun acces aux tabs sans session', async () => {
-  const { getByText, queryByText } = render(<RootNavigator />);
+  const { getByText, queryByText } = renderNav();
 
   await waitFor(() => expect(getByText('Carnet Rose')).toBeTruthy());
   expect(queryByText('Classes')).toBeNull();
@@ -106,7 +118,7 @@ test('aucun acces aux tabs sans session', async () => {
 test('acces aux tabs avec utilisateur mocke', async () => {
   authService.getCurrentUser.mockResolvedValueOnce({ user: { email: 'demo@example.com' }, error: null });
 
-  const { getByText, queryByText } = render(<RootNavigator />);
+  const { getByText, queryByText } = renderNav();
 
   await waitFor(() => expect(getByText('Classes')).toBeTruthy());
   expect(getByText('Statistics')).toBeTruthy();
@@ -115,7 +127,7 @@ test('acces aux tabs avec utilisateur mocke', async () => {
 });
 
 test('apres login auth, les tabs principales remplacent le login', async () => {
-  const { getByText, queryByText } = render(<RootNavigator />);
+  const { getByText, queryByText } = renderNav();
   await waitFor(() => expect(getByText('Carnet Rose')).toBeTruthy());
 
   act(() => {
@@ -136,7 +148,7 @@ test('retour navigateur simule ne declenche pas signOut si une session existe', 
   });
   window.removeEventListener = jest.fn();
   authService.getCurrentUser.mockResolvedValue({ user: { email: 'demo@example.com' }, error: null });
-  const { getByText } = render(<RootNavigator />);
+  const { getByText } = renderNav();
   await waitFor(() => expect(getByText('Classes')).toBeTruthy());
 
   popstateHandler();
@@ -149,7 +161,7 @@ test('retour navigateur simule ne declenche pas signOut si une session existe', 
 
 test('signOut renvoie vers LoginScreen', async () => {
   authService.getCurrentUser.mockResolvedValueOnce({ user: { email: 'demo@example.com' }, error: null });
-  const { getByText } = render(<RootNavigator />);
+  const { getByText } = renderNav();
   await waitFor(() => expect(getByText('Settings screen')).toBeTruthy());
 
   fireEvent.press(getByText('Settings screen'));

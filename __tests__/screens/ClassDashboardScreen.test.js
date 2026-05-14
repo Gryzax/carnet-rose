@@ -1,5 +1,5 @@
-import { fireEvent, render, waitFor } from '@testing-library/react-native';
-import { ClassDashboardScreen } from '../../views/ClassDashboardScreen';
+import { fireEvent, render, waitFor } from '../../test-utils/render';
+import { ClassDashboardScreen } from '../../screens/ClassDashboardScreen';
 
 const mockRefresh = jest.fn(() => Promise.resolve());
 const student = { id: 's1', firstName: 'Emma', lastName: 'Martin', ticks: 0, crosses: 2, merits: 0, detentions: 0 };
@@ -8,24 +8,24 @@ jest.mock('../../hooks/useStudents', () => ({
   useStudents: jest.fn(() => ({ students: [student], refresh: mockRefresh }))
 }));
 
-jest.mock('../../controllers/studentController', () => ({
+jest.mock('../../domain/studentController', () => ({
   addStudent: jest.fn(() => Promise.resolve({ lastInsertRowId: 2 })),
   deleteStudent: jest.fn(() => Promise.resolve()),
   updateStudent: jest.fn(() => Promise.resolve())
 }));
 
-jest.mock('../../controllers/classController', () => ({
+jest.mock('../../domain/classController', () => ({
   markClassUsed: jest.fn(() => Promise.resolve())
 }));
 
-import { addStudent, deleteStudent, updateStudent } from '../../controllers/studentController';
-import { markClassUsed } from '../../controllers/classController';
+import { addStudent, deleteStudent, updateStudent } from '../../domain/studentController';
+import { markClassUsed } from '../../domain/classController';
 
 beforeEach(() => jest.clearAllMocks());
 
 test('suppression élève demande confirmation', async () => {
   const { getByTestId, getByText } = render(<ClassDashboardScreen route={{ params: { classRow: { id: 'c1', name: '4e Rose' } } }} navigation={{ navigate: jest.fn() }} />);
-  expect(getByTestId('class-dashboard-list').props.contentContainerStyle).toEqual(expect.objectContaining({ flexGrow: 1, paddingBottom: 148 }));
+  expect(getByTestId('class-dashboard-list').props.contentContainerStyle).toEqual(expect.objectContaining({ flexGrow: 1, paddingBottom: 96 }));
   fireEvent.press(getByTestId('student-menu-s1'));
   fireEvent.press(getByTestId('menu-delete-student'));
   expect(getByText('Delete student')).toBeTruthy();

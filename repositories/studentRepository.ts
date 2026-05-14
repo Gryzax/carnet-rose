@@ -1,6 +1,6 @@
 import { deleteStudentCascade, putStudent, replaceAllStudents } from '../models/studentModel';
 import { fetchStudents, pushStudent, softDeleteStudentRemote } from '../services/remote/studentRemote';
-import { invalidate } from '../store/dataStore';
+import { invalidate } from '../lib/queryClient';
 import { flushThenPull, pushOrQueue } from './shared';
 import type { StudentRow } from '../types/domain';
 

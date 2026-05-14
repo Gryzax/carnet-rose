@@ -99,6 +99,7 @@ alter table public.classes
 alter table public.students
   add column if not exists ticks integer not null default 0,
   add column if not exists crosses integer not null default 0,
+  add column if not exists forgets integer not null default 0,
   add column if not exists term integer not null default 1;
 
 alter table public.events
@@ -182,3 +183,24 @@ create policy "sync_state select own" on public.sync_state for select using (aut
 create policy "sync_state insert own" on public.sync_state for insert with check (auth.uid() = user_id);
 create policy "sync_state update own" on public.sync_state for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
 create policy "sync_state delete own" on public.sync_state for delete using (auth.uid() = user_id);
+
+-- Account self-deletion. Removes the caller's row from auth.users; the
+-- ON DELETE CASCADE foreign keys above wipe all of their data. Runs as a
+-- security-definer function so an authenticated user (with only the anon key)
+-- can delete their own account without exposing the service_role key.
+create or replace function public.delete_account()
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if auth.uid() is null then
+    raise exception 'Not authenticated';
+  end if;
+  delete from auth.users where id = auth.uid();
+end;
+$$;
+
+revoke all on function public.delete_account() from public, anon;
+grant execute on function public.delete_account() to authenticated;

@@ -26,6 +26,7 @@ export interface StudentRow {
   crosses: number;
   merits: number;
   detentions: number;
+  forgets: number;
   currentTrimester: number;
 }
 
@@ -33,7 +34,7 @@ export interface StudentWithClass extends StudentRow {
   className: string;
 }
 
-export type EventType = 'tick' | 'cross';
+export type EventType = 'tick' | 'cross' | 'forgot';
 
 export interface EventRow {
   id: string;
@@ -46,6 +47,8 @@ export interface EventRow {
   previousCrosses: number;
   newTicks: number;
   newCrosses: number;
+  previousForgets: number;
+  newForgets: number;
   cancelled: 0 | 1;
 }
 
@@ -65,5 +68,6 @@ export interface StudentCounters {
   crosses: number;
   merits: number;
   detentions: number;
+  forgets: number;
   currentTrimester: number;
 }

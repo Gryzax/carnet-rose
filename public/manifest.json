@@ -1,13 +1,13 @@
 {
   "name": "Carnet Rose",
   "short_name": "Carnet Rose",
-  "description": "Suivi hors ligne des élèves.",
+  "description": "Suivi des mérites, croix et progrès de vos élèves.",
   "start_url": ".",
   "scope": ".",
   "display": "standalone",
   "orientation": "portrait",
   "theme_color": "#DB2777",
-  "background_color": "#FFF7FB",
+  "background_color": "#F9E8E0",
   "icons": [
     {
       "src": "./icon.svg",

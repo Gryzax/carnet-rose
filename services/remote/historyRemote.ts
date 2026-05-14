@@ -19,6 +19,8 @@ interface SupabaseEvent {
     previousCrosses?: number;
     newTicks?: number;
     newCrosses?: number;
+    previousForgets?: number;
+    newForgets?: number;
     cancelled?: 0 | 1;
   } | null;
   occurred_at: string;
@@ -49,6 +51,8 @@ export const mapEventToSupabase = (event: EventRow, userId: string) => ({
     previousCrosses: event.previousCrosses,
     newTicks: event.newTicks,
     newCrosses: event.newCrosses,
+    previousForgets: event.previousForgets,
+    newForgets: event.newForgets,
     cancelled: event.cancelled || 0
   },
   occurred_at: event.createdAt,
@@ -63,7 +67,7 @@ export const mapEventFromSupabase = (row: SupabaseEvent): EventRow => {
     id: row.local_id,
     studentId: row.student_local_id || '',
     // Tolerate the pre-refactor French value 'croix'.
-    type: row.event_type === 'tick' ? 'tick' : 'cross',
+    type: row.event_type === 'tick' ? 'tick' : row.event_type === 'forgot' ? 'forgot' : 'cross',
     reason: row.reason ?? null,
     trimester: row.term || 1,
     createdAt: row.occurred_at,
@@ -71,6 +75,8 @@ export const mapEventFromSupabase = (row: SupabaseEvent): EventRow => {
     previousCrosses: payload.previousCrosses || 0,
     newTicks: payload.newTicks || 0,
     newCrosses: payload.newCrosses || 0,
+    previousForgets: payload.previousForgets || 0,
+    newForgets: payload.newForgets || 0,
     cancelled: payload.cancelled ? 1 : 0
   };
 };

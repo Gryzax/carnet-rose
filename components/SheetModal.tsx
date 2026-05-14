@@ -1,12 +1,16 @@
 import { useEffect, useRef, type ReactNode } from 'react';
 import { Animated, KeyboardAvoidingView, Modal, Platform, Pressable, StyleSheet } from 'react-native';
 import { colors } from '../constants/colors';
+import { USE_NATIVE_DRIVER } from '../utils/animation';
 
 export interface SheetModalProps {
   visible: boolean;
   onRequestClose?: () => void;
   onShow?: () => void;
   onBackdropPress?: () => void;
+  // Accessible label for the tap-to-dismiss backdrop (only used when
+  // `onBackdropPress` is set). Defaults to "Close".
+  backdropLabel?: string;
   children: ReactNode;
 }
 
@@ -16,6 +20,7 @@ export const SheetModal = ({
   onRequestClose,
   onShow,
   onBackdropPress,
+  backdropLabel = 'Close',
   children
 }: SheetModalProps) => {
   const slide = useRef(new Animated.Value(24)).current;
@@ -26,19 +31,29 @@ export const SheetModal = ({
     slide.setValue(24);
     opacity.setValue(0);
     Animated.parallel([
-      Animated.timing(slide, { toValue: 0, duration: 220, useNativeDriver: true }),
-      Animated.timing(opacity, { toValue: 1, duration: 180, useNativeDriver: true })
+      Animated.timing(slide, { toValue: 0, duration: 220, useNativeDriver: USE_NATIVE_DRIVER }),
+      Animated.timing(opacity, { toValue: 1, duration: 180, useNativeDriver: USE_NATIVE_DRIVER })
     ]).start();
   }, [opacity, slide, visible]);
 
   const content = (
-    <Animated.View style={{ opacity, transform: [{ translateY: slide }] }}>{children}</Animated.View>
+    <Animated.View
+      accessibilityViewIsModal
+      style={{ opacity, transform: [{ translateY: slide }] }}
+    >
+      {children}
+    </Animated.View>
   );
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onRequestClose} onShow={onShow}>
       {onBackdropPress ? (
-        <Pressable onPress={onBackdropPress} style={styles.backdrop}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={backdropLabel}
+          onPress={onBackdropPress}
+          style={styles.backdrop}
+        >
           {content}
         </Pressable>
       ) : (

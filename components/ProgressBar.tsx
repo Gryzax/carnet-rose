@@ -6,9 +6,13 @@ export interface ProgressBarProps {
   value: number;
   max: number;
   color: string;
+  // When provided, the bar is exposed to screen readers as a progress bar with
+  // this label. Left undefined the bar is decorative (e.g. inside StudentCard,
+  // where an adjacent "3/5" count already conveys the value) and is hidden.
+  label?: string;
 }
 
-export const ProgressBar = ({ value, max, color }: ProgressBarProps) => {
+export const ProgressBar = ({ value, max, color, label }: ProgressBarProps) => {
   const width = useRef(new Animated.Value(0)).current;
   useEffect(() => {
     Animated.spring(width, {
@@ -19,7 +23,16 @@ export const ProgressBar = ({ value, max, color }: ProgressBarProps) => {
     }).start();
   }, [value, max, width]);
   return (
-    <View style={styles.track} testID="progress-track">
+    <View
+      style={styles.track}
+      testID="progress-track"
+      accessible={label !== undefined}
+      accessibilityElementsHidden={label === undefined}
+      importantForAccessibility={label === undefined ? 'no-hide-descendants' : 'yes'}
+      accessibilityRole="progressbar"
+      accessibilityLabel={label}
+      accessibilityValue={{ min: 0, max, now: Math.min(value, max) }}
+    >
       <Animated.View
         testID="progress-fill"
         style={[

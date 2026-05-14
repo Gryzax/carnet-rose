@@ -14,9 +14,11 @@ test('rendu de StudentCard', () => {
 });
 
 test('avatar initiales', () => {
+  // StudentAvatar is decorative and hidden from the accessibility tree, so
+  // its testID is only reachable with includeHiddenElements.
   const { getByText, getByTestId } = render(<StudentAvatar student={student} />);
-  expect(getByTestId('student-avatar')).toBeTruthy();
-  expect(getByText('EM')).toBeTruthy();
+  expect(getByTestId('student-avatar', { includeHiddenElements: true })).toBeTruthy();
+  expect(getByText('EM', { includeHiddenElements: true })).toBeTruthy();
   expect(getStudentInitials(student)).toBe('EM');
 });
 
@@ -28,7 +30,16 @@ test('couleurs selon etat', () => {
 });
 
 test('progress bars', () => {
+  // Without a `label` the bar is decorative and hidden from the a11y tree.
   const { getByTestId } = render(<ProgressBar value={2} max={4} color={colors.primaryPink} />);
-  expect(getByTestId('progress-track')).toBeTruthy();
-  expect(getByTestId('progress-fill')).toBeTruthy();
+  expect(getByTestId('progress-track', { includeHiddenElements: true })).toBeTruthy();
+  expect(getByTestId('progress-fill', { includeHiddenElements: true })).toBeTruthy();
+});
+
+test('progress bar with label is exposed to screen readers', () => {
+  const { getByRole } = render(
+    <ProgressBar value={2} max={4} color={colors.primaryPink} label="Ticks 2/4" />
+  );
+  const bar = getByRole('progressbar');
+  expect(bar.props.accessibilityValue).toEqual({ min: 0, max: 4, now: 2 });
 });

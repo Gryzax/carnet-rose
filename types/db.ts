@@ -31,4 +31,6 @@ export interface CacheStore {
   remove(table: CacheTable, id: string): Promise<void>;
   /** Replace the entire contents of a table — used when pulling from Supabase. */
   replaceAll<T extends CacheRow = CacheRow>(table: CacheTable, rows: T[]): Promise<void>;
+  /** Wipe every table — used when deleting the account / signing out for good. */
+  clear(): Promise<void>;
 }

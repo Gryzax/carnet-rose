@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState, type ReactNode } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import {
   ActivityIndicator,
   Pressable,
@@ -11,19 +11,16 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { colors } from '../constants/colors';
-import { getClassroomStatistics, type StatsPeriod } from '../controllers/statisticsController';
-import { BackButton } from '../components/BackButton';
+import type { StatsPeriod } from '../domain/statisticsController';
 import { EmptyState } from '../components/EmptyState';
 import { StudentAvatar } from '../components/StudentAvatar';
 import { SheetModal } from '../components/SheetModal';
 import { Card, Pill, PillButton, Screen, Sparkle, Title, WashiTape, type IoniconName } from '../components/Themed';
 import { useT } from '../utils/i18n';
-import { useQuery, type StoreKey } from '../store/dataStore';
+import { useStatistics } from '../hooks/useStatistics';
 import type { AppTabsParamList } from '../navigation/types';
 
 type Props = BottomTabScreenProps<AppTabsParamList, 'Statistics'>;
-
-type StatsData = Awaited<ReturnType<typeof getClassroomStatistics>>;
 
 type QuickList = 'toWatch' | 'forgottenNotebooks' | 'noRecentEvent';
 type TopTab = 'encourage' | 'reframe';
@@ -41,8 +38,6 @@ interface StatStudent {
   meta?: string;
 }
 
-// Dashboard aggregates classes, students and events, so it refreshes on any write.
-const STATS_KEYS: StoreKey[] = ['classes', 'students', 'events'];
 const PERIOD_VALUES: StatsPeriod[] = ['week', 'month', 'trimester'];
 const PERIOD_NOUN_KEY: Record<StatsPeriod, string> = {
   week: 'periodNounWeek',
@@ -192,8 +187,7 @@ export const StatisticsScreen = ({ navigation }: Props) => {
   const [quickList, setQuickList] = useState<QuickList>('toWatch');
   const [archiveTrimester, setArchiveTrimester] = useState<number | null>(null);
 
-  const fetcher = useCallback(() => getClassroomStatistics({ period, classId }), [period, classId]);
-  const { data: stats, loading } = useQuery<StatsData>(STATS_KEYS, fetcher);
+  const { stats, loading } = useStatistics(period, classId);
 
   const periodOptions = useMemo(
     () => PERIOD_VALUES.map((value) => ({ value, label: t(PERIOD_LABEL_KEY[value]) as string })),
@@ -510,7 +504,6 @@ export const StatisticsScreen = ({ navigation }: Props) => {
           </Card>
         </Pressable>
       </SheetModal>
-      <BackButton floating navigation={navigation} fallbackRoute="Classes" />
     </Screen>
   );
 };
@@ -519,7 +512,7 @@ const baseText = { fontFamily: 'PatrickHand_400Regular', color: colors.ink, lett
 const bordered = { borderColor: colors.border, borderWidth: 1.5 };
 
 const styles = StyleSheet.create({
-  scrollContent: { flexGrow: 1, paddingTop: 76, paddingBottom: 148, paddingHorizontal: 16 },
+  scrollContent: { flexGrow: 1, paddingTop: 16, paddingBottom: 96, paddingHorizontal: 16 },
   pressed: { transform: [{ scale: 0.97 }] },
   textOnPink: { color: colors.onPrimary },
 

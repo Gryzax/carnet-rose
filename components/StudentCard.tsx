@@ -7,6 +7,7 @@ import { ProgressBar } from './ProgressBar';
 import { StudentAvatar, getStudentAvatarColor, type StudentLike } from './StudentAvatar';
 import { CatMascot, Pill, Sparkle } from './Themed';
 import { useT } from '../utils/i18n';
+import { USE_NATIVE_DRIVER } from '../utils/animation';
 import type { StudentRow } from '../types/domain';
 
 export const getStudentStateColor = (student: StudentLike): string => getStudentAvatarColor(student);
@@ -23,7 +24,7 @@ const StudentCardBase = ({ student, onPress, onMenu }: StudentCardProps) => {
   const atRisk = student.crosses >= CROSSES_FOR_DETENTION - 1;
 
   useEffect(() => {
-    Animated.timing(fade, { toValue: 1, duration: 250, useNativeDriver: true }).start();
+    Animated.timing(fade, { toValue: 1, duration: 250, useNativeDriver: USE_NATIVE_DRIVER }).start();
   }, [fade]);
 
   return (
@@ -31,7 +32,10 @@ const StudentCardBase = ({ student, onPress, onMenu }: StudentCardProps) => {
       <Pressable
         testID="student-card"
         accessibilityRole="button"
-        accessibilityLabel={`${student.lastName} ${student.firstName}`}
+        accessibilityLabel={
+          `${student.lastName} ${student.firstName}` +
+          (atRisk ? `, ${t('atRiskBadge')}` : '')
+        }
         onPress={onPress}
         style={({ pressed }) => [styles.card, pressed && styles.pressed]}
       >
@@ -47,7 +51,8 @@ const StudentCardBase = ({ student, onPress, onMenu }: StudentCardProps) => {
               {atRisk && (
                 <View
                   testID={`at-risk-badge-${student.id}`}
-                  accessibilityLabel={t('atRiskBadge') as string}
+                  accessibilityElementsHidden
+                  importantForAccessibility="no-hide-descendants"
                   style={styles.alertBadge}
                 >
                   <Ionicons name="alert" size={14} color={colors.card} />
@@ -55,15 +60,7 @@ const StudentCardBase = ({ student, onPress, onMenu }: StudentCardProps) => {
               )}
             </View>
           </View>
-          <Pressable
-            testID={`student-menu-${student.id}`}
-            accessibilityRole="button"
-            accessibilityLabel={t('studentActions') as string}
-            onPress={onMenu}
-            style={({ pressed }) => [styles.more, pressed && styles.pressed]}
-          >
-            <Ionicons name="ellipsis-horizontal" size={22} color={colors.ink} />
-          </Pressable>
+          <View style={styles.morePlaceholder} />
         </View>
         <View style={styles.row}>
           <Pill style={styles.metric}>{t('ticksLabel')}</Pill>
@@ -88,7 +85,20 @@ const StudentCardBase = ({ student, onPress, onMenu }: StudentCardProps) => {
             <Sparkle />
             <Text style={styles.badge}>{t('detentionsPlainPill', { count: student.detentions })}</Text>
           </View>
+          <View style={styles.badgeRow}>
+            <Sparkle />
+            <Text style={styles.badge}>{t('forgetsPlainPill', { count: student.forgets })}</Text>
+          </View>
         </View>
+      </Pressable>
+      <Pressable
+        testID={`student-menu-${student.id}`}
+        accessibilityRole="button"
+        accessibilityLabel={t('studentActions') as string}
+        onPress={onMenu}
+        style={({ pressed }) => [styles.more, pressed && styles.pressed]}
+      >
+        <Ionicons name="ellipsis-horizontal" size={22} color={colors.ink} />
       </Pressable>
     </Animated.View>
   );
@@ -112,7 +122,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center'
   },
-  more: { width: 44, height: 44, borderRadius: 22, borderWidth: 1.5, borderColor: colors.border, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.card },
+  morePlaceholder: { width: 44, height: 44 },
+  more: { position: 'absolute', top: 16, right: 16, width: 44, height: 44, borderRadius: 22, borderWidth: 1.5, borderColor: colors.border, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.card },
   row: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 8 },
   metric: { width: 70, textAlign: 'center' },
   count: { fontFamily: 'PatrickHand_400Regular', color: colors.ink, fontSize: 18, width: 38 },

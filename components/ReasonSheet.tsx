@@ -3,6 +3,7 @@ import { useEffect, useRef } from 'react';
 import { colors } from '../constants/colors';
 import { Sparkle } from './Themed';
 import { useT } from '../utils/i18n';
+import { USE_NATIVE_DRIVER } from '../utils/animation';
 
 export interface ReasonSheetProps {
   visible: boolean;
@@ -15,7 +16,7 @@ export const ReasonSheet = ({ visible, reasons, onSelect, onClose }: ReasonSheet
   const { t } = useT();
   const y = useRef(new Animated.Value(220)).current;
   useEffect(() => {
-    Animated.spring(y, { toValue: visible ? 0 : 220, friction: 9, tension: 90, useNativeDriver: true }).start();
+    Animated.spring(y, { toValue: visible ? 0 : 220, friction: 9, tension: 90, useNativeDriver: USE_NATIVE_DRIVER }).start();
   }, [visible, y]);
   return (
     <Modal transparent visible={visible} animationType="none" onRequestClose={onClose}>

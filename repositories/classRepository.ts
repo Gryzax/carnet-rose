@@ -2,7 +2,7 @@ import { deleteClassCascade, getClassById, putClass, replaceAllClasses } from '.
 import { getStudentsByClass } from '../models/studentModel';
 import { fetchClasses, pushClass, softDeleteClassRemote } from '../services/remote/classRemote';
 import { softDeleteStudentRemote } from '../services/remote/studentRemote';
-import { invalidate } from '../store/dataStore';
+import { invalidate } from '../lib/queryClient';
 import { nowIso } from '../utils/date';
 import { flushThenPull, pushOrQueue } from './shared';
 import type { ClassRow } from '../types/domain';

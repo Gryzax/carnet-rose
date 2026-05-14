@@ -1,5 +1,5 @@
-import { act, fireEvent, render, waitFor } from '@testing-library/react-native';
-import { StudentDetailScreen } from '../../views/StudentDetailScreen';
+import { act, fireEvent, render, waitFor } from '../../test-utils/render';
+import { StudentDetailScreen } from '../../screens/StudentDetailScreen';
 
 const student = { id: 's1', firstName: 'Emma', lastName: 'Martin', ticks: 0, crosses: 0, merits: 0, detentions: 0, currentTrimester: 1 };
 
@@ -33,21 +33,21 @@ jest.mock('../../components/UndoSnackbar', () => ({
   }
 }));
 
-jest.mock('../../controllers/studentController', () => ({
+jest.mock('../../domain/studentController', () => ({
   addTick: jest.fn((student) => Promise.resolve({ student: { ...student, ticks: 1 }, meritObtained: false })),
   addCross: jest.fn((student) => Promise.resolve({ student: { ...student, crosses: 1 }, detentionTriggered: false })),
   undoLastAction: jest.fn(() => Promise.resolve({ cancelled: true, student })),
   deleteEvent: jest.fn(() => Promise.resolve())
 }));
 
-import { addTick } from '../../controllers/studentController';
+import { addTick } from '../../domain/studentController';
 
 beforeEach(() => jest.clearAllMocks());
 
 test('détail élève affiche le toast après tick', async () => {
   const { getByTestId, getByText } = render(<StudentDetailScreen route={{ params: { studentId: 's1' } }} navigation={{ navigate: jest.fn(), canGoBack: jest.fn(() => false) }} />);
   await waitFor(() => expect(getByText('Emma Martin')).toBeTruthy());
-  expect(getByTestId('student-detail-list').props.contentContainerStyle).toEqual(expect.objectContaining({ flexGrow: 1, paddingBottom: 148 }));
+  expect(getByTestId('student-detail-list').props.contentContainerStyle).toEqual(expect.objectContaining({ flexGrow: 1, paddingBottom: 96 }));
   fireEvent.press(getByText('TICK'));
   await waitFor(() => expect(getByText('Participation')).toBeTruthy());
   await act(async () => {

@@ -20,6 +20,23 @@ export const translations = {
     appTagline: 'Your classroom companion',
     reassure: 'Everything you note stays safe on your device.',
 
+    // Landing
+    landingHeadline: 'Track your class with a little sparkle',
+    landingIntro:
+      'Carnet Rose helps teachers note merits, crosses and progress — quickly, kindly, and right from your pocket.',
+    landingFeature1Title: 'Classes & students',
+    landingFeature1Body: 'Organise your classes and find any student in a tap.',
+    landingFeature2Title: 'Ticks & crosses',
+    landingFeature2Body:
+      'Reward effort with ticks, flag slips with crosses. 4 ticks make a merit, 4 crosses a detention.',
+    landingFeature3Title: 'History & archives',
+    landingFeature3Body: 'Every event is kept, and each term is neatly archived.',
+    landingFeature4Title: 'Statistics & climate',
+    landingFeature4Body:
+      'See your class climate, your brightest sparks and who needs a little attention.',
+    landingPricing: 'Free and ready in seconds · No credit card needed',
+    landingCta: 'Get started',
+
     // Common actions
     cancel: 'Cancel',
     delete: 'Delete',
@@ -37,6 +54,12 @@ export const translations = {
     tabClasses: 'Classes',
     tabStatistics: 'Stats',
     tabSettings: 'Settings',
+
+    // Web page titles & meta
+    loginTitle: 'Sign in',
+    studentDetailTitle: 'Student',
+    metaDescription:
+      'Carnet Rose helps teachers track student merits, crosses and progress — on any device.',
 
     // Classes screen
     classesTitle: 'My classes',
@@ -63,6 +86,8 @@ export const translations = {
 
     // Class dashboard
     studentsAndRisk: '{count} students · {risk} need a little attention',
+    searchStudents: 'Search a student',
+    noStudentsMatch: 'No student matches your search.',
     sortName: 'Name',
     sortCroix: 'Crosses',
     sortTicks: 'Ticks',
@@ -80,6 +105,7 @@ export const translations = {
     atRiskBadge: 'Needs a little attention',
 
     // Login
+    loginPrompt: 'Sign in to continue',
     connectionUnavailable: 'Sign-in unavailable',
     unavailableMessage: 'Sign-in isn’t set up yet. Please reach out to your administrator.',
     continueGoogle: 'Continue with Google',
@@ -99,9 +125,17 @@ export const translations = {
     sectionAbout: 'About',
     aboutTagline: 'Your classroom companion',
     sectionData: 'Data',
+    sectionPreferences: 'Preferences',
+    sectionDangerZone: 'Danger zone',
     exportData: 'Export my data',
     exportDataTitle: 'Export my data',
     comingSoon: 'Coming soon — stay tuned!',
+    deleteAccount: 'Delete my account',
+    deleteAccountTitle: 'Delete my account?',
+    deleteAccountWarning: 'This permanently erases your account and all synced data. This cannot be undone.',
+    deleteAccountWord: 'DELETE',
+    deleteAccountConfirm: 'Delete forever',
+    deleteAccountError: 'Couldn’t delete your account right now. Please try again.',
     sectionLanguage: 'Language',
     languageHint: 'Pick the language that feels like home.',
     sectionTrimester: 'Term',
@@ -130,8 +164,11 @@ export const translations = {
     crossesPill: 'Crosses {value}/{max}',
     meritsPlainPill: 'Merits {count}',
     detentionsPlainPill: 'Detentions {count}',
+    forgetsPill: 'Forgotten notebook {count}',
+    forgetsPlainPill: 'Forgotten notebooks {count}',
     tickAction: 'TICK',
     crossAction: 'CROSS',
+    forgotAction: 'Forgot notebook',
     counterLegend: '{ticks} ticks → 1 merit · {crosses} crosses → 1 detention',
     currentTermHistory: 'THIS TERM’S HISTORY',
     emptyHistoryTitle: 'No history yet',
@@ -142,6 +179,7 @@ export const translations = {
     deleteHistoryMessage: 'This history entry will be permanently deleted.',
     typeTick: 'Tick',
     typeCross: 'Cross',
+    typeForgot: 'Forgotten notebook',
 
     // Reasons
     tickReasons: ['Participation', 'Lesson learned', 'Great work', 'Effort'],
@@ -155,6 +193,7 @@ export const translations = {
     snackTickAdded: 'Tick added for {name} ⭐',
     snackCrossCancelledTick: 'Cross added and a tick removed for {name}',
     snackCrossAdded: 'Cross added for {name}',
+    snackForgotAdded: 'Forgotten notebook noted for {name}',
     meritObtainedTitle: 'Merit earned! 🎉',
     meritCopy: 'Hooray for {name}! A focused, eager and involved student.',
     copyMessage: 'Copy message',
@@ -229,6 +268,23 @@ export const translations = {
     appTagline: 'Votre compagnon de classe',
     reassure: 'Tout ce que vous notez reste en sécurité sur votre appareil.',
 
+    // Landing
+    landingHeadline: 'Suivez votre classe avec une touche de magie',
+    landingIntro:
+      'Carnet Rose aide les enseignants à noter mérites, croix et progrès — vite, avec bienveillance, droit dans votre poche.',
+    landingFeature1Title: 'Classes et élèves',
+    landingFeature1Body: 'Organisez vos classes et retrouvez chaque élève en un instant.',
+    landingFeature2Title: 'Ticks et croix',
+    landingFeature2Body:
+      'Récompensez les efforts avec des ticks, signalez les écarts avec des croix. 4 ticks font un mérite, 4 croix une retenue.',
+    landingFeature3Title: 'Historique et archives',
+    landingFeature3Body: 'Chaque évènement est conservé, et chaque trimestre est soigneusement archivé.',
+    landingFeature4Title: 'Statistiques et climat',
+    landingFeature4Body:
+      'Visualisez le climat de classe, vos meilleurs élèves et ceux à accompagner de près.',
+    landingPricing: 'Gratuit, prêt en quelques secondes · Sans carte bancaire',
+    landingCta: 'Commencer',
+
     cancel: 'Annuler',
     delete: 'Supprimer',
     deleting: 'Suppression…',
@@ -244,6 +300,11 @@ export const translations = {
     tabClasses: 'Classes',
     tabStatistics: 'Stats',
     tabSettings: 'Réglages',
+
+    loginTitle: 'Connexion',
+    studentDetailTitle: 'Élève',
+    metaDescription:
+      'Carnet Rose aide les enseignants à suivre les mérites, les croix et la progression de leurs élèves — sur tous les appareils.',
 
     classesTitle: 'Mes classes',
     searchStudent: 'Rechercher un élève',
@@ -268,6 +329,8 @@ export const translations = {
     deleteClassMessage: 'Cette classe, ses élèves, leur historique et leurs archives trimestrielles seront supprimés définitivement.',
 
     studentsAndRisk: '{count} élèves · {risk} à accompagner de près',
+    searchStudents: 'Rechercher un élève',
+    noStudentsMatch: 'Aucun élève ne correspond à votre recherche.',
     sortName: 'Nom',
     sortCroix: 'Croix',
     sortTicks: 'Ticks',
@@ -284,6 +347,7 @@ export const translations = {
     studentActions: 'Actions sur l’élève',
     atRiskBadge: 'À accompagner de près',
 
+    loginPrompt: 'Connecte-toi pour continuer',
     connectionUnavailable: 'Connexion indisponible',
     unavailableMessage: 'La connexion n’est pas encore configurée. Veuillez contacter l’administrateur.',
     continueGoogle: 'Continuer avec Google',
@@ -302,9 +366,17 @@ export const translations = {
     sectionAbout: 'À propos',
     aboutTagline: 'Votre compagnon de classe',
     sectionData: 'Données',
+    sectionPreferences: 'Préférences',
+    sectionDangerZone: 'Zone sensible',
     exportData: 'Exporter mes données',
     exportDataTitle: 'Exporter mes données',
     comingSoon: 'Bientôt disponible — restez à l’écoute !',
+    deleteAccount: 'Supprimer mon compte',
+    deleteAccountTitle: 'Supprimer mon compte ?',
+    deleteAccountWarning: 'Cela efface définitivement votre compte et toutes les données synchronisées. Action irréversible.',
+    deleteAccountWord: 'SUPPRIMER',
+    deleteAccountConfirm: 'Supprimer définitivement',
+    deleteAccountError: 'Impossible de supprimer votre compte pour le moment. Réessayez.',
     sectionLanguage: 'Langue',
     languageHint: 'Choisissez la langue qui vous met à l’aise.',
     sectionTrimester: 'Trimestre',
@@ -331,8 +403,11 @@ export const translations = {
     crossesPill: 'Croix {value}/{max}',
     meritsPlainPill: 'Mérites {count}',
     detentionsPlainPill: 'Retenues {count}',
+    forgetsPill: 'Carnet oublié {count}',
+    forgetsPlainPill: 'Carnets oubliés {count}',
     tickAction: 'TICK',
     crossAction: 'CROIX',
+    forgotAction: 'Carnet oublié',
     counterLegend: '{ticks} ticks → 1 mérite · {crosses} croix → 1 retenue',
     currentTermHistory: 'HISTORIQUE DU TRIMESTRE COURANT',
     emptyHistoryTitle: 'Aucun historique',
@@ -343,6 +418,7 @@ export const translations = {
     deleteHistoryMessage: 'Cette entrée de l’historique sera supprimée définitivement.',
     typeTick: 'Tick',
     typeCross: 'Croix',
+    typeForgot: 'Carnet oublié',
 
     tickReasons: ['Participation', 'Leçon sue', 'Bon travail', 'Effort'],
     crossReasons: ['Devoirs non faits', 'Leçon non sue', 'Travail insuffisant', 'Comportement'],
@@ -354,6 +430,7 @@ export const translations = {
     snackTickAdded: 'Tick ajouté à {name} ⭐',
     snackCrossCancelledTick: 'Croix ajoutée et un tick retiré pour {name}',
     snackCrossAdded: 'Croix ajoutée à {name}',
+    snackForgotAdded: 'Carnet oublié noté pour {name}',
     meritObtainedTitle: 'Mérite obtenu ! 🎉',
     meritCopy: 'Félicitations à {name} ! Élève sérieux, participatif et impliqué.',
     copyMessage: 'Copier le message',
@@ -427,6 +504,23 @@ export const translations = {
     appTagline: 'Tu compañero de aula',
     reassure: 'Todo lo que anotas se guarda a salvo en tu dispositivo.',
 
+    // Landing
+    landingHeadline: 'Sigue tu clase con un toque de magia',
+    landingIntro:
+      'Carnet Rose ayuda a los docentes a anotar méritos, cruces y progreso — rápido, con cariño y desde tu bolsillo.',
+    landingFeature1Title: 'Clases y alumnos',
+    landingFeature1Body: 'Organiza tus clases y encuentra a cualquier alumno con un toque.',
+    landingFeature2Title: 'Marcas y cruces',
+    landingFeature2Body:
+      'Premia el esfuerzo con marcas, señala los deslices con cruces. 4 marcas dan un mérito, 4 cruces una sanción.',
+    landingFeature3Title: 'Historial y archivos',
+    landingFeature3Body: 'Cada evento se guarda, y cada trimestre se archiva con cuidado.',
+    landingFeature4Title: 'Estadísticas y ambiente',
+    landingFeature4Body:
+      'Mira el ambiente de la clase, tus alumnos destacados y quién necesita un poco de atención.',
+    landingPricing: 'Gratis y listo en segundos · Sin tarjeta de crédito',
+    landingCta: 'Empezar',
+
     cancel: 'Cancelar',
     delete: 'Eliminar',
     deleting: 'Eliminando…',
@@ -442,6 +536,11 @@ export const translations = {
     tabClasses: 'Clases',
     tabStatistics: 'Stats',
     tabSettings: 'Ajustes',
+
+    loginTitle: 'Iniciar sesión',
+    studentDetailTitle: 'Alumno',
+    metaDescription:
+      'Carnet Rose ayuda a los docentes a seguir los méritos, las cruces y el progreso de sus alumnos — en cualquier dispositivo.',
 
     classesTitle: 'Mis clases',
     searchStudent: 'Buscar un alumno',
@@ -466,6 +565,8 @@ export const translations = {
     deleteClassMessage: 'Esta clase, sus alumnos, su historial y sus archivos trimestrales se eliminarán de forma permanente.',
 
     studentsAndRisk: '{count} alumnos · {risk} merecen un poco de atención',
+    searchStudents: 'Buscar un alumno',
+    noStudentsMatch: 'Ningún alumno coincide con tu búsqueda.',
     sortName: 'Nombre',
     sortCroix: 'Cruces',
     sortTicks: 'Marcas',
@@ -482,6 +583,7 @@ export const translations = {
     studentActions: 'Acciones del alumno',
     atRiskBadge: 'Merece un poco de atención',
 
+    loginPrompt: 'Inicia sesión para continuar',
     connectionUnavailable: 'Inicio de sesión no disponible',
     unavailableMessage: 'El inicio de sesión aún no está configurado. Ponte en contacto con el administrador.',
     continueGoogle: 'Continuar con Google',
@@ -500,9 +602,17 @@ export const translations = {
     sectionAbout: 'Acerca de',
     aboutTagline: 'Tu compañero de aula',
     sectionData: 'Datos',
+    sectionPreferences: 'Preferencias',
+    sectionDangerZone: 'Zona de peligro',
     exportData: 'Exportar mis datos',
     exportDataTitle: 'Exportar mis datos',
     comingSoon: 'Próximamente — ¡no te lo pierdas!',
+    deleteAccount: 'Eliminar mi cuenta',
+    deleteAccountTitle: '¿Eliminar mi cuenta?',
+    deleteAccountWarning: 'Esto borra permanentemente tu cuenta y todos los datos sincronizados. No se puede deshacer.',
+    deleteAccountWord: 'ELIMINAR',
+    deleteAccountConfirm: 'Eliminar para siempre',
+    deleteAccountError: 'No se pudo eliminar tu cuenta ahora mismo. Inténtalo de nuevo.',
     sectionLanguage: 'Idioma',
     languageHint: 'Elige el idioma con el que te sientas como en casa.',
     sectionTrimester: 'Trimestre',
@@ -529,8 +639,11 @@ export const translations = {
     crossesPill: 'Cruces {value}/{max}',
     meritsPlainPill: 'Méritos {count}',
     detentionsPlainPill: 'Sanciones {count}',
+    forgetsPill: 'Cuaderno olvidado {count}',
+    forgetsPlainPill: 'Cuadernos olvidados {count}',
     tickAction: 'MARCA',
     crossAction: 'CRUZ',
+    forgotAction: 'Cuaderno olvidado',
     counterLegend: '{ticks} marcas → 1 mérito · {crosses} cruces → 1 sanción',
     currentTermHistory: 'HISTORIAL DEL TRIMESTRE ACTUAL',
     emptyHistoryTitle: 'Aún no hay historial',
@@ -541,6 +654,7 @@ export const translations = {
     deleteHistoryMessage: 'Esta entrada del historial se eliminará de forma permanente.',
     typeTick: 'Marca',
     typeCross: 'Cruz',
+    typeForgot: 'Cuaderno olvidado',
 
     tickReasons: ['Participación', 'Lección aprendida', 'Buen trabajo', 'Esfuerzo'],
     crossReasons: ['Deberes sin hacer', 'Lección no aprendida', 'Trabajo insuficiente', 'Comportamiento'],
@@ -552,6 +666,7 @@ export const translations = {
     snackTickAdded: 'Marca añadida a {name} ⭐',
     snackCrossCancelledTick: 'Cruz añadida y una marca retirada para {name}',
     snackCrossAdded: 'Cruz añadida a {name}',
+    snackForgotAdded: 'Cuaderno olvidado registrado para {name}',
     meritObtainedTitle: '¡Mérito conseguido! 🎉',
     meritCopy: '¡Enhorabuena a {name}! Un alumno aplicado, participativo e implicado.',
     copyMessage: 'Copiar mensaje',

@@ -22,6 +22,10 @@ export interface CrossResult {
   detentionTriggered: boolean;
 }
 
+export interface ForgotResult {
+  student: StudentRow;
+}
+
 export type UndoResult =
   | { cancelled: false; reason: string }
   | { cancelled: true; student: StudentRow };
@@ -50,8 +54,6 @@ const buildEvent = (
   student: StudentRow,
   type: EventRow['type'],
   reason: string,
-  previousTicks: number,
-  previousCrosses: number,
   next: StudentRow
 ): EventRow => ({
   id: uuid(),
@@ -60,16 +62,16 @@ const buildEvent = (
   reason: reason || null,
   trimester: student.currentTrimester,
   createdAt: nowIso(),
-  previousTicks,
-  previousCrosses,
+  previousTicks: student.ticks,
+  previousCrosses: student.crosses,
   newTicks: next.ticks,
   newCrosses: next.crosses,
+  previousForgets: student.forgets,
+  newForgets: next.forgets,
   cancelled: 0
 });
 
 export const addTick = async (student: StudentRow, reason = ''): Promise<TickResult> => {
-  const previousTicks = student.ticks;
-  const previousCrosses = student.crosses;
   const next: StudentRow = { ...student, ticks: student.ticks + 1 };
   const meritObtained = next.ticks >= TICKS_FOR_MERIT;
   if (meritObtained) {
@@ -78,13 +80,11 @@ export const addTick = async (student: StudentRow, reason = ''): Promise<TickRes
   }
   await saveStudent(next);
   await touchClass(student.classId);
-  await saveEvent(buildEvent(student, 'tick', reason, previousTicks, previousCrosses, next));
+  await saveEvent(buildEvent(student, 'tick', reason, next));
   return { student: next, meritObtained };
 };
 
 export const addCross = async (student: StudentRow, reason = ''): Promise<CrossResult> => {
-  const previousTicks = student.ticks;
-  const previousCrosses = student.crosses;
   const next: StudentRow = { ...student, crosses: student.crosses + 1 };
   const detentionTriggered = next.crosses >= CROSSES_FOR_DETENTION;
   if (detentionTriggered) {
@@ -93,8 +93,18 @@ export const addCross = async (student: StudentRow, reason = ''): Promise<CrossR
   }
   await saveStudent(next);
   await touchClass(student.classId);
-  await saveEvent(buildEvent(student, 'cross', reason, previousTicks, previousCrosses, next));
+  await saveEvent(buildEvent(student, 'cross', reason, next));
   return { student: next, detentionTriggered };
+};
+
+// Records that a student forgot their notebook. Unlike ticks and crosses this
+// is a standalone counter: it never rolls up into merits or detentions.
+export const addForgot = async (student: StudentRow): Promise<ForgotResult> => {
+  const next: StudentRow = { ...student, forgets: student.forgets + 1 };
+  await saveStudent(next);
+  await touchClass(student.classId);
+  await saveEvent(buildEvent(student, 'forgot', '', next));
+  return { student: next };
 };
 
 export const undoLastAction = async (studentId: string): Promise<UndoResult> => {
@@ -108,7 +118,8 @@ export const undoLastAction = async (studentId: string): Promise<UndoResult> => 
   const restored: StudentRow = {
     ...student,
     ticks: event.previousTicks,
-    crosses: event.previousCrosses
+    crosses: event.previousCrosses,
+    forgets: event.previousForgets
   };
   await saveStudent(restored);
   await saveEvent({ ...event, cancelled: 1 });
@@ -147,6 +158,7 @@ export const resetTrimester = async (
       crosses: 0,
       merits: 0,
       detentions: 0,
+      forgets: 0,
       currentTrimester: student.currentTrimester + 1
     });
   }
@@ -202,6 +214,7 @@ export const addStudent = async ({
     crosses: 0,
     merits: 0,
     detentions: 0,
+    forgets: 0,
     currentTrimester: 1
   };
   await saveStudent(student);

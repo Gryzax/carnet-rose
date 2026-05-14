@@ -3,6 +3,7 @@ import { useEffect, useRef } from 'react';
 import { colors } from '../constants/colors';
 import { PillButton } from './Themed';
 import { useT } from '../utils/i18n';
+import { USE_NATIVE_DRIVER } from '../utils/animation';
 
 export interface UndoSnackbarProps {
   visible: boolean;
@@ -15,11 +16,16 @@ export const UndoSnackbar = ({ visible, onUndo, message }: UndoSnackbarProps) =>
   const resolvedMessage = message ?? (t('actionSaved') as string);
   const y = useRef(new Animated.Value(90)).current;
   useEffect(() => {
-    Animated.spring(y, { toValue: visible ? 0 : 90, friction: 9, tension: 90, useNativeDriver: true }).start();
+    Animated.spring(y, { toValue: visible ? 0 : 90, friction: 9, tension: 90, useNativeDriver: USE_NATIVE_DRIVER }).start();
   }, [visible, y]);
   if (!visible) return null;
   return (
-    <Animated.View testID="undo-snackbar" style={[styles.snack, { transform: [{ translateY: y }] }]}>
+    <Animated.View
+      testID="undo-snackbar"
+      accessibilityLiveRegion="polite"
+      accessibilityRole="alert"
+      style={[styles.snack, { transform: [{ translateY: y }] }]}
+    >
       <Text style={styles.text}>{resolvedMessage}</Text>
       <PillButton onPress={onUndo} variant="pink" style={styles.undo}>
         {t('undo')}

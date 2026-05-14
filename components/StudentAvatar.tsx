@@ -22,6 +22,10 @@ export interface StudentAvatarProps {
 export const StudentAvatar = ({ student, size = 44 }: StudentAvatarProps) => (
   <View
     testID="student-avatar"
+    // Decorative: always rendered next to the student's name, and the colour
+    // it encodes is also surfaced as text (pills / at-risk badge).
+    accessibilityElementsHidden
+    importantForAccessibility="no-hide-descendants"
     style={[
       styles.avatar,
       {

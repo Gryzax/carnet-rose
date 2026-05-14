@@ -1,5 +1,5 @@
-import { fireEvent, render, waitFor } from '@testing-library/react-native';
-import { ClassesScreen } from '../../views/ClassesScreen';
+import { fireEvent, render, waitFor } from '../../test-utils/render';
+import { ClassesScreen } from '../../screens/ClassesScreen';
 
 const mockRefresh = jest.fn(() => Promise.resolve());
 let mockClasses = [];
@@ -20,14 +20,14 @@ jest.mock('../../hooks/useStudents', () => ({
   useAllStudents: jest.fn(() => ({ students: [], loading: false, refresh: jest.fn() }))
 }));
 
-jest.mock('../../controllers/classController', () => ({
+jest.mock('../../domain/classController', () => ({
   addClass: jest.fn(() => Promise.resolve({ id: 'c3', name: '4e Rose' })),
   markClassUsed: jest.fn(() => Promise.resolve()),
   deleteClass: jest.fn(() => Promise.resolve()),
   updateClass: jest.fn((classRow, name) => Promise.resolve({ ...classRow, name }))
 }));
 
-import { addClass, markClassUsed, deleteClass, updateClass } from '../../controllers/classController';
+import { addClass, markClassUsed, deleteClass, updateClass } from '../../domain/classController';
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -46,7 +46,7 @@ test('base vide affiche un EmptyState propre sans classes demo', () => {
   const { getByTestId, getByText, queryByText } = render(<ClassesScreen navigation={{ navigate: jest.fn() }} />);
 
   expect(getByTestId('classes-list')).toBeTruthy();
-  expect(getByTestId('classes-list').props.contentContainerStyle).toEqual(expect.objectContaining({ flexGrow: 1, paddingBottom: 148 }));
+  expect(getByTestId('classes-list').props.contentContainerStyle).toEqual(expect.objectContaining({ flexGrow: 1, paddingBottom: 96 }));
   expect(getByText('No classes yet')).toBeTruthy();
   expect(queryByText('5e Pivoine')).toBeNull();
   expect(queryByText('6e Rose')).toBeNull();

@@ -40,11 +40,19 @@ export const seedDemo = async (store?: CacheStore): Promise<void> => {
         crosses: (i + c) % 4,
         merits: Math.floor(i / 3),
         detentions: c === 1 && i === 4 ? 1 : 0,
+        forgets: (i + c) % 3,
         currentTrimester: 1
       };
       await cache.put('students', student);
     }
   }
+};
+
+// Wipes every local table (classes, students, events, archives, outbox).
+// Used when the user deletes their account so no data lingers on the device.
+export const clearLocalData = async (): Promise<void> => {
+  const store = await getStore();
+  await store.clear();
 };
 
 export const initDatabase = async (): Promise<CacheStore> => {

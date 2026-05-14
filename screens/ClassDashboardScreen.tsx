@@ -2,14 +2,14 @@ import { FlatList, Modal, StyleSheet, Text, View } from 'react-native';
 import { useEffect, useMemo, useState } from 'react';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { colors } from '../constants/colors';
-import { addStudent, updateStudent, deleteStudent } from '../controllers/studentController';
-import { markClassUsed } from '../controllers/classController';
 import { BackButton } from '../components/BackButton';
 import { EmptyState } from '../components/EmptyState';
 import { SheetModal } from '../components/SheetModal';
 import { StudentCard } from '../components/StudentCard';
 import { Card, JournalInput, PillButton, Screen, SegmentedControl, Sparkle, Title, WashiTape } from '../components/Themed';
 import { useStudents, type StudentSort } from '../hooks/useStudents';
+import { useStudentMutations } from '../hooks/useStudentMutations';
+import { useClassMutations } from '../hooks/useClassMutations';
 import { useT } from '../utils/i18n';
 import type { ClassesStackParamList } from '../navigation/types';
 import type { StudentRow } from '../types/domain';
@@ -20,6 +20,7 @@ export const ClassDashboardScreen = ({ route, navigation }: Props) => {
   const { t } = useT();
   const { classRow } = route.params;
   const [sort, setSort] = useState<StudentSort>('name');
+  const [query, setQuery] = useState('');
   const [studentToDelete, setStudentToDelete] = useState<StudentRow | null>(null);
   const [menuStudent, setMenuStudent] = useState<StudentRow | null>(null);
   const [studentToEdit, setStudentToEdit] = useState<StudentRow | null>(null);
@@ -34,17 +35,28 @@ export const ClassDashboardScreen = ({ route, navigation }: Props) => {
   const [editError, setEditError] = useState('');
   const [editSaving, setEditSaving] = useState(false);
   const { students } = useStudents(classRow.id, sort);
+  const { create, edit, remove } = useStudentMutations();
+  const { markUsed } = useClassMutations();
   const atRisk = useMemo(() => students.filter((s) => s.crosses >= 2).length, [students]);
+  const filteredStudents = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return students;
+    return students.filter((s) =>
+      `${s.firstName} ${s.lastName}`.toLowerCase().includes(q) ||
+      `${s.lastName} ${s.firstName}`.toLowerCase().includes(q)
+    );
+  }, [students, query]);
 
   useEffect(() => {
-    markClassUsed(classRow);
+    markUsed.mutate(classRow);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [classRow]);
 
   const confirmDeleteStudent = async () => {
     if (!studentToDelete) return;
     setDeleting(true);
     try {
-      await deleteStudent(studentToDelete);
+      await remove.mutateAsync(studentToDelete);
       setStudentToDelete(null);
     } finally {
       setDeleting(false);
@@ -72,7 +84,10 @@ export const ClassDashboardScreen = ({ route, navigation }: Props) => {
     setEditSaving(true);
     setEditError('');
     try {
-      await updateStudent(studentToEdit, { firstName: editFirstName, lastName: editLastName });
+      await edit.mutateAsync({
+        student: studentToEdit,
+        changes: { firstName: editFirstName, lastName: editLastName }
+      });
       setStudentToEdit(null);
       setEditFirstName('');
       setEditLastName('');
@@ -95,7 +110,11 @@ export const ClassDashboardScreen = ({ route, navigation }: Props) => {
     setSaving(true);
     setAddError('');
     try {
-      await addStudent({ classId: classRow.id, firstName: studentFirstName, lastName: studentLastName });
+      await create.mutateAsync({
+        classId: classRow.id,
+        firstName: studentFirstName,
+        lastName: studentLastName
+      });
       setAddModalVisible(false);
       setStudentFirstName('');
       setStudentLastName('');
@@ -126,6 +145,18 @@ export const ClassDashboardScreen = ({ route, navigation }: Props) => {
         ]}
         style={styles.segmented}
       />
+      {students.length > 0 && (
+        <JournalInput
+          testID="student-search"
+          clearable
+          placeholder={t('searchStudents') as string}
+          value={query}
+          onChangeText={setQuery}
+          autoCapitalize="none"
+          autoCorrect={false}
+          style={styles.search}
+        />
+      )}
     </>
   );
 
@@ -133,20 +164,27 @@ export const ClassDashboardScreen = ({ route, navigation }: Props) => {
     <Screen>
       <FlatList
         testID="class-dashboard-list"
-        data={students}
+        data={filteredStudents}
         keyExtractor={(item) => String(item.id)}
         contentContainerStyle={styles.listContent}
         initialNumToRender={10}
         getItemLayout={(_, index) => ({ length: 174, offset: 174 * index, index })}
         ListHeaderComponent={listHeader}
         ListEmptyComponent={
-          <EmptyState
-            icon="people-outline"
-            title={t('emptyStudentsTitle') as string}
-            message={t('emptyStudentsMessage') as string}
-            actionLabel={t('addStudent') as string}
-            onAction={() => setAddModalVisible(true)}
-          />
+          query.trim() ? (
+            <EmptyState
+              icon="search-outline"
+              title={t('noStudentsMatch') as string}
+            />
+          ) : (
+            <EmptyState
+              icon="people-outline"
+              title={t('emptyStudentsTitle') as string}
+              message={t('emptyStudentsMessage') as string}
+              actionLabel={t('addStudent') as string}
+              onAction={() => setAddModalVisible(true)}
+            />
+          )
         }
         renderItem={({ item }) => (
           <StudentCard
@@ -310,12 +348,13 @@ export const ClassDashboardScreen = ({ route, navigation }: Props) => {
 };
 
 const styles = StyleSheet.create({
-  listContent: { flexGrow: 1, paddingTop: 76, paddingBottom: 148, paddingHorizontal: 16 },
+  listContent: { flexGrow: 1, paddingTop: 76, paddingBottom: 96, paddingHorizontal: 16 },
   header: { marginBottom: 14 },
   title: { marginBottom: 4 },
   metaLine: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   meta: { fontFamily: 'PatrickHand_400Regular', color: colors.muted, fontSize: 19 },
   segmented: { marginBottom: 12 },
+  search: { marginBottom: 12 },
   add: { marginTop: 8, marginBottom: 84, marginHorizontal: 16 },
   backdrop: { flex: 1, backgroundColor: colors.scrim, justifyContent: 'center', padding: 20 },
   sheet: { gap: 12 },

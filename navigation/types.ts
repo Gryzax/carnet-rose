@@ -14,5 +14,6 @@ export type AppTabsParamList = {
 };
 
 export type AuthStackParamList = {
+  Landing: undefined;
   LoginScreen: undefined;
 };

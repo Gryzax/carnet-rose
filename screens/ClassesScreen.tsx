@@ -3,6 +3,7 @@ import {
   FlatList,
   Modal,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -15,8 +16,8 @@ import { useMemo, useRef, useState } from 'react';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { colors } from '../constants/colors';
 import { useT } from '../utils/i18n';
-import { addClass, markClassUsed, updateClass, deleteClass } from '../controllers/classController';
 import { useClasses } from '../hooks/useClasses';
+import { useClassMutations } from '../hooks/useClassMutations';
 import { useAllStudents } from '../hooks/useStudents';
 import { EmptyState } from '../components/EmptyState';
 import { SheetModal } from '../components/SheetModal';
@@ -36,7 +37,7 @@ import {
   WashiTape
 } from '../components/Themed';
 import type { ClassesStackParamList } from '../navigation/types';
-import type { ClassSort } from '../controllers/classController';
+import type { ClassSort } from '../domain/classController';
 import type { ClassWithStats, StudentWithClass } from '../types/domain';
 
 type Props = NativeStackScreenProps<ClassesStackParamList, 'ClassesHome'>;
@@ -45,6 +46,7 @@ export const ClassesScreen = ({ navigation }: Props) => {
   const { t } = useT();
   const [sort, setSort] = useState<ClassSort>('alpha');
   const [query, setQuery] = useState('');
+  const [classFilter, setClassFilter] = useState<string | null>(null);
   const [addModalVisible, setAddModalVisible] = useState(false);
   const [className, setClassName] = useState('');
   const [addError, setAddError] = useState('');
@@ -60,15 +62,33 @@ export const ClassesScreen = ({ navigation }: Props) => {
   const { width } = useWindowDimensions();
   const { classes } = useClasses(sort);
   const { students: allStudents } = useAllStudents();
+  const { create, rename, remove, markUsed } = useClassMutations();
   const searching = query.trim().length >= 2;
   const columns = searching ? 1 : width >= 768 ? 2 : 1;
-  const results = useMemo<StudentWithClass[]>(() => {
+  // Students matching the typed name, before any class filter is applied.
+  const nameMatches = useMemo<StudentWithClass[]>(() => {
     const text = query.trim().toLowerCase();
     if (text.length < 2) return [];
     return allStudents.filter((s) =>
       `${s.firstName} ${s.lastName}`.toLowerCase().includes(text)
     );
   }, [query, allStudents]);
+  // Only the classes that actually contain a name match get a filter chip.
+  const filterClasses = useMemo(() => {
+    const seen = new Map<string, string>();
+    for (const s of nameMatches) {
+      if (!seen.has(s.classId)) seen.set(s.classId, s.className);
+    }
+    return [...seen].map(([id, name]) => ({ id, name }));
+  }, [nameMatches]);
+  // Drop a stale filter when the new query no longer has that class.
+  const activeFilter =
+    classFilter && filterClasses.some((c) => c.id === classFilter) ? classFilter : null;
+  const results = useMemo<StudentWithClass[]>(
+    () =>
+      activeFilter ? nameMatches.filter((s) => s.classId === activeFilter) : nameMatches,
+    [nameMatches, activeFilter]
+  );
   const data = useMemo<(ClassWithStats | StudentWithClass)[]>(
     () => (searching ? results : classes),
     [searching, results, classes]
@@ -96,7 +116,7 @@ export const ClassesScreen = ({ navigation }: Props) => {
     setSaving(true);
     setAddError('');
     try {
-      await addClass(normalizedName);
+      await create.mutateAsync(normalizedName);
       setAddModalVisible(false);
       setClassName('');
     } catch {
@@ -130,7 +150,7 @@ export const ClassesScreen = ({ navigation }: Props) => {
     setEditSaving(true);
     setEditError('');
     try {
-      await updateClass(classToEdit, normalizedName);
+      await rename.mutateAsync({ classRow: classToEdit, name: normalizedName });
       setClassToEdit(null);
       setEditName('');
     } catch {
@@ -157,7 +177,7 @@ export const ClassesScreen = ({ navigation }: Props) => {
     setDeleting(true);
     setDeleteError('');
     try {
-      await deleteClass(classToDelete);
+      await remove.mutateAsync(classToDelete);
       setClassToDelete(null);
     } catch {
       setDeleteError(t('cannotDeleteClass') as string);
@@ -167,7 +187,7 @@ export const ClassesScreen = ({ navigation }: Props) => {
   };
 
   const openClass = async (classRow: ClassWithStats) => {
-    await markClassUsed(classRow);
+    await markUsed.mutateAsync(classRow);
     navigation.navigate('ClassDashboard', { classRow });
   };
 
@@ -214,47 +234,70 @@ export const ClassesScreen = ({ navigation }: Props) => {
   );
 
   const renderClass = ({ item }: ListRenderItemInfo<ClassWithStats>) => (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={item.name}
-      onPress={() => openClass(item)}
-      style={({ pressed }) => [styles.classWrap, pressed && styles.pressed]}
-    >
-      <Card washi style={styles.classCard}>
-        <View style={styles.classHeader}>
-          <Text accessibilityRole="header" style={styles.classTitle}>
-            {item.name}
-          </Text>
-          <IconButton
-            icon="ellipsis-horizontal"
-            testID={`class-menu-${item.id}`}
-            accessibilityLabel={t('classOptions', { name: item.name }) as string}
-            onPress={() => setMenuClass(item)}
-          />
-        </View>
-        <View style={styles.line}>
-          <Sparkle />
-          <Text style={styles.meta}>{t('studentsCountShort', { count: item.studentCount })}</Text>
-        </View>
-        <View style={styles.stats}>
-          <Pill tone="pink">{t('meritsPill', { count: item.totalMerits })}</Pill>
-          <Pill>{t('detentionsPill', { count: item.totalDetentions })}</Pill>
-        </View>
-      </Card>
-    </Pressable>
+    // The menu button is a sibling of the card Pressable, not a child: nesting
+    // one pressable inside another renders as nested <button>s on web.
+    <View style={styles.classWrap}>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={item.name}
+        onPress={() => openClass(item)}
+        style={({ pressed }) => [styles.classPressable, pressed && styles.pressed]}
+      >
+        <Card washi style={styles.classCard}>
+          <View style={styles.classHeader}>
+            <Text accessibilityRole="header" style={styles.classTitle}>
+              {item.name}
+            </Text>
+            <View style={styles.menuSpacer} />
+          </View>
+          <View style={styles.line}>
+            <Sparkle />
+            <Text style={styles.meta}>{t('studentsCountShort', { count: item.studentCount })}</Text>
+          </View>
+          <View style={styles.stats}>
+            <Pill tone="pink">{t('meritsPill', { count: item.totalMerits })}</Pill>
+            <Pill>{t('detentionsPill', { count: item.totalDetentions })}</Pill>
+          </View>
+        </Card>
+      </Pressable>
+      <View style={styles.menuButton}>
+        <IconButton
+          icon="ellipsis-horizontal"
+          testID={`class-menu-${item.id}`}
+          accessibilityLabel={t('classOptions', { name: item.name }) as string}
+          onPress={() => setMenuClass(item)}
+        />
+      </View>
+    </View>
   );
 
+  // The search input lives outside the FlatList: changing `numColumns` forces
+  // the list (and its header) to remount, which would steal focus mid-typing.
   const listHeader = (
     <>
-      <WashiTape />
-      <Title>{t('classesTitle')}</Title>
-      <JournalInput
-        placeholder={t('searchStudent') as string}
-        value={query}
-        onChangeText={setQuery}
-        clearable
-        style={styles.search}
-      />
+      {searching && filterClasses.length > 1 && (
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+          style={styles.filterScroll}
+          contentContainerStyle={styles.filterRow}
+        >
+          <FilterChip
+            label={t('allClasses') as string}
+            active={activeFilter === null}
+            onPress={() => setClassFilter(null)}
+          />
+          {filterClasses.map((c) => (
+            <FilterChip
+              key={c.id}
+              label={c.name}
+              active={activeFilter === c.id}
+              onPress={() => setClassFilter(c.id)}
+            />
+          ))}
+        </ScrollView>
+      )}
       {!searching && (
         <SegmentedControl
           value={sort}
@@ -271,6 +314,15 @@ export const ClassesScreen = ({ navigation }: Props) => {
 
   return (
     <Screen>
+      <WashiTape />
+      <Title style={styles.title}>{t('classesTitle')}</Title>
+      <JournalInput
+        placeholder={t('searchStudent') as string}
+        value={query}
+        onChangeText={setQuery}
+        clearable
+        style={styles.search}
+      />
       <FlatList
         testID="classes-list"
         key={columns}
@@ -418,6 +470,25 @@ export const ClassesScreen = ({ navigation }: Props) => {
   );
 };
 
+const FilterChip = ({
+  label,
+  active,
+  onPress
+}: {
+  label: string;
+  active: boolean;
+  onPress: () => void;
+}) => (
+  <Pressable
+    accessibilityRole="button"
+    accessibilityState={{ selected: active }}
+    onPress={onPress}
+    style={({ pressed }) => [styles.chip, active && styles.chipActive, pressed && styles.pressed]}
+  >
+    <Text style={[styles.chipText, active && styles.chipTextActive]}>{label}</Text>
+  </Pressable>
+);
+
 interface EditClassModalProps {
   visible: boolean;
   title: string;
@@ -478,11 +549,32 @@ const EditClassModal = ({
 };
 
 const styles = StyleSheet.create({
-  listContent: { flexGrow: 1, paddingTop: 16, paddingBottom: 148, paddingHorizontal: 16 },
-  search: { marginBottom: 12 },
+  listContent: { flexGrow: 1, paddingTop: 16, paddingBottom: 96, paddingHorizontal: 16 },
+  // Title and search live outside the FlatList, so they don't inherit
+  // listContent's horizontal padding — add it here to match the list edges.
+  title: { marginHorizontal: 16, marginTop: 16 },
+  search: { marginBottom: 12, marginHorizontal: 16 },
   segmented: { marginBottom: 12 },
+  filterScroll: { marginBottom: 12 },
+  filterRow: { gap: 8, paddingVertical: 2 },
+  chip: {
+    borderRadius: 999,
+    backgroundColor: colors.card,
+    borderColor: colors.border,
+    borderWidth: 1.5,
+    paddingHorizontal: 14,
+    minHeight: 38,
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  chipActive: { backgroundColor: colors.pink },
+  chipText: { fontFamily: 'PatrickHand_400Regular', fontSize: 17, color: colors.ink },
+  chipTextActive: { color: colors.white },
   classWrap: { flex: 1 },
+  classPressable: { flex: 1 },
   classCard: { margin: 6, minHeight: 128 },
+  menuSpacer: { width: 44, height: 44 },
+  menuButton: { position: 'absolute', top: 14, right: 14 },
   classHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
   classTitle: { flex: 1, fontFamily: 'PatrickHand_400Regular', fontSize: 28, color: colors.ink, lineHeight: 32 },
   line: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 8 },
@@ -496,7 +588,7 @@ const styles = StyleSheet.create({
   resultRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 6 },
   resultMetric: { width: 70, textAlign: 'center' },
   resultCount: { fontFamily: 'PatrickHand_400Regular', color: colors.ink, fontSize: 18, width: 40 },
-  fab: { position: 'absolute', right: 20, bottom: 92, backgroundColor: colors.pink, borderColor: colors.border, borderWidth: 1.5, width: 62, height: 62, borderRadius: 31, alignItems: 'center', justifyContent: 'center' },
+  fab: { position: 'absolute', right: 20, bottom: 116, backgroundColor: colors.pink, borderColor: colors.border, borderWidth: 1.5, width: 62, height: 62, borderRadius: 31, alignItems: 'center', justifyContent: 'center' },
   pressed: { transform: [{ scale: 0.97 }] },
   backdrop: { flex: 1, backgroundColor: colors.scrim, justifyContent: 'center', padding: 20 },
   sheet: { marginBottom: 0 },

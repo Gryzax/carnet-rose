@@ -77,6 +77,10 @@ const cacheStore: CacheStore = {
     const state = await loadState();
     state[table] = [...rows];
     await saveState(state);
+  },
+
+  async clear(): Promise<void> {
+    await saveState(emptyState());
   }
 };
 
