@@ -1,12 +1,16 @@
 import { Ionicons } from '@expo/vector-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, View } from 'react-native';
 import { colors } from '../constants/colors';
 import { ClassesScreen } from '../views/ClassesScreen';
 import { ClassDashboardScreen } from '../views/ClassDashboardScreen';
+import { LoginScreen } from '../views/LoginScreen';
 import { StudentDetailScreen } from '../views/StudentDetailScreen';
 import { SettingsScreen } from '../views/SettingsScreen';
 import { StatisticsScreen } from '../views/StatisticsScreen';
+import { getCurrentUser, onAuthStateChange } from '../services/auth/authService';
 
 const Stack = createNativeStackNavigator();
 const Tabs = createBottomTabNavigator();
@@ -19,7 +23,15 @@ const ClassesStack = () => (
   </Stack.Navigator>
 );
 
-export const RootNavigator = () => (
+export const AuthStack = ({ onAuthenticated }) => (
+  <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Screen name="LoginScreen">
+      {(props) => <LoginScreen {...props} onAuthenticated={onAuthenticated} />}
+    </Stack.Screen>
+  </Stack.Navigator>
+);
+
+export const AppTabs = ({ onSignedOut }) => (
   <Tabs.Navigator
     screenOptions={({ route }) => ({
       headerShown: false,
@@ -53,6 +65,43 @@ export const RootNavigator = () => (
   >
     <Tabs.Screen name="Classes" component={ClassesStack} options={{ title: 'Classes' }} />
     <Tabs.Screen name="Statistiques" component={StatisticsScreen} options={{ title: 'Statistiques' }} />
-    <Tabs.Screen name="Parametres" component={SettingsScreen} options={{ title: 'Paramètres' }} />
+    <Tabs.Screen name="Parametres" options={{ title: 'Parametres' }}>
+      {(props) => <SettingsScreen {...props} onSignedOut={onSignedOut} />}
+    </Tabs.Screen>
   </Tabs.Navigator>
 );
+
+export const RootNavigator = () => {
+  const [checkingSession, setCheckingSession] = useState(true);
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    let active = true;
+    getCurrentUser().then(({ user }) => {
+      if (!active) return;
+      setUser(user);
+      setCheckingSession(false);
+    });
+    const subscription = onAuthStateChange((_event, session) => {
+      setUser(session?.user || null);
+    });
+    return () => {
+      active = false;
+      subscription?.unsubscribe?.();
+    };
+  }, []);
+
+  if (checkingSession) {
+    return (
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.canvas }}>
+        <ActivityIndicator color={colors.deepPink} />
+      </View>
+    );
+  }
+
+  if (!user) {
+    return <AuthStack onAuthenticated={({ user }) => setUser(user)} />;
+  }
+
+  return <AppTabs onSignedOut={() => setUser(null)} />;
+};

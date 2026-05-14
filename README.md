@@ -36,6 +36,61 @@ npm test
 
 Objectif de couverture : 80 % minimum.
 
+## Configuration Supabase
+
+L'application utilise Supabase pour la connexion obligatoire Google / Apple. Ne committez jamais `.env`, une cle OAuth, une cle `service_role` ou un secret.
+
+Variables attendues dans `.env` en local et dans GitHub Actions Variables pour la PWA :
+
+```env
+EXPO_PUBLIC_SUPABASE_URL=https://frmiyddfipejirtbzoxr.supabase.co
+EXPO_PUBLIC_SUPABASE_ANON_KEY=
+EXPO_PUBLIC_APP_URL=https://gryzax.github.io/carnet-rose/
+```
+
+Utilisez la cle publishable Supabase `sb_publishable_...` pour `EXPO_PUBLIC_SUPABASE_ANON_KEY`. `.env.example` garde uniquement des placeholders non sensibles.
+
+Dans Supabase Authentication -> URL Configuration :
+
+Site URL :
+
+```txt
+https://gryzax.github.io/carnet-rose/
+```
+
+Redirect URLs :
+
+```txt
+https://gryzax.github.io/carnet-rose/
+https://gryzax.github.io/carnet-rose/auth/callback
+http://localhost:8081
+http://localhost:19006
+```
+
+Google Cloud Authorized JavaScript origins :
+
+```txt
+https://gryzax.github.io
+http://localhost:8081
+http://localhost:19006
+```
+
+Google Cloud Authorized redirect URI :
+
+```txt
+https://frmiyddfipejirtbzoxr.supabase.co/auth/v1/callback
+```
+
+Le Client ID et le Client Secret Google doivent etre places dans Supabase Dashboard -> Authentication -> Providers -> Google, jamais dans le code.
+
+Apple Sign-In necessite generalement Apple Developer. Configurez Apple Developer puis renseignez Supabase Dashboard -> Authentication -> Providers -> Apple. Callback Supabase :
+
+```txt
+https://frmiyddfipejirtbzoxr.supabase.co/auth/v1/callback
+```
+
+Voir `docs/supabase-setup.md` pour les etapes completes et `docs/supabase-schema.sql` pour le schema SQL a copier dans Supabase SQL Editor.
+
 ## Utiliser l'application sur iPhone sans Expo Go
 
 Cette version utilise une PWA.
