@@ -17,6 +17,7 @@ test('statistiques affiche légende et tops', async () => {
   const { getByText, getByTestId } = render(<StatisticsScreen navigation={{ navigate: jest.fn(), canGoBack: jest.fn(() => false) }} />);
   await waitFor(() => expect(getByTestId('chart-legend')).toBeTruthy());
   expect(getByTestId('statistics-scroll')).toBeTruthy();
+  expect(getByTestId('statistics-scroll').props.contentContainerStyle).toEqual(expect.objectContaining({ flexGrow: 1, paddingBottom: 116 }));
   expect(getByText(/Mérites/)).toBeTruthy();
   expect(getByText(/Retenues/)).toBeTruthy();
   expect(getByText('Top 3 participatifs')).toBeTruthy();

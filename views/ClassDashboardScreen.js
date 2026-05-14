@@ -62,19 +62,27 @@ export const ClassDashboardScreen = ({ route, navigation }) => {
     }
   };
 
-  return (
-    <Screen>
+  const listHeader = (
+    <>
       <BackButton navigation={navigation} fallbackRoute="ClassesHome" />
       <View style={styles.header}>
         <Title style={styles.title}>{classe.nom}</Title>
         <View style={styles.metaLine}><Sparkle /><Text style={styles.meta}>{students.length} élèves - {atRisk} élèves à risque</Text></View>
       </View>
       <SegmentedControl value={sort} onChange={setSort} options={[{ value: 'nom', label: 'Nom' }, { value: 'croix', label: 'Croix' }, { value: 'ticks', label: 'Ticks' }]} style={styles.segmented} />
+    </>
+  );
+
+  return (
+    <Screen>
       <FlatList
+        testID="class-dashboard-list"
         data={students}
         keyExtractor={(item) => String(item.id)}
+        contentContainerStyle={styles.listContent}
         initialNumToRender={10}
         getItemLayout={(_, index) => ({ length: 174, offset: 174 * index, index })}
+        ListHeaderComponent={listHeader}
         ListEmptyComponent={<EmptyState icon="people-outline" title="Aucun élève dans cette classe" message="Ajoutez votre premier élève pour commencer." actionLabel="Ajouter un élève" onAction={() => setAddModalVisible(true)} />}
         renderItem={({ item }) => <StudentCard student={item} onPress={() => navigation.navigate('StudentDetail', { studentId: item.id })} onDelete={() => setStudentToDelete(item)} />}
       />
@@ -111,6 +119,7 @@ export const ClassDashboardScreen = ({ route, navigation }) => {
 };
 
 const styles = StyleSheet.create({
+  listContent: { flexGrow: 1, paddingBottom: 116 },
   header: { marginBottom: 14 },
   title: { marginBottom: 4 },
   metaLine: { flexDirection: 'row', alignItems: 'center', gap: 6 },

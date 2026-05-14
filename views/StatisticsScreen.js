@@ -27,10 +27,11 @@ export const StatisticsScreen = ({ navigation }) => {
 
   return (
     <Screen>
-      <BackButton navigation={navigation} fallbackRoute="Classes" />
-      <Title>Statistiques</Title>
-      {!hasData ? <EmptyState icon="bar-chart-outline" title="Pas encore de statistiques." message="Commencez a noter vos eleves !" /> : (
-        <ScrollView testID="statistics-scroll" contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView testID="statistics-scroll" contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <BackButton navigation={navigation} fallbackRoute="Classes" />
+        <Title>Statistiques</Title>
+        {!hasData ? <EmptyState icon="bar-chart-outline" title="Pas encore de statistiques." message="Commencez a noter vos eleves !" /> : (
+        <>
           <Card washi>
             <BarChart data={chartData} barWidth={22} spacing={14} roundedTop hideRules yAxisThickness={0} xAxisThickness={0} xAxisLabelTextStyle={styles.axis} yAxisTextStyle={styles.axis} noOfSections={4} disableScroll />
             <View testID="chart-legend" style={styles.legend}>
@@ -40,15 +41,16 @@ export const StatisticsScreen = ({ navigation }) => {
           </Card>
           {list('Top 3 participatifs', stats.topParticipatifs, 'mérites')}
           {list('Top 3 à surveiller', stats.topSurveillance, 'croix')}
-        </ScrollView>
-      )}
+        </>
+        )}
+      </ScrollView>
     </Screen>
   );
 };
 
 const styles = StyleSheet.create({
   chartLabel: { color: colors.ink, fontSize: 14, fontFamily: 'PatrickHand_400Regular' },
-  scrollContent: { paddingBottom: 96 },
+  scrollContent: { flexGrow: 1, paddingBottom: 116 },
   axis: { color: colors.muted, fontSize: 13, fontFamily: 'PatrickHand_400Regular' },
   legend: { flexDirection: 'row', gap: 16, justifyContent: 'center', marginTop: 12 },
   legendItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },

@@ -23,8 +23,9 @@ jest.mock('../../services/sync/syncService', () => ({
 import { syncAll } from '../../services/sync/syncService';
 
 test('parametres affiche les sections enrichies', async () => {
-  const { getByText } = render(<SettingsScreen navigation={{ navigate: jest.fn(), canGoBack: jest.fn(() => false) }} />);
+  const { getByTestId, getByText } = render(<SettingsScreen navigation={{ navigate: jest.fn(), canGoBack: jest.fn(() => false) }} />);
   await waitFor(() => expect(getByText('demo@example.com')).toBeTruthy());
+  expect(getByTestId('settings-scroll').props.contentContainerStyle).toEqual(expect.objectContaining({ flexGrow: 1, paddingBottom: 116 }));
   expect(getByText('A propos')).toBeTruthy();
   expect(getByText('Carnet Rose')).toBeTruthy();
   expect(getByText('Donnees')).toBeTruthy();
