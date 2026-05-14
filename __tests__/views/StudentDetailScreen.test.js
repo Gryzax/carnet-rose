@@ -1,7 +1,7 @@
 import { act, fireEvent, render, waitFor } from '@testing-library/react-native';
 import { StudentDetailScreen } from '../../views/StudentDetailScreen';
 
-const student = { id: 1, prenom: 'Emma', nom: 'Martin', ticks: 0, croix: 0, merites: 0, retenues: 0, trimestreActuel: 1 };
+const student = { id: 's1', firstName: 'Emma', lastName: 'Martin', ticks: 0, crosses: 0, merits: 0, detentions: 0, currentTrimester: 1 };
 
 jest.mock('expo-linear-gradient', () => ({
   LinearGradient: ({ children }) => {
@@ -10,8 +10,8 @@ jest.mock('expo-linear-gradient', () => ({
   }
 }));
 
-jest.mock('../../models/studentModel', () => ({
-  getStudentById: jest.fn(() => Promise.resolve(student))
+jest.mock('../../hooks/useStudents', () => ({
+  useStudent: jest.fn(() => ({ student, loading: false, refresh: jest.fn() }))
 }));
 
 jest.mock('../../hooks/useHistory', () => ({
@@ -34,31 +34,32 @@ jest.mock('../../components/UndoSnackbar', () => ({
 }));
 
 jest.mock('../../controllers/studentController', () => ({
-  ajouterTick: jest.fn((eleve) => Promise.resolve({ eleve: { ...eleve, ticks: 1 }, meritObtenu: false })),
-  ajouterCroix: jest.fn((eleve) => Promise.resolve({ eleve: { ...eleve, croix: 1 }, retenueDeclenchee: false })),
-  annulerDerniereAction: jest.fn(() => Promise.resolve({ annule: true }))
+  addTick: jest.fn((student) => Promise.resolve({ student: { ...student, ticks: 1 }, meritObtained: false })),
+  addCross: jest.fn((student) => Promise.resolve({ student: { ...student, crosses: 1 }, detentionTriggered: false })),
+  undoLastAction: jest.fn(() => Promise.resolve({ cancelled: true, student })),
+  deleteEvent: jest.fn(() => Promise.resolve())
 }));
 
-import { ajouterTick } from '../../controllers/studentController';
+import { addTick } from '../../controllers/studentController';
 
 beforeEach(() => jest.clearAllMocks());
 
 test('détail élève affiche le toast après tick', async () => {
-  const { getByTestId, getByText } = render(<StudentDetailScreen route={{ params: { studentId: 1 } }} navigation={{ navigate: jest.fn(), canGoBack: jest.fn(() => false) }} />);
+  const { getByTestId, getByText } = render(<StudentDetailScreen route={{ params: { studentId: 's1' } }} navigation={{ navigate: jest.fn(), canGoBack: jest.fn(() => false) }} />);
   await waitFor(() => expect(getByText('Emma Martin')).toBeTruthy());
-  expect(getByTestId('student-detail-list').props.contentContainerStyle).toEqual(expect.objectContaining({ flexGrow: 1, paddingBottom: 116 }));
+  expect(getByTestId('student-detail-list').props.contentContainerStyle).toEqual(expect.objectContaining({ flexGrow: 1, paddingBottom: 148 }));
   fireEvent.press(getByText('TICK'));
   await waitFor(() => expect(getByText('Participation')).toBeTruthy());
   await act(async () => {
     fireEvent.press(getByText('Participation'));
   });
-  await waitFor(() => expect(ajouterTick).toHaveBeenCalled());
-  expect(getByText('Tick ajouté à Emma')).toBeTruthy();
+  await waitFor(() => expect(addTick).toHaveBeenCalled());
+  expect(getByText('Tick added for Emma ⭐')).toBeTruthy();
 });
 
 test('détail élève affiche une flèche retour avec fallback accueil', async () => {
   const navigation = { navigate: jest.fn(), canGoBack: jest.fn(() => false), goBack: jest.fn() };
-  const { getByTestId, getByText } = render(<StudentDetailScreen route={{ params: { studentId: 1 } }} navigation={navigation} />);
+  const { getByTestId, getByText } = render(<StudentDetailScreen route={{ params: { studentId: 's1' } }} navigation={navigation} />);
 
   await waitFor(() => expect(getByText('Emma Martin')).toBeTruthy());
   fireEvent.press(getByTestId('back-button'));

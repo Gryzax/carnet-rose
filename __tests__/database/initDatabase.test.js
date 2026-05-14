@@ -1,33 +1,35 @@
 const loadDbModule = async (enableDemoSeed) => {
   jest.resetModules();
   process.env.EXPO_PUBLIC_ENABLE_DEMO_SEED = enableDemoSeed;
-  const mockConn = {};
-  const getDb = jest.fn(() => Promise.resolve(mockConn));
-  const migrate = jest.fn(() => Promise.resolve());
-  const seedDemo = jest.fn(() => Promise.resolve());
-  jest.doMock('../../database/storage', () => ({ getDb, migrate, seedDemo }));
+  const store = { all: jest.fn(() => Promise.resolve([])), put: jest.fn(() => Promise.resolve()) };
+  const getStore = jest.fn(() => Promise.resolve(store));
+  jest.doMock('../../database/storage', () => ({ getStore }));
   const dbModule = require('../../database/db');
+  const seedSpy = jest.spyOn(dbModule, 'seedDemo');
   await dbModule.initDatabase();
-  return { getDb, migrate, seedDemo, mockConn, dbModule };
+  return { getStore, store, seedSpy, dbModule };
 };
 
 afterEach(() => {
   delete process.env.EXPO_PUBLIC_ENABLE_DEMO_SEED;
   jest.dontMock('../../database/storage');
+  jest.restoreAllMocks();
   jest.resetModules();
 });
 
-test('initDatabase ne lance aucun seed automatique par defaut', async () => {
-  const { migrate, seedDemo, mockConn, dbModule } = await loadDbModule(undefined);
+test('initDatabase ne lance aucun seed automatique par défaut', async () => {
+  const { getStore, store, dbModule } = await loadDbModule(undefined);
 
   expect(dbModule.ENABLE_DEMO_SEED).toBe(false);
-  expect(migrate).toHaveBeenCalledWith(mockConn);
-  expect(seedDemo).not.toHaveBeenCalled();
+  expect(getStore).toHaveBeenCalled();
+  // No demo seed: nothing was written to the cache.
+  expect(store.put).not.toHaveBeenCalled();
 });
 
-test('initDatabase lance le seed demo uniquement si explicitement active', async () => {
-  const { seedDemo, mockConn, dbModule } = await loadDbModule('true');
+test('initDatabase lance le seed démo uniquement si explicitement activé', async () => {
+  const { store, dbModule } = await loadDbModule('true');
 
   expect(dbModule.ENABLE_DEMO_SEED).toBe(true);
-  expect(seedDemo).toHaveBeenCalledWith(mockConn);
+  // Demo seed ran: classes + students were written through the store.
+  expect(store.put).toHaveBeenCalled();
 });

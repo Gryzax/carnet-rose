@@ -4,13 +4,13 @@ import { ProgressBar } from '../../components/ProgressBar';
 import { StudentAvatar, getStudentInitials } from '../../components/StudentAvatar';
 import { StudentCard, getStudentStateColor } from '../../components/StudentCard';
 
-const student = { id: 1, prenom: 'Emma', nom: 'Martin', ticks: 1, croix: 0, merites: 2, retenues: 1 };
+const student = { id: 1, firstName: 'Emma', lastName: 'Martin', ticks: 1, crosses: 0, merits: 2, detentions: 1 };
 
 test('rendu de StudentCard', () => {
   const { getByText } = render(<StudentCard student={student} />);
   expect(getByText('MARTIN Emma')).toBeTruthy();
-  expect(getByText('Mérites 2')).toBeTruthy();
-  expect(getByText('Retenues 1')).toBeTruthy();
+  expect(getByText('Merits 2')).toBeTruthy();
+  expect(getByText('Detentions 1')).toBeTruthy();
 });
 
 test('avatar initiales', () => {
@@ -21,10 +21,10 @@ test('avatar initiales', () => {
 });
 
 test('couleurs selon etat', () => {
-  expect(getStudentStateColor({ ticks: 3, croix: 0 })).toBe(colors.successGreen);
-  expect(getStudentStateColor({ ticks: 0, croix: 3 })).toBe(colors.dangerRed);
-  expect(getStudentStateColor({ ticks: 0, croix: 2 })).toBe(colors.warningOrange);
-  expect(getStudentStateColor({ ticks: 0, croix: 0 })).toBe(colors.primaryPink);
+  expect(getStudentStateColor({ ticks: 3, crosses: 0 })).toBe(colors.successGreen);
+  expect(getStudentStateColor({ ticks: 0, crosses: 3 })).toBe(colors.dangerRed);
+  expect(getStudentStateColor({ ticks: 0, crosses: 2 })).toBe(colors.warningOrange);
+  expect(getStudentStateColor({ ticks: 0, crosses: 0 })).toBe(colors.primaryPink);
 });
 
 test('progress bars', () => {

@@ -74,6 +74,7 @@ jest.mock('../../services/supabase/supabaseClient', () => ({
 }));
 
 jest.mock('../../services/auth/authService', () => ({
+  consumePendingAuthError: jest.fn(() => null),
   getCurrentUser: jest.fn(() => Promise.resolve({ user: null, error: null })),
   onAuthStateChange: jest.fn((callback) => {
     mockAuthCallback = callback;
@@ -108,8 +109,8 @@ test('acces aux tabs avec utilisateur mocke', async () => {
   const { getByText, queryByText } = render(<RootNavigator />);
 
   await waitFor(() => expect(getByText('Classes')).toBeTruthy());
-  expect(getByText('Statistiques')).toBeTruthy();
-  expect(getByText('Parametres')).toBeTruthy();
+  expect(getByText('Statistics')).toBeTruthy();
+  expect(getByText('Settings')).toBeTruthy();
   expect(queryByText('Carnet Rose')).toBeNull();
 });
 

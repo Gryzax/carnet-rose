@@ -16,17 +16,18 @@ jest.mock('../../hooks/useClasses', () => ({
   }))
 }));
 
+jest.mock('../../hooks/useStudents', () => ({
+  useAllStudents: jest.fn(() => ({ students: [], loading: false, refresh: jest.fn() }))
+}));
+
 jest.mock('../../controllers/classController', () => ({
-  ajouterClasse: jest.fn(() => Promise.resolve({ lastInsertRowId: 3 })),
-  marquerClasseUtilisee: jest.fn(() => Promise.resolve()),
-  supprimerClasse: jest.fn(() => Promise.resolve())
+  addClass: jest.fn(() => Promise.resolve({ id: 'c3', name: '4e Rose' })),
+  markClassUsed: jest.fn(() => Promise.resolve()),
+  deleteClass: jest.fn(() => Promise.resolve()),
+  updateClass: jest.fn((classRow, name) => Promise.resolve({ ...classRow, name }))
 }));
 
-jest.mock('../../models/studentModel', () => ({
-  getAllStudents: jest.fn(() => Promise.resolve([]))
-}));
-
-import { ajouterClasse, marquerClasseUtilisee, supprimerClasse } from '../../controllers/classController';
+import { addClass, markClassUsed, deleteClass, updateClass } from '../../controllers/classController';
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -38,93 +39,107 @@ test("le FAB ouvre la modale d'ajout de classe", () => {
 
   fireEvent.press(getByTestId('add-class-fab'));
 
-  expect(getByPlaceholderText('Nom de la classe')).toBeTruthy();
+  expect(getByPlaceholderText('Class name')).toBeTruthy();
 });
 
 test('base vide affiche un EmptyState propre sans classes demo', () => {
   const { getByTestId, getByText, queryByText } = render(<ClassesScreen navigation={{ navigate: jest.fn() }} />);
 
   expect(getByTestId('classes-list')).toBeTruthy();
-  expect(getByTestId('classes-list').props.contentContainerStyle).toEqual(expect.objectContaining({ flexGrow: 1, paddingBottom: 128 }));
-  expect(getByText("Aucune classe pour l'instant")).toBeTruthy();
+  expect(getByTestId('classes-list').props.contentContainerStyle).toEqual(expect.objectContaining({ flexGrow: 1, paddingBottom: 148 }));
+  expect(getByText('No classes yet')).toBeTruthy();
   expect(queryByText('5e Pivoine')).toBeNull();
   expect(queryByText('6e Rose')).toBeNull();
 });
 
-test('la modale ajoute une classe puis rafraîchit la liste', async () => {
+test('la modale ajoute une classe', async () => {
   const { getByTestId, getByPlaceholderText, getByText } = render(<ClassesScreen navigation={{ navigate: jest.fn() }} />);
 
   fireEvent.press(getByTestId('add-class-fab'));
-  fireEvent.changeText(getByPlaceholderText('Nom de la classe'), '4e Rose');
-  fireEvent.press(getByText('Ajouter'));
+  fireEvent.changeText(getByPlaceholderText('Class name'), '4e Rose');
+  fireEvent.press(getByText('Add'));
 
-  await waitFor(() => expect(ajouterClasse).toHaveBeenCalledWith('4e Rose'));
-  expect(mockRefresh).toHaveBeenCalled();
+  await waitFor(() => expect(addClass).toHaveBeenCalledWith('4e Rose'));
 });
 
 test('la modale bloque un nom vide', () => {
   const { getByTestId, getByText } = render(<ClassesScreen navigation={{ navigate: jest.fn() }} />);
 
   fireEvent.press(getByTestId('add-class-fab'));
-  fireEvent.press(getByText('Ajouter'));
+  fireEvent.press(getByText('Add'));
 
-  expect(getByText('Le nom de la classe est obligatoire.')).toBeTruthy();
-  expect(ajouterClasse).not.toHaveBeenCalled();
+  expect(getByText('Please give the class a name.')).toBeTruthy();
+  expect(addClass).not.toHaveBeenCalled();
 });
 
 test("Annuler l'ajout de classe ne crée pas de classe", () => {
   const { getByTestId, getByPlaceholderText, getByText, queryByPlaceholderText } = render(<ClassesScreen navigation={{ navigate: jest.fn() }} />);
 
   fireEvent.press(getByTestId('add-class-fab'));
-  fireEvent.changeText(getByPlaceholderText('Nom de la classe'), '3e Rose');
-  fireEvent.press(getByText('Annuler'));
+  fireEvent.changeText(getByPlaceholderText('Class name'), '3e Rose');
+  fireEvent.press(getByText('Cancel'));
 
-  expect(ajouterClasse).not.toHaveBeenCalled();
-  expect(queryByPlaceholderText('Nom de la classe')).toBeNull();
+  expect(addClass).not.toHaveBeenCalled();
+  expect(queryByPlaceholderText('Class name')).toBeNull();
 });
 
-test('la corbeille ouvre la confirmation de suppression', () => {
-  mockClasses = [{ id: 7, nom: '4e Rose', nombreEleves: 2, totalMerites: 0, totalRetenues: 0 }];
+test('le menu ouvre la confirmation de suppression', () => {
+  mockClasses = [{ id: 'c7', name: '4e Rose', studentCount: 2, totalMerits: 0, totalDetentions: 0 }];
   const { getAllByText, getByTestId, getByText } = render(<ClassesScreen navigation={{ navigate: jest.fn() }} />);
 
-  fireEvent.press(getByTestId('delete-class-7'));
+  fireEvent.press(getByTestId('class-menu-c7'));
+  fireEvent.press(getByTestId('menu-delete-class'));
 
-  expect(getByText('Supprimer la classe')).toBeTruthy();
+  expect(getByText('Delete class')).toBeTruthy();
   expect(getAllByText('4e Rose').length).toBeGreaterThan(1);
-  expect(getByText('Les élèves de cette classe, leur historique et leurs archives trimestrielles seront supprimés définitivement.')).toBeTruthy();
+  expect(getByText('This class, its students, their history and term archives will be permanently deleted.')).toBeTruthy();
 });
 
 test('Annuler ne supprime pas la classe', () => {
-  mockClasses = [{ id: 7, nom: '4e Rose', nombreEleves: 2, totalMerites: 0, totalRetenues: 0 }];
+  mockClasses = [{ id: 'c7', name: '4e Rose', studentCount: 2, totalMerits: 0, totalDetentions: 0 }];
   const { getByTestId, queryByText } = render(<ClassesScreen navigation={{ navigate: jest.fn() }} />);
 
-  fireEvent.press(getByTestId('delete-class-7'));
+  fireEvent.press(getByTestId('class-menu-c7'));
+  fireEvent.press(getByTestId('menu-delete-class'));
   fireEvent.press(getByTestId('cancel-delete-class'));
 
-  expect(supprimerClasse).not.toHaveBeenCalled();
-  expect(queryByText('Supprimer la classe')).toBeNull();
+  expect(deleteClass).not.toHaveBeenCalled();
+  expect(queryByText('Delete class')).toBeNull();
 });
 
-test('Supprimer supprime la classe puis rafraichit la liste', async () => {
-  const classe = { id: 7, nom: '4e Rose', nombreEleves: 2, totalMerites: 0, totalRetenues: 0 };
-  mockClasses = [classe];
+test('Supprimer supprime la classe', async () => {
+  const classRow = { id: 'c7', name: '4e Rose', studentCount: 2, totalMerits: 0, totalDetentions: 0 };
+  mockClasses = [classRow];
   const { getByTestId } = render(<ClassesScreen navigation={{ navigate: jest.fn() }} />);
 
-  fireEvent.press(getByTestId('delete-class-7'));
+  fireEvent.press(getByTestId('class-menu-c7'));
+  fireEvent.press(getByTestId('menu-delete-class'));
   fireEvent.press(getByTestId('confirm-delete-class'));
 
-  await waitFor(() => expect(supprimerClasse).toHaveBeenCalledWith(classe));
-  expect(mockRefresh).toHaveBeenCalled();
+  await waitFor(() => expect(deleteClass).toHaveBeenCalledWith(classRow));
+});
+
+test('le menu permet de renommer la classe', async () => {
+  const classRow = { id: 'c7', name: '4e Rose', studentCount: 2, totalMerits: 0, totalDetentions: 0 };
+  mockClasses = [classRow];
+  const { getByTestId, getByDisplayValue, getByText } = render(<ClassesScreen navigation={{ navigate: jest.fn() }} />);
+
+  fireEvent.press(getByTestId('class-menu-c7'));
+  fireEvent.press(getByTestId('menu-edit-class'));
+  fireEvent.changeText(getByDisplayValue('4e Rose'), '4e Pivoine');
+  fireEvent.press(getByText('Save'));
+
+  await waitFor(() => expect(updateClass).toHaveBeenCalledWith(classRow, '4e Pivoine'));
 });
 
 test("ouvrir une classe marque son utilisation recente", async () => {
-  const classe = { id: 7, nom: '4e Rose', nombreEleves: 2, totalMerites: 0, totalRetenues: 0 };
+  const classRow = { id: 'c7', name: '4e Rose', studentCount: 2, totalMerits: 0, totalDetentions: 0 };
   const navigation = { navigate: jest.fn() };
-  mockClasses = [classe];
+  mockClasses = [classRow];
   const { getByText } = render(<ClassesScreen navigation={navigation} />);
 
   fireEvent.press(getByText('4e Rose'));
 
-  await waitFor(() => expect(marquerClasseUtilisee).toHaveBeenCalledWith(classe));
-  expect(navigation.navigate).toHaveBeenCalledWith('ClassDashboard', { classe });
+  await waitFor(() => expect(markClassUsed).toHaveBeenCalledWith(classRow));
+  expect(navigation.navigate).toHaveBeenCalledWith('ClassDashboard', { classRow });
 });

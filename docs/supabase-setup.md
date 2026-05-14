@@ -8,7 +8,7 @@ Copy `.env.example` to `.env` locally and fill:
 
 ```env
 EXPO_PUBLIC_SUPABASE_URL=https://frmiyddfipejirtbzoxr.supabase.co
-EXPO_PUBLIC_SUPABASE_ANON_KEY=
+EXPO_PUBLIC_SUPABASE_KEY=
 EXPO_PUBLIC_APP_URL=https://gryzax.github.io/carnet-rose/
 ```
 
@@ -19,7 +19,7 @@ For the GitHub Pages PWA, add the same values in GitHub:
 Settings -> Secrets and variables -> Actions -> Variables
 
 - `EXPO_PUBLIC_SUPABASE_URL`
-- `EXPO_PUBLIC_SUPABASE_ANON_KEY`
+- `EXPO_PUBLIC_SUPABASE_KEY`
 - `EXPO_PUBLIC_APP_URL`
 
 ## Supabase Auth URLs

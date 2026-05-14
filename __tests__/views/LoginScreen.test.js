@@ -9,6 +9,7 @@ jest.mock('../../services/supabase/supabaseClient', () => ({
 
 jest.mock('../../services/auth/authService', () => ({
   getCurrentUser: jest.fn(() => Promise.resolve({ user: null, error: null })),
+  consumePendingAuthError: jest.fn(() => null),
   signInWithApple: jest.fn(() => Promise.resolve({ user: null, message: 'Apple pending' })),
   signInWithGoogle: jest.fn(() => Promise.resolve({ user: null, message: 'Google pending' }))
 }));
@@ -23,8 +24,8 @@ test('Supabase absent bloque proprement le login', () => {
   const { getByText, getByTestId, queryByText } = render(<LoginScreen onAuthenticated={onAuthenticated} />);
 
   expect(getByText('Carnet Rose')).toBeTruthy();
-  expect(getByText('Connexion indisponible')).toBeTruthy();
-  expect(getByText('La connexion n’est pas encore configurée. Veuillez contacter l’administrateur.')).toBeTruthy();
+  expect(getByText('Sign-in unavailable')).toBeTruthy();
+  expect(getByText('Sign-in isn’t set up yet. Please reach out to your administrator.')).toBeTruthy();
   expect(queryByText('Continuer en mode local')).toBeNull();
 
   fireEvent.press(getByTestId('login-google'));
@@ -39,7 +40,7 @@ test('variables Supabase presentes gardent les boutons Google et Apple disponibl
 
   expect(getByTestId('login-google')).toBeTruthy();
   expect(getByTestId('login-apple')).toBeTruthy();
-  expect(queryByText('Connexion indisponible')).toBeNull();
+  expect(queryByText('Sign-in unavailable')).toBeNull();
 });
 
 test('Google appelle signInWithGoogle quand Supabase est configure', async () => {

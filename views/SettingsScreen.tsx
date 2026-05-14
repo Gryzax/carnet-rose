@@ -1,0 +1,228 @@
+import { Alert, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useEffect, useState, type ReactNode } from 'react';
+import { Ionicons } from '@expo/vector-icons';
+import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
+import { colors } from '../constants/colors';
+import { resetTrimester, type ResetTrimesterResult } from '../controllers/studentController';
+import { getAllStudents } from '../models/studentModel';
+import { BackButton } from '../components/BackButton';
+import { Card, InfoIcon, JournalInput, Pill, PillButton, Screen, Sparkle, Title, WashiTape } from '../components/Themed';
+import { getCurrentUser, signOut } from '../services/auth/authService';
+import { useT } from '../utils/i18n';
+import { LANGUAGE_LABELS, SUPPORTED_LANGUAGES } from '../constants/i18n';
+import type { AppTabsParamList } from '../navigation/types';
+import type { AuthUser } from '../types/services';
+
+interface TrimesterSummary {
+  totalMerits: number;
+  totalDetentions: number;
+  totalStudents: number;
+  trimester: number;
+}
+
+export interface SettingsScreenProps {
+  navigation: BottomTabNavigationProp<AppTabsParamList, 'Settings'>;
+  onSignedOut?: () => void;
+}
+
+const Section = ({ title, children }: { title: ReactNode; children: ReactNode }) => (
+  <Card washi>
+    <Pill accessibilityRole="header">{title}</Pill>
+    <View style={styles.sectionBody}>{children}</View>
+  </Card>
+);
+
+export const SettingsScreen = ({ navigation, onSignedOut }: SettingsScreenProps) => {
+  const { t, lang, setLang } = useT();
+  const [summary, setSummary] = useState<TrimesterSummary | null>(null);
+  const [success, setSuccess] = useState<ResetTrimesterResult | null>(null);
+  const [confirmText, setConfirmText] = useState('');
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [langOpen, setLangOpen] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    getCurrentUser().then(({ user }) => {
+      if (active) setUser(user);
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const prepare = async () => {
+    const students = await getAllStudents();
+    setConfirmText('');
+    setSummary({
+      totalMerits: students.reduce((s, e) => s + e.merits, 0),
+      totalDetentions: students.reduce((s, e) => s + e.detentions, 0),
+      totalStudents: students.length,
+      trimester: students[0]?.currentTrimester || 1
+    });
+  };
+
+  const confirmWord = t('confirmWord') as string;
+
+  const confirm = async () => {
+    if (!summary || confirmText !== confirmWord) return;
+    const res = await resetTrimester(summary.trimester);
+    setSummary(null);
+    setSuccess(res);
+  };
+
+  const disconnect = async () => {
+    await signOut();
+    setUser(null);
+    onSignedOut?.();
+  };
+
+  const userName = (user?.user_metadata as { name?: string } | undefined)?.name;
+
+  return (
+    <Screen>
+      <ScrollView
+        testID="settings-scroll"
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={styles.scrollContent}
+      >
+        <WashiTape />
+        <Title>{t('settingsTitle')}</Title>
+        <Section title={t('sectionAccount')}>
+          <Text testID="account-user" style={styles.strong}>
+            {user?.email || userName || t('connectedUser')}
+          </Text>
+          <PillButton testID="sign-out" onPress={disconnect} variant="pink">
+            {t('signOut')}
+          </PillButton>
+        </Section>
+        <Section title={t('sectionLanguage')}>
+          <Text style={styles.muted}>{t('languageHint')}</Text>
+          <Pressable
+            testID="language-dropdown"
+            accessibilityRole="button"
+            accessibilityState={{ expanded: langOpen }}
+            accessibilityLabel={LANGUAGE_LABELS[lang]}
+            onPress={() => setLangOpen((open) => !open)}
+            style={({ pressed }) => [styles.languageRow, pressed && styles.pressed]}
+          >
+            <Text style={styles.languageLabel}>{LANGUAGE_LABELS[lang]}</Text>
+            <Ionicons name={langOpen ? 'chevron-up' : 'chevron-down'} size={20} color={colors.ink} />
+          </Pressable>
+          {langOpen && (
+            <View style={styles.languageMenu}>
+              {SUPPORTED_LANGUAGES.map((code) => {
+                const active = code === lang;
+                return (
+                  <Pressable
+                    key={code}
+                    testID={`language-${code}`}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: active }}
+                    accessibilityLabel={LANGUAGE_LABELS[code]}
+                    onPress={() => {
+                      setLang(code);
+                      setLangOpen(false);
+                    }}
+                    style={({ pressed }) => [
+                      styles.languageRow,
+                      active && styles.languageRowActive,
+                      pressed && styles.pressed
+                    ]}
+                  >
+                    <Text style={[styles.languageLabel, active && styles.languageLabelActive]}>
+                      {LANGUAGE_LABELS[code]}
+                    </Text>
+                    {active && <Ionicons name="checkmark" size={20} color={colors.onPrimary} />}
+                  </Pressable>
+                );
+              })}
+            </View>
+          )}
+        </Section>
+        <Section title={t('sectionAbout')}>
+          <View style={styles.infoRow}>
+            <InfoIcon />
+            <Text style={styles.strong}>{t('appName')}</Text>
+          </View>
+          <Text style={styles.muted}>{t('aboutTagline')}</Text>
+          <Text style={styles.muted}>fourkane ahmerelain</Text>
+          <Text style={styles.muted}>v1.0.0</Text>
+        </Section>
+        <Section title={t('sectionData')}>
+          <PillButton
+            testID="export-data"
+            onPress={() => Alert.alert(t('exportDataTitle') as string, t('comingSoon') as string)}
+            variant="light"
+          >
+            {t('exportData')}
+          </PillButton>
+        </Section>
+        <Section title={t('sectionTrimester')}>
+          <PillButton onPress={prepare} variant="pink">
+            {t('endTrimester')}
+          </PillButton>
+          {success && (
+            <View style={styles.success}>
+              <Sparkle />
+              <Text style={styles.text}>
+                {t('trimesterArchived', {
+                  students: success.totalStudents,
+                  merits: success.totalMerits,
+                  detentions: success.totalDetentions
+                })}
+              </Text>
+            </View>
+          )}
+        </Section>
+      </ScrollView>
+      <Modal transparent visible={Boolean(summary)} onRequestClose={() => setSummary(null)}>
+        <View style={styles.backdrop}>
+          <Card style={styles.dialog} washi>
+            <Text style={styles.modalTitle}>{t('confirmEndTrimesterTitle')}</Text>
+            <Text style={styles.muted}>
+              {t('allClassesSummary', {
+                merits: summary?.totalMerits ?? 0,
+                detentions: summary?.totalDetentions ?? 0,
+                students: summary?.totalStudents ?? 0
+              })}
+            </Text>
+            <Text style={styles.text}>{t('typeConfirmToContinue', { word: confirmWord })}</Text>
+            <JournalInput
+              testID="trimester-confirm-input"
+              value={confirmText}
+              onChangeText={setConfirmText}
+              autoCapitalize="characters"
+            />
+            <PillButton onPress={confirm} variant="pink" disabled={confirmText !== confirmWord}>
+              {t('iConfirm')}
+            </PillButton>
+            <PillButton onPress={() => setSummary(null)} variant="light">
+              {t('cancel')}
+            </PillButton>
+          </Card>
+        </View>
+      </Modal>
+      <BackButton floating navigation={navigation} fallbackRoute="Classes" />
+    </Screen>
+  );
+};
+
+const styles = StyleSheet.create({
+  scrollContent: { flexGrow: 1, paddingTop: 76, paddingBottom: 148, paddingHorizontal: 16 },
+  sectionBody: { marginTop: 12, gap: 8 },
+  infoRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  strong: { color: colors.ink, fontFamily: 'PatrickHand_400Regular', fontSize: 23 },
+  muted: { color: colors.muted, fontFamily: 'PatrickHand_400Regular', fontSize: 19, lineHeight: 24 },
+  text: { color: colors.ink, fontFamily: 'PatrickHand_400Regular', fontSize: 19, lineHeight: 24, flex: 1 },
+  success: { marginTop: 14, backgroundColor: colors.sage, borderColor: colors.border, borderWidth: 1.5, borderRadius: 16, padding: 14, flexDirection: 'row', alignItems: 'center', gap: 8 },
+  backdrop: { flex: 1, justifyContent: 'center', padding: 24, backgroundColor: colors.scrim },
+  dialog: { gap: 12 },
+  modalTitle: { fontSize: 28, fontFamily: 'PatrickHand_400Regular', color: colors.ink },
+  languageRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', minHeight: 48, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 10, backgroundColor: colors.canvas, borderColor: colors.border, borderWidth: 1.5 },
+  languageMenu: { gap: 8 },
+  languageRowActive: { backgroundColor: colors.pink },
+  languageLabel: { color: colors.ink, fontFamily: 'PatrickHand_400Regular', fontSize: 21 },
+  languageLabelActive: { color: colors.onPrimary },
+  pressed: { transform: [{ scale: 0.98 }] }
+});

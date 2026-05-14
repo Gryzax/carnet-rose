@@ -21,7 +21,7 @@ describe('supabaseClient', () => {
     const { getSupabaseAuthUrl, getSupabaseUrl, isSupabaseConfigured } = loadSupabaseClientWithEnv({
       NODE_ENV: 'test',
       EXPO_PUBLIC_SUPABASE_URL: 'https://frmiyddfipejirtbzoxr.supabase.co',
-      EXPO_PUBLIC_SUPABASE_ANON_KEY: 'mock_publishable_key',
+      EXPO_PUBLIC_SUPABASE_KEY: 'mock_publishable_key',
       EXPO_PUBLIC_APP_URL: 'https://gryzax.github.io/carnet-rose/'
     });
 
@@ -34,7 +34,7 @@ describe('supabaseClient', () => {
   test('ne crashe pas sans env', () => {
     const envWithoutSupabase = { NODE_ENV: 'test' };
     delete envWithoutSupabase.EXPO_PUBLIC_SUPABASE_URL;
-    delete envWithoutSupabase.EXPO_PUBLIC_SUPABASE_ANON_KEY;
+    delete envWithoutSupabase.EXPO_PUBLIC_SUPABASE_KEY;
     delete envWithoutSupabase.EXPO_PUBLIC_APP_URL;
 
     const { getSupabaseAuthUrl, isSupabaseConfigured } = loadSupabaseClientWithEnv(envWithoutSupabase);

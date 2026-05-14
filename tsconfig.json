@@ -1,0 +1,52 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "esnext",
+    "lib": [
+      "esnext",
+      "dom"
+    ],
+    "jsx": "react-jsx",
+    "moduleResolution": "bundler",
+    "allowJs": true,
+    "checkJs": false,
+    "noEmit": true,
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noFallthroughCasesInSwitch": true,
+    "types": [
+      "react",
+      "jest",
+      "node"
+    ]
+  },
+  "include": [
+    "App.tsx",
+    "components/**/*",
+    "constants/**/*",
+    "controllers/**/*",
+    "database/**/*",
+    "hooks/**/*",
+    "models/**/*",
+    "navigation/**/*",
+    "services/**/*",
+    "store/**/*",
+    "utils/**/*",
+    "views/**/*",
+    "__tests__/**/*",
+    "jest.setup.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "carnet-rose",
+    "android",
+    "ios"
+  ],
+  "extends": "expo/tsconfig.base"
+}

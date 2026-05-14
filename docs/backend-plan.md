@@ -2,42 +2,43 @@
 
 ## Recommendation
 
-Supabase is the best fit for Carnet Rose. It provides a generous free tier, PostgreSQL, row-level security, OAuth providers including Google and Apple, and a JavaScript client that works with Expo, React Native, and PWA builds. The current local-first SQLite and IndexedDB storage should remain the source of truth until sync is implemented and tested.
+Supabase is the chosen backend for Carnet Rose: generous free tier, PostgreSQL, row-level security, Google/Apple OAuth, and a JavaScript client that works with Expo, React Native and PWA builds. Local-first SQLite (native) and IndexedDB (web) remain the source of truth; Supabase is used for auth and one-way push sync.
 
 ## Comparison
 
 | Option | Strengths | Limits |
 | --- | --- | --- |
-| Supabase | PostgreSQL, free tier, Google/Apple auth, RLS, REST API, realtime/sync path later, works for PWA | Requires careful RLS policies and conflict handling for offline sync |
-| Firebase | Mature auth, good free tier, strong mobile support | Firestore data model is less relational, export/migration can be less direct, rules are a separate skill set |
-| Appwrite Cloud | Open source style, auth and database included | Smaller ecosystem than Supabase/Firebase, less direct PostgreSQL fit |
+| Supabase | PostgreSQL, free tier, Google/Apple auth, RLS, REST API, realtime path later | Careful RLS policies and conflict handling needed for offline sync |
+| Firebase | Mature auth, good free tier, strong mobile support | Less relational data model, migration less direct, separate rules skill set |
+| Appwrite Cloud | Open-source style, auth and database included | Smaller ecosystem, less direct PostgreSQL fit |
 
-## Proposed Architecture
+## Architecture (current)
 
-Keep the app local-first:
+Local-first, with Supabase layered on top:
 
-- `database/storage.native.js`: native SQLite remains available offline.
-- `database/storage.web.js`: IndexedDB/localforage remains available offline and keeps the Klassia to CarnetRose migration.
-- `services/api/supabaseClient.js`: optional Supabase REST gateway, disabled without public env vars.
-- `services/auth/authService.js`: future Google/Apple auth boundary.
-- `services/sync/classSyncService.js` and `services/sync/studentSyncService.js`: future sync boundaries.
+- `database/storage.native.js` — native SQLite, offline.
+- `database/storage.web.js` — IndexedDB/localforage, offline; keeps the Klassia → CarnetRose migration.
+- `services/supabase/supabaseClient.js` — Supabase REST/auth gateway, disabled without public env vars.
+- `services/auth/authService.js` — Google/Apple sign-in, session handling (web localStorage, refresh token never persisted).
+- `services/sync/` — `classSyncService`, `studentSyncService`, `historySyncService`, orchestrated by `syncService` (one-way push of local changes).
+
+Sign-in is mandatory (`navigation/RootNavigator.js` gates the app behind `AuthStack`).
 
 ## Environment
 
-Only public Supabase values are expected in Expo:
+Only public Supabase values belong in Expo env:
 
 ```txt
 EXPO_PUBLIC_SUPABASE_URL=
-EXPO_PUBLIC_SUPABASE_ANON_KEY=
+EXPO_PUBLIC_SUPABASE_KEY=
+EXPO_PUBLIC_APP_URL=
 ```
 
-Do not commit `.env`. The anonymous key is not a server secret, but data access must be protected by Supabase Row Level Security.
+Never commit `.env`. The anon/publishable key is not a server secret, but data access must be protected by Supabase Row Level Security.
 
 ## Next Steps
 
-1. Add `@supabase/supabase-js` when auth work begins.
-2. Create Supabase tables for classes, students, events, and term archives with `user_id`.
-3. Enable RLS policies so each user only reads/writes their own rows.
-4. Configure Google OAuth and Apple Sign In in Supabase.
-5. Add account screens without blocking local mode.
-6. Implement one-way backup, then two-way sync with conflict rules based on `updatedAt` or `derniereUtilisation`.
+1. Create/maintain Supabase tables for classes, students, history and term archives with `user_id` (see `docs/supabase-schema.sql`).
+2. Keep RLS policies so each user only reads/writes their own rows.
+3. Add two-way sync with conflict rules based on `updatedAt` / `derniereUtilisation`.
+4. Add data export (Settings → Export) — currently a placeholder.

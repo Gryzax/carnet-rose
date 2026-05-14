@@ -16,21 +16,15 @@ jest.mock('../../services/auth/authService', () => ({
   signOut: jest.fn(() => Promise.resolve({ error: null }))
 }));
 
-jest.mock('../../services/sync/syncService', () => ({
-  syncAll: jest.fn(() => Promise.resolve({ synced: true }))
-}));
-
-import { syncAll } from '../../services/sync/syncService';
-
 test('parametres affiche les sections enrichies', async () => {
   const { getByTestId, getByText } = render(<SettingsScreen navigation={{ navigate: jest.fn(), canGoBack: jest.fn(() => false) }} />);
   await waitFor(() => expect(getByText('demo@example.com')).toBeTruthy());
-  expect(getByTestId('settings-scroll').props.contentContainerStyle).toEqual(expect.objectContaining({ flexGrow: 1, paddingBottom: 116 }));
-  expect(getByText('A propos')).toBeTruthy();
+  expect(getByTestId('settings-scroll').props.contentContainerStyle).toEqual(expect.objectContaining({ flexGrow: 1, paddingBottom: 148 }));
+  expect(getByText('About')).toBeTruthy();
   expect(getByText('Carnet Rose')).toBeTruthy();
-  expect(getByText('Donnees')).toBeTruthy();
-  expect(getByText('Trimestre')).toBeTruthy();
-  expect(getByText('Compte')).toBeTruthy();
+  expect(getByText('Data')).toBeTruthy();
+  expect(getByText('Term')).toBeTruthy();
+  expect(getByText('Account')).toBeTruthy();
 });
 
 test('export affiche bientot disponible', async () => {
@@ -38,18 +32,7 @@ test('export affiche bientot disponible', async () => {
   const { getByTestId, getByText } = render(<SettingsScreen navigation={{ navigate: jest.fn(), canGoBack: jest.fn(() => false) }} />);
   await waitFor(() => expect(getByText('demo@example.com')).toBeTruthy());
   fireEvent.press(getByTestId('export-data'));
-  expect(Alert.alert).toHaveBeenCalledWith('Exporter les donnees', 'Fonctionnalite bientot disponible');
-});
-
-test('synchroniser maintenant appelle syncAll', async () => {
-  jest.spyOn(Alert, 'alert').mockImplementation(() => {});
-  const { getByTestId, getByText } = render(<SettingsScreen navigation={{ navigate: jest.fn(), canGoBack: jest.fn(() => false) }} />);
-  await waitFor(() => expect(getByText('demo@example.com')).toBeTruthy());
-
-  fireEvent.press(getByTestId('sync-now'));
-
-  await waitFor(() => expect(syncAll).toHaveBeenCalled());
-  expect(Alert.alert).toHaveBeenCalledWith('Synchroniser maintenant', 'Synchronisation terminée');
+  expect(Alert.alert).toHaveBeenCalledWith('Export my data', 'Coming soon — stay tuned!');
 });
 
 test("parametres affiche une fleche retour vers l'accueil", async () => {

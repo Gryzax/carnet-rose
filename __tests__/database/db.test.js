@@ -1,44 +1,29 @@
-jest.mock('expo-sqlite', () => ({ openDatabaseAsync: jest.fn() }));
+import { createMemStore } from '../../test-utils/memStore';
+import { seedDemo } from '../../database/db';
 
-import { migrate, seedDemo } from '../../database/db';
+test('seedDemo crée deux classes et dix élèves avec des UUID', async () => {
+  const store = createMemStore();
+  await seedDemo(store);
 
-const createMockDb = (count = 0) => ({
-  sql: [],
-  runs: [],
-  execAsync: jest.fn(function (sql) { this.sql.push(sql); return Promise.resolve(); }),
-  getFirstAsync: jest.fn(() => Promise.resolve({ count })),
-  runAsync: jest.fn(function (...args) { this.runs.push(args); return Promise.resolve({ lastInsertRowId: this.runs.length }); })
+  expect(store.tables.classes).toHaveLength(2);
+  expect(store.tables.students).toHaveLength(10);
+  for (const classRow of store.tables.classes) {
+    expect(typeof classRow.id).toBe('string');
+    expect(classRow.id.length).toBeGreaterThan(8);
+  }
+  // Every student points at one of the seeded classes.
+  const classIds = new Set(store.tables.classes.map((c) => c.id));
+  for (const student of store.tables.students) {
+    expect(classIds.has(student.classId)).toBe(true);
+  }
 });
 
-test('création des tables et migrations', async () => {
-  const db = createMockDb();
-  await migrate(db);
-  expect(db.execAsync).toHaveBeenCalled();
-  expect(db.sql.join(' ')).toContain('CREATE TABLE IF NOT EXISTS classes');
-  expect(db.sql.join(' ')).toContain('archive_trimestre');
-});
+test('seedDemo est ignoré si le cache contient déjà des classes', async () => {
+  const store = createMemStore({
+    classes: [{ id: 'c1', name: 'Déjà là', createdAt: 'now', lastUsedAt: 'now' }]
+  });
+  await seedDemo(store);
 
-test('CRUD classes via seed demo', async () => {
-  const db = createMockDb();
-  await seedDemo(db);
-  expect(db.runAsync).toHaveBeenCalledWith(expect.stringContaining('INSERT INTO classes'), '6e Rose');
-  expect(db.runAsync).toHaveBeenCalledWith(expect.stringContaining('INSERT INTO classes'), '5e Pivoine');
-});
-
-test('CRUD élèves via seed demo', async () => {
-  const db = createMockDb();
-  await seedDemo(db);
-  expect(db.runs.filter((r) => String(r[0]).includes('INSERT INTO eleves'))).toHaveLength(10);
-});
-
-test('persistance des données: seed ignoré si données présentes', async () => {
-  const db = createMockDb(1);
-  await seedDemo(db);
-  expect(db.runAsync).not.toHaveBeenCalled();
-});
-
-test('seed demo charge deux classes et dix élèves', async () => {
-  const db = createMockDb();
-  await seedDemo(db);
-  expect(db.runs).toHaveLength(12);
+  expect(store.tables.classes).toHaveLength(1);
+  expect(store.tables.students).toHaveLength(0);
 });

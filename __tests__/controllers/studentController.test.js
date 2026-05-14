@@ -45,10 +45,10 @@ test('ajouterTick cas normal', async () => {
   expect(upsertEvent).toHaveBeenCalledWith(expect.objectContaining({ event: expect.objectContaining({ id: 20, type: 'tick' }) }));
 });
 
-test('tick qui annule une croix', async () => {
+test('tick n’affecte pas les croix existantes', async () => {
   const res = await ajouterTick({ ...eleve, croix: 2 });
-  expect(res.eleve.croix).toBe(1);
-  expect(res.eleve.ticks).toBe(0);
+  expect(res.eleve.croix).toBe(2);
+  expect(res.eleve.ticks).toBe(1);
 });
 
 test('mérite déclenché à 4 ticks', async () => {
@@ -68,9 +68,9 @@ test('ajouterCroix cas normal', async () => {
   expect(upsertEvent).toHaveBeenCalledWith(expect.objectContaining({ event: expect.objectContaining({ id: 21, type: 'croix' }) }));
 });
 
-test('croix qui retire un tick', async () => {
+test('croix n’affecte pas les ticks existants', async () => {
   const res = await ajouterCroix({ ...eleve, ticks: 2 });
-  expect(res.eleve.ticks).toBe(1);
+  expect(res.eleve.ticks).toBe(2);
   expect(res.eleve.croix).toBe(1);
 });
 

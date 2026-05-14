@@ -4,21 +4,23 @@ name: Carnet Rose Cozy Journal
 description: A light-mode-only, cozy hand-drawn interface inspired by a Spanish grocery list and meal-planning journal. The product should feel warm, playful, tactile, and calm: soft peach paper, white notebook cards, thin black ink borders, sage and pink pill labels, orange washi tape, sparkle bullets, and a single handwritten marker-style font throughout.
 
 colors:
-  canvas: "#F7E7DC"
+  canvas: "#F9E8E0"
   surface-card: "#FFFFFF"
-  primary: "#F4C2C2"
-  primary-soft: "#F8D7DA"
-  secondary: "#C7DDD0"
-  secondary-strong: "#AFCBBE"
-  tertiary: "#E89B4C"
-  tertiary-soft: "#F5A65B"
+  primary: "#DB2777"
+  primary-strong: "#BE185D"
+  primary-soft: "#FBCFE4"
+  on-primary: "#FFFFFF"
+  secondary: "#C9D9CF"
+  secondary-strong: "#B2C7BC"
+  tertiary: "#E79360"
+  tertiary-soft: "#F2A877"
   ink: "#1A1A1A"
-  muted: "#7B6F68"
-  placeholder: "#A89B92"
+  muted: "#7D6D6A"
+  placeholder: "#AC9B98"
   border: "#1A1A1A"
-  success: "#7AAA8B"
-  danger: "#B45D5D"
-  warning: "#D58A3B"
+  success: "#74A684"
+  danger: "#C05C6B"
+  warning: "#DA9150"
   scrim: "rgba(26,26,26,0.48)"
 
 typography:
@@ -92,6 +94,7 @@ components:
     rotation: "-4deg to 4deg"
   pill-label-day:
     backgroundColor: "{colors.primary}"
+    textColor: "{colors.on-primary}"
     borderColor: "{colors.border}"
     borderWidth: 1.5px
     rounded: "{rounded.full}"
@@ -108,9 +111,12 @@ components:
     borderWidth: 1.5px
     rounded: "{rounded.full}"
     activeFill: "{colors.primary}"
+    activeTextColor: "{colors.on-primary}"
+    inactiveTextColor: "{colors.ink}"
   button-primary:
     backgroundColor: "{colors.primary}"
-    textColor: "{colors.ink}"
+    textColor: "{colors.on-primary}"
+    pressedColor: "{colors.primary-strong}"
     borderColor: "{colors.border}"
     borderWidth: 1.5px
     typography: "{typography.button}"
@@ -150,37 +156,39 @@ The app still supports repeated operational use. Decoration should add delight w
 
 - **Paper-first canvas:** use soft peach/cream as the global background.
 - **White notebook cards:** keep content on white cards with 1.5px black borders and 16-20px radii.
-- **Pastel hierarchy:** pink is for active state and primary CTAs, sage is for section labels and secondary actions, orange is for tape, sparkles, and info accents.
+- **Pink-led hierarchy:** bright pink is for active state and primary CTAs (with white text), pale pink is for soft supporting fills, sage is for section labels and secondary actions, orange is for tape, sparkles, and info accents.
 - **One handwritten voice:** every visible label, button, title, input, chart label, and tab label uses the same handwritten font.
 - **Ink over elevation:** separation comes from thin black outlines and whitespace. Avoid shadows except nearly invisible platform defaults.
-- **Journal details are sparse:** washi tape and the cat mascot appear at most once per screen or one major card.
+- **Journal details are sparse:** washi tape appears at most once per screen or one major card. A small cat peeks from the top-right corner of every card.
 
 ## Colors
 
 ### Core Palette
 
-- **Canvas Peach** (`#F7E7DC`): app background.
+- **Canvas Rose-Peach** (`#F9E8E0`): app background — a warm peach with a faint rose undertone so it reads as the same family as the pink.
 - **Card White** (`#FFFFFF`): primary readable surface.
-- **Soft Pink** (`#F4C2C2`): active tabs, primary CTAs, day-style pills.
-- **Pale Pink** (`#F8D7DA`): soft supporting fills.
-- **Sage** (`#C7DDD0`): section labels, meal-type tags, secondary buttons.
-- **Warm Orange** (`#E89B4C`): washi tape, sparkle bullets, info icons.
+- **Bright Pink** (`#DB2777`): active tabs, primary CTAs, day-style pills. Always pair with white (`#FFFFFF`) text/icons — white reaches ~4.6:1 here, black does not. Never place black or muted text on this fill.
+- **Deep Pink** (`#BE185D`): pressed/active state of bright-pink controls. White text clears ~6:1 here, so it is also the safe choice when bright pink sits behind smaller or thinner text.
+- **On Primary** (`#FFFFFF`): the fixed text/icon color for any bright-pink or deep-pink fill.
+- **Pale Pink** (`#FBCFE4`): soft supporting fills only — it is too light for white text, so it always pairs with black ink text.
+- **Sage** (`#C9D9CF`): section labels, meal-type tags, secondary buttons — a softly warmed, slightly greyed sage that complements the pink instead of clashing with it.
+- **Warm Coral-Orange** (`#E79360`): washi tape, sparkle bullets, info icons — nudged from yellow-orange toward coral so it shares the pink's warmth.
 
 ### Text And Lines
 
 - **Ink** (`#1A1A1A`): primary text and all borders.
-- **Muted Warm Grey** (`#7B6F68`): metadata and secondary text.
-- **Placeholder Grey** (`#A89B92`): input placeholders.
+- **Muted Warm Grey** (`#7D6D6A`): metadata and secondary text — a warm taupe with a faint rosy undertone.
+- **Placeholder Grey** (`#AC9B98`): input placeholders.
 
-Use black text on pastel fills. Do not place muted text over colored fills.
+Use black text on pale fills (pale pink, sage) and white text on the bright pink and deep pink fills. Never the reverse: black on bright pink fails contrast, and white on pale pink fails contrast. Do not place muted text over any colored fill.
 
 ### Status Colors
 
 Functional states use softened but distinct tones:
 
-- **Success** (`#7AAA8B`)
-- **Danger** (`#B45D5D`)
-- **Warning** (`#D58A3B`)
+- **Success** (`#74A684`) — tied to the sage family.
+- **Danger** (`#C05C6B`) — a rosy brick red that sits in the pink's hue family rather than fighting it.
+- **Warning** (`#DA9150`) — a coral-amber that matches the warm orange.
 
 These are for data/status only, not broad page theming.
 
@@ -226,15 +234,15 @@ Cards are white with black hairline borders. Major cards may have an orange wash
 
 ### Pills
 
-Use pink pills for active/day/primary labels and sage pills for section or meal-type labels. Pills always have black borders and black text.
+Use bright pink pills for active/day/primary labels and sage pills for section or meal-type labels. Pills always have black borders; pink pills use white text, sage pills use black text.
 
 ### Segmented Controls
 
-Use one rounded container with a black border. The active segment fills pink; inactive segments remain transparent/white.
+Use one rounded container with a black border. The active segment fills bright pink with white text; inactive segments remain transparent/white with black text.
 
 ### Buttons
 
-Primary CTAs use pink fill. Secondary actions use sage or white fill. All buttons use black text, black borders, handwritten labels, 48px minimum touch targets, and press scale `0.97`.
+Primary CTAs use bright pink fill with white text. On press, the fill deepens to deep pink (`#BE185D`) while the text stays white. Secondary actions use sage or white fill with black text. All buttons use black borders, handwritten labels, 48px minimum touch targets, and press scale `0.97`.
 
 ### Inputs
 
@@ -250,7 +258,7 @@ Use black outlined icons. Info icons are orange circles with a lowercase `i`. Bo
 
 ### Mascot
 
-Use one cute white-and-orange cat per screen at most. The cat may peek from a card corner and must never cover content or controls.
+Every card carries a small cute hand-drawn cat peeking from its top-right corner. The cat is white-and-orange with a tiny `• ᴗ •` face, sits half-outside the card border, and must never cover content or controls.
 
 ## Responsive Behavior
 
@@ -298,6 +306,5 @@ Use a white card/sheet with washi tape, handwritten title, white input, and pink
 - Neumorphism.
 - Heavy shadows or Material elevation.
 - System sans-serif UI surfaces.
-- Bright saturated colors.
-- Decorative mascot overload.
+- Neon or clashing colors.
 - Purple/blue gradient SaaS styling.
