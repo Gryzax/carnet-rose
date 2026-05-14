@@ -88,6 +88,16 @@ export const getCurrentUser = async () => {
   return loadUserFromSession(extractWebSession() || getStoredSession());
 };
 
+export const getCurrentSession = async () => {
+  const session = extractWebSession() || getStoredSession();
+  if (!session?.accessToken) return { session: null, error: null };
+  if (!currentUser) {
+    const { error } = await loadUserFromSession(session);
+    if (error) return { session: null, error };
+  }
+  return { session, error: null };
+};
+
 export const onAuthStateChange = (callback) => {
   listeners.add(callback);
   return { unsubscribe: () => listeners.delete(callback) };

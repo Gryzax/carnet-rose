@@ -18,6 +18,11 @@ export const getLastActiveEvent = async (eleveId) => {
   return db.getFirstAsync('SELECT * FROM evenements WHERE eleveId = ? AND annule = 0 ORDER BY creeLe DESC, id DESC LIMIT 1', eleveId);
 };
 
+export const getAllEvents = async () => {
+  const db = await getDb();
+  return db.getAllAsync('SELECT * FROM evenements ORDER BY creeLe ASC, id ASC');
+};
+
 export const markEventCancelled = async (id) => {
   const db = await getDb();
   return db.runAsync('UPDATE evenements SET annule = 1 WHERE id = ?', id);
@@ -31,4 +36,9 @@ export const archiveStudent = async (student, trimester, archiveLe) => {
 export const getArchives = async (eleveId) => {
   const db = await getDb();
   return db.getAllAsync('SELECT * FROM archive_trimestre WHERE eleveId = ? ORDER BY archiveLe DESC', eleveId);
+};
+
+export const getAllArchives = async () => {
+  const db = await getDb();
+  return db.getAllAsync('SELECT * FROM archive_trimestre ORDER BY archiveLe ASC, id ASC');
 };

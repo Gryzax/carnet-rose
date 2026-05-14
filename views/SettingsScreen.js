@@ -6,6 +6,7 @@ import { getAllStudents } from '../models/studentModel';
 import { BackButton } from '../components/BackButton';
 import { Card, InfoIcon, JournalInput, Pill, PillButton, Screen, Sparkle, Title } from '../components/Themed';
 import { getCurrentUser, signOut } from '../services/auth/authService';
+import { syncAll } from '../services/sync/syncService';
 
 const Section = ({ title, children }) => (
   <Card washi>
@@ -49,13 +50,22 @@ export const SettingsScreen = ({ navigation, onSignedOut }) => {
     onSignedOut?.();
   };
 
+  const synchronizeNow = async () => {
+    const result = await syncAll();
+    if (result.synced) {
+      Alert.alert('Synchroniser maintenant', 'Synchronisation terminée');
+    } else {
+      Alert.alert('Synchroniser maintenant', 'Synchronisation impossible pour le moment. Vos données restent sauvegardées localement.');
+    }
+  };
+
   return (
     <Screen>
       <BackButton navigation={navigation} fallbackRoute="Classes" />
       <Title>Parametres</Title>
       <Section title="Compte">
         <Text testID="account-user" style={styles.strong}>{user?.email || user?.user_metadata?.name || 'Utilisateur connecte'}</Text>
-        <PillButton testID="sync-now" onPress={() => Alert.alert('Synchroniser maintenant', 'Synchronisation Supabase a configurer.')} variant="light">Synchroniser maintenant</PillButton>
+        <PillButton testID="sync-now" onPress={synchronizeNow} variant="light">Synchroniser maintenant</PillButton>
         <PillButton testID="sign-out" onPress={disconnect} variant="pink">Se deconnecter</PillButton>
       </Section>
       <Section title="A propos">

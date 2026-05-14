@@ -2,6 +2,9 @@ import { CROSSES_FOR_DETENTION, TICKS_FOR_MERIT, UNDO_LIMIT_SECONDS } from '../c
 import { createEvent, getLastActiveEvent, archiveStudent, markEventCancelled } from '../models/historyModel';
 import { touchClass } from '../models/classModel';
 import { createStudent, deleteStudent, getAllStudents, getStudentById, updateCounters, resetAllStudents } from '../models/studentModel';
+import { upsertEvent } from '../services/sync/historySyncService';
+import { runBackgroundSync } from '../services/sync/syncService';
+import { softDeleteStudent, upsertStudent } from '../services/sync/studentSyncService';
 import { nowIso, secondsBetween } from '../utils/date';
 
 export const ajouterTick = async (eleve, raison = '') => {
@@ -17,7 +20,12 @@ export const ajouterTick = async (eleve, raison = '') => {
   }
   await updateCounters(eleve.id, next);
   await touchClass(eleve.classeId);
-  await createEvent({ eleveId: eleve.id, type: 'tick', raison, trimestre: eleve.trimestreActuel, creeLe: nowIso(), previousTicks, previousCroix, newTicks: next.ticks, newCroix: next.croix });
+  const event = { eleveId: eleve.id, type: 'tick', raison, trimestre: eleve.trimestreActuel, creeLe: nowIso(), previousTicks, previousCroix, newTicks: next.ticks, newCroix: next.croix };
+  const eventResult = await createEvent(event);
+  await runBackgroundSync(async (context) => {
+    await upsertStudent({ ...context, student: next });
+    return upsertEvent({ ...context, event: { ...event, id: eventResult?.lastInsertRowId } });
+  });
   return { eleve: next, meritObtenu };
 };
 
@@ -33,7 +41,12 @@ export const ajouterCroix = async (eleve, raison = '') => {
   }
   await updateCounters(eleve.id, next);
   await touchClass(eleve.classeId);
-  await createEvent({ eleveId: eleve.id, type: 'croix', raison, trimestre: eleve.trimestreActuel, creeLe: nowIso(), previousTicks, previousCroix, newTicks: next.ticks, newCroix: next.croix });
+  const event = { eleveId: eleve.id, type: 'croix', raison, trimestre: eleve.trimestreActuel, creeLe: nowIso(), previousTicks, previousCroix, newTicks: next.ticks, newCroix: next.croix };
+  const eventResult = await createEvent(event);
+  await runBackgroundSync(async (context) => {
+    await upsertStudent({ ...context, student: next });
+    return upsertEvent({ ...context, event: { ...event, id: eventResult?.lastInsertRowId } });
+  });
   return { eleve: next, retenueDeclenchee };
 };
 
@@ -64,7 +77,9 @@ export const reinitialiserTrimestre = async (numeroTrimestre) => {
 export const supprimerEleve = async (eleve) => {
   const id = typeof eleve === 'object' ? eleve?.id : eleve;
   if (!id) throw new Error('Élève introuvable.');
-  return deleteStudent(id);
+  const result = await deleteStudent(id);
+  await runBackgroundSync((context) => softDeleteStudent({ ...context, studentId: id }));
+  return result;
 };
 
 export const ajouterEleve = async ({ classeId, prenom, nom }) => {
@@ -75,5 +90,9 @@ export const ajouterEleve = async ({ classeId, prenom, nom }) => {
   if (!normalizedNom) throw new Error("Le nom de l'élève est obligatoire.");
   const result = await createStudent({ classeId, prenom: normalizedPrenom, nom: normalizedNom });
   await touchClass(classeId);
+  if (result?.lastInsertRowId) {
+    const student = await getStudentById(result.lastInsertRowId);
+    await runBackgroundSync((context) => upsertStudent({ ...context, student }));
+  }
   return result;
 };

@@ -16,6 +16,12 @@ jest.mock('../../services/auth/authService', () => ({
   signOut: jest.fn(() => Promise.resolve({ error: null }))
 }));
 
+jest.mock('../../services/sync/syncService', () => ({
+  syncAll: jest.fn(() => Promise.resolve({ synced: true }))
+}));
+
+import { syncAll } from '../../services/sync/syncService';
+
 test('parametres affiche les sections enrichies', async () => {
   const { getByText } = render(<SettingsScreen navigation={{ navigate: jest.fn(), canGoBack: jest.fn(() => false) }} />);
   await waitFor(() => expect(getByText('demo@example.com')).toBeTruthy());
@@ -32,6 +38,17 @@ test('export affiche bientot disponible', async () => {
   await waitFor(() => expect(getByText('demo@example.com')).toBeTruthy());
   fireEvent.press(getByTestId('export-data'));
   expect(Alert.alert).toHaveBeenCalledWith('Exporter les donnees', 'Fonctionnalite bientot disponible');
+});
+
+test('synchroniser maintenant appelle syncAll', async () => {
+  jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+  const { getByTestId, getByText } = render(<SettingsScreen navigation={{ navigate: jest.fn(), canGoBack: jest.fn(() => false) }} />);
+  await waitFor(() => expect(getByText('demo@example.com')).toBeTruthy());
+
+  fireEvent.press(getByTestId('sync-now'));
+
+  await waitFor(() => expect(syncAll).toHaveBeenCalled());
+  expect(Alert.alert).toHaveBeenCalledWith('Synchroniser maintenant', 'Synchronisation terminée');
 });
 
 test("parametres affiche une fleche retour vers l'accueil", async () => {
