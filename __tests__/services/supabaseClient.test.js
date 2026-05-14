@@ -1,25 +1,29 @@
 describe('supabaseClient', () => {
-  const originalEnv = { ...process.env };
+  const originalEnv = process.env;
 
-  const loadSupabaseClient = () => {
+  const loadSupabaseClientWithEnv = (env) => {
     jest.resetModules();
+    process.env = { ...env };
     return require('../../services/supabase/supabaseClient');
   };
 
   beforeEach(() => {
     process.env = { ...originalEnv };
+    jest.resetModules();
   });
 
   afterEach(() => {
-    process.env = { ...originalEnv };
+    process.env = originalEnv;
+    jest.resetModules();
   });
 
   test('detecte Supabase configure avec URL projet simple', () => {
-    process.env.EXPO_PUBLIC_SUPABASE_URL = 'https://frmiyddfipejirtbzoxr.supabase.co';
-    process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY = 'mock_publishable_key';
-    process.env.EXPO_PUBLIC_APP_URL = 'https://gryzax.github.io/carnet-rose/';
-
-    const { getSupabaseAuthUrl, getSupabaseUrl, isSupabaseConfigured } = loadSupabaseClient();
+    const { getSupabaseAuthUrl, getSupabaseUrl, isSupabaseConfigured } = loadSupabaseClientWithEnv({
+      NODE_ENV: 'test',
+      EXPO_PUBLIC_SUPABASE_URL: 'https://frmiyddfipejirtbzoxr.supabase.co',
+      EXPO_PUBLIC_SUPABASE_ANON_KEY: 'mock_publishable_key',
+      EXPO_PUBLIC_APP_URL: 'https://gryzax.github.io/carnet-rose/'
+    });
 
     expect(isSupabaseConfigured()).toBe(true);
     expect(getSupabaseUrl()).toBe('https://frmiyddfipejirtbzoxr.supabase.co');
@@ -28,11 +32,12 @@ describe('supabaseClient', () => {
   });
 
   test('ne crashe pas sans env', () => {
-    delete process.env.EXPO_PUBLIC_SUPABASE_URL;
-    delete process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
-    delete process.env.EXPO_PUBLIC_APP_URL;
+    const envWithoutSupabase = { NODE_ENV: 'test' };
+    delete envWithoutSupabase.EXPO_PUBLIC_SUPABASE_URL;
+    delete envWithoutSupabase.EXPO_PUBLIC_SUPABASE_ANON_KEY;
+    delete envWithoutSupabase.EXPO_PUBLIC_APP_URL;
 
-    const { getSupabaseAuthUrl, isSupabaseConfigured } = loadSupabaseClient();
+    const { getSupabaseAuthUrl, isSupabaseConfigured } = loadSupabaseClientWithEnv(envWithoutSupabase);
 
     expect(isSupabaseConfigured()).toBe(false);
     expect(getSupabaseAuthUrl('google', 'https://gryzax.github.io/carnet-rose/')).toBeNull();
