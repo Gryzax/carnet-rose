@@ -144,3 +144,32 @@ test('stockage web: reset trimestriel archive puis remet les compteurs a zero', 
   expect(resetStudent.ticks).toBe(0);
   expect(resetStudent.trimestreActuel).toBe(2);
 });
+
+test('stockage web: les donnees marquees deleted_at ne sont pas affichees', async () => {
+  localforage.__stores.get('CarnetRose').clear();
+  localforage.__stores.get('CarnetRose').set('state:v1', {
+    classes: [
+      { id: 1, nom: '6e Rose', creeLe: 'now', derniereUtilisation: 'now', deleted_at: '2026-01-01T00:00:00.000Z' },
+      { id: 2, nom: '4e Rose', creeLe: 'now', derniereUtilisation: 'now' }
+    ],
+    eleves: [
+      { id: 1, classeId: 1, prenom: 'Demo', nom: 'Supprime', ticks: 0, croix: 0, merites: 0, retenues: 0, trimestreActuel: 1 },
+      { id: 2, classeId: 2, prenom: 'Ada', nom: 'Lovelace', ticks: 0, croix: 0, merites: 0, retenues: 0, trimestreActuel: 1 }
+    ],
+    evenements: [],
+    archive_trimestre: [],
+    seq: { classes: 2, eleves: 2, evenements: 0, archive_trimestre: 0 }
+  });
+
+  const db = await getDb();
+  const classes = await db.getAllAsync(`
+    SELECT c.*, COUNT(e.id) as nombreEleves, COALESCE(SUM(e.merites), 0) as totalMerites, COALESCE(SUM(e.retenues), 0) as totalRetenues
+    FROM classes c LEFT JOIN eleves e ON e.classeId = c.id
+    GROUP BY c.id ORDER BY c.nom COLLATE NOCASE
+  `);
+  const students = await db.getAllAsync('SELECT e.*, c.nom as classeNom FROM eleves e JOIN classes c ON c.id = e.classeId');
+
+  expect(classes).toEqual([expect.objectContaining({ nom: '4e Rose', nombreEleves: 1 })]);
+  expect(classes).not.toEqual(expect.arrayContaining([expect.objectContaining({ nom: '6e Rose' })]));
+  expect(students).toEqual([expect.objectContaining({ prenom: 'Ada', classeNom: '4e Rose' })]);
+});
