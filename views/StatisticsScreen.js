@@ -4,6 +4,15 @@ import { colors } from '../constants/colors';
 import { getStatistics } from '../controllers/statisticsController';
 import { Card, PillButton, Screen, SegmentedControl, Sparkle, Title } from '../components/Themed';
 
+const FORGOTTEN_NOTEBOOK_REGEX = /(cahier|carnet|notebook)/i;
+const climateThresholds = [
+  { min: 0.72, status: 'Climat positif et stable', advice: 'Maintenez le cap et valorisez les efforts des élèves discrets.' },
+  { min: 0.5, status: 'Climat stable', advice: 'Renforcez les encouragements ciblés en début de séance.' },
+  { min: 0.35, status: 'Climat à surveiller', advice: 'Planifiez un rappel collectif des attentes puis récompensez vite les progrès.', warning: true }
+];
+const encouragerScore = (student) => student.merites * 4 + student.ticks;
+const recadrerScore = (student) => student.retenues * 4 + student.croix;
+
 export const StatisticsScreen = ({ navigation }) => {
   const [stats, setStats] = useState({ classes: [], students: [], events: [] });
   const [period, setPeriod] = useState('week');
@@ -45,7 +54,7 @@ export const StatisticsScreen = ({ navigation }) => {
   }, [filteredEvents, now]);
 
   const forgottenNotebookCount = useMemo(
-    () => todayEvents.filter((event) => /(cahier|carnet|devoir|notebook|oubli)/i.test(event.raison || '')).length,
+    () => todayEvents.filter((event) => FORGOTTEN_NOTEBOOK_REGEX.test(event.raison || '')).length,
     [todayEvents]
   );
 
@@ -65,20 +74,20 @@ export const StatisticsScreen = ({ navigation }) => {
       return { status: 'Manque de données récentes', advice: 'Multipliez les observations courtes pour calibrer la tendance.', warning: true };
     }
     const positiveRatio = tickCount / (tickCount + crossCount);
-    if (positiveRatio >= 0.72) return { status: 'Climat positif et stable', advice: 'Maintenez le cap et valorisez les efforts des élèves discrets.' };
-    if (positiveRatio >= 0.5) return { status: 'Climat stable', advice: 'Renforcez les encouragements ciblés en début de séance.' };
-    if (positiveRatio >= 0.35) return { status: "Climat à surveiller", advice: 'Planifiez un rappel collectif des attentes puis récompensez vite les progrès.', warning: true };
+    const threshold = climateThresholds.find((item) => positiveRatio >= item.min);
+    if (threshold) return threshold;
     return { status: 'Climat tendu', advice: 'Priorisez 3 élèves à recadrer puis valorisez immédiatement les comportements attendus.', warning: true };
   }, [periodEvents]);
 
   const topEncourager = useMemo(
-    () => [...filteredStudents].sort((a, b) => (b.merites * 4 + b.ticks) - (a.merites * 4 + a.ticks)).slice(0, 3),
+    () => [...filteredStudents].sort((a, b) => encouragerScore(b) - encouragerScore(a)).slice(0, 3),
     [filteredStudents]
   );
   const topRecadrer = useMemo(
-    () => [...filteredStudents].sort((a, b) => (b.retenues * 4 + b.croix) - (a.retenues * 4 + a.croix)).slice(0, 3),
+    () => [...filteredStudents].sort((a, b) => recadrerScore(b) - recadrerScore(a)).slice(0, 3),
     [filteredStudents]
   );
+  const displayedTop = topTab === 'encourager' ? topEncourager : topRecadrer;
 
   const evolution = useMemo(() => {
     const totals = {
@@ -127,7 +136,7 @@ export const StatisticsScreen = ({ navigation }) => {
             <Card style={styles.dropdownCard}>
               <Pressable onPress={() => { setSelectedClassId('all'); setShowClassPicker(false); }} style={styles.dropdownOption}><Text style={styles.text}>Toutes les classes</Text></Pressable>
               {stats.classes.map((classe) => (
-                <Pressable key={classe.id} onPress={() => { setSelectedClassId(classe.id); setShowClassPicker(false); }} style={styles.dropdownOption}>
+                <Pressable key={classe.id} onPress={() => { setSelectedClassId(String(classe.id)); setShowClassPicker(false); }} style={styles.dropdownOption}>
                   <Text style={styles.text}>{classe.nom}</Text>
                 </Pressable>
               ))}
@@ -142,7 +151,7 @@ export const StatisticsScreen = ({ navigation }) => {
         </Card>
 
         <Card style={styles.card}>
-          <Text style={styles.sectionLabel}>Aujourd&apos;hui</Text>
+          <Text style={styles.sectionLabel}>Aujourd’hui</Text>
           <View style={styles.metricGrid}>
             <View style={styles.metric}><Text style={styles.metricValue}>{atRiskStudents}</Text><Text style={styles.metricLabel}>Élèves à surveiller</Text></View>
             <View style={styles.metric}><Text style={styles.metricValue}>{todayEvents.filter((event) => event.type === 'tick').length}</Text><Text style={styles.metricLabel}>Ticks donnés</Text></View>
@@ -169,13 +178,15 @@ export const StatisticsScreen = ({ navigation }) => {
             options={[{ value: 'encourager', label: 'À encourager' }, { value: 'recadrer', label: 'À recadrer' }]}
           />
           <View style={styles.listBody}>
-            {(topTab === 'encourager' ? topEncourager : topRecadrer).map((student, index) => (
+            {displayedTop.map((student, index) => (
               <View key={student.id} style={styles.line}>
                 <Sparkle />
-                <Text style={styles.text}>{index + 1}. {student.prenom} {student.nom} - {topTab === 'encourager' ? student.merites : student.croix}</Text>
+                <Text style={styles.text}>
+                  {index + 1}. {student.prenom} {student.nom} - score {topTab === 'encourager' ? encouragerScore(student) : recadrerScore(student)}
+                </Text>
               </View>
             ))}
-            {!filteredStudents.length && <Text style={styles.text}>Aucun élève pour cette sélection.</Text>}
+            {!displayedTop.length && <Text style={styles.text}>Aucun élève pour cette sélection.</Text>}
           </View>
         </Card>
 
@@ -201,7 +212,7 @@ export const StatisticsScreen = ({ navigation }) => {
               style={styles.segmented}
               value={archive}
               onChange={setArchive}
-              options={archiveOptions.slice(0, 3).map((option) => ({ value: option, label: option === 'current' ? 'En cours' : option.toUpperCase() }))}
+              options={archiveOptions.map((option) => ({ value: option, label: option === 'current' ? 'En cours' : option.toUpperCase() }))}
             />
           </Card>
         )}
@@ -225,7 +236,7 @@ const styles = StyleSheet.create({
   status: { color: colors.ink, fontFamily: 'PatrickHand_400Regular', fontSize: 25, marginBottom: 6 },
   warningText: { color: '#D27C2C' },
   metricGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  metric: { width: '48%', borderWidth: 1.1, borderColor: colors.ink, borderRadius: 12, backgroundColor: '#FFFDFB', padding: 10 },
+  metric: { flexGrow: 1, flexBasis: '48%', borderWidth: 1.1, borderColor: colors.ink, borderRadius: 12, backgroundColor: '#FFFDFB', padding: 10 },
   metricValue: { color: colors.ink, fontFamily: 'PatrickHand_400Regular', fontSize: 28, lineHeight: 30 },
   metricLabel: { color: colors.muted, fontFamily: 'PatrickHand_400Regular', fontSize: 17 },
   actions: { gap: 8 },

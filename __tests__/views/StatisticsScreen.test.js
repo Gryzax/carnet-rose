@@ -21,7 +21,7 @@ test('statistiques affiche le tableau de bord actionnable', async () => {
   expect(getByTestId('statistics-scroll')).toBeTruthy();
   expect(getByTestId('statistics-scroll').props.contentContainerStyle).toEqual(expect.objectContaining({ flexGrow: 1, paddingBottom: 116 }));
   expect(getByText('Climat de classe')).toBeTruthy();
-  expect(getByText("Aujourd'hui")).toBeTruthy();
+  expect(getByText('Aujourd’hui')).toBeTruthy();
   expect(getByText('Action rapide')).toBeTruthy();
   expect(getByText('Top 3')).toBeTruthy();
   expect(getByText('Évolution')).toBeTruthy();
