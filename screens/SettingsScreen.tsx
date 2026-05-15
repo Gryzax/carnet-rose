@@ -22,6 +22,7 @@ import { deleteAccount, getCurrentUser, signOut } from '../services/auth/authSer
 import { clearLocalData } from '../database/db';
 import { invalidate } from '../lib/queryClient';
 import { useT } from '../utils/i18n';
+import { THRESHOLD_MAX, THRESHOLD_MIN, setThresholds, useThresholds } from '../utils/thresholds';
 import { LANGUAGE_LABELS, SUPPORTED_LANGUAGES } from '../constants/i18n';
 import type { AppTabsParamList } from '../navigation/types';
 import type { AuthUser } from '../types/services';
@@ -45,8 +46,72 @@ const Section = ({ title, children }: { title: ReactNode; children: ReactNode })
   </Card>
 );
 
+interface StepperProps {
+  label: string;
+  value: number;
+  onChange: (next: number) => void;
+  decreaseLabel: string;
+  increaseLabel: string;
+  testID: string;
+}
+
+const Stepper = ({
+  label,
+  value,
+  onChange,
+  decreaseLabel,
+  increaseLabel,
+  testID,
+}: StepperProps) => {
+  const atMin = value <= THRESHOLD_MIN;
+  const atMax = value >= THRESHOLD_MAX;
+  return (
+    <View style={styles.stepperRow}>
+      <Text style={styles.stepperLabel}>{label}</Text>
+      <View style={styles.stepperControls}>
+        <Pressable
+          testID={`${testID}-decrease`}
+          accessibilityRole="button"
+          accessibilityLabel={decreaseLabel}
+          accessibilityState={{ disabled: atMin }}
+          disabled={atMin}
+          onPress={() => onChange(value - 1)}
+          hitSlop={8}
+          style={({ pressed }) => [
+            styles.stepperBtn,
+            atMin && styles.stepperBtnDisabled,
+            pressed && styles.pressed,
+          ]}
+        >
+          <Ionicons name="remove" size={20} color={atMin ? colors.muted : colors.ink} />
+        </Pressable>
+        <Text testID={`${testID}-value`} style={styles.stepperValue}>
+          {value}
+        </Text>
+        <Pressable
+          testID={`${testID}-increase`}
+          accessibilityRole="button"
+          accessibilityLabel={increaseLabel}
+          accessibilityState={{ disabled: atMax }}
+          disabled={atMax}
+          onPress={() => onChange(value + 1)}
+          hitSlop={8}
+          style={({ pressed }) => [
+            styles.stepperBtn,
+            atMax && styles.stepperBtnDisabled,
+            pressed && styles.pressed,
+          ]}
+        >
+          <Ionicons name="add" size={20} color={atMax ? colors.muted : colors.ink} />
+        </Pressable>
+      </View>
+    </View>
+  );
+};
+
 export const SettingsScreen = ({ onSignedOut }: SettingsScreenProps) => {
   const { t, lang, setLang } = useT();
+  const { ticksForMerit, crossesForDetention } = useThresholds();
   const [summary, setSummary] = useState<TrimesterSummary | null>(null);
   const [success, setSuccess] = useState<ResetTrimesterResult | null>(null);
   const [confirmText, setConfirmText] = useState('');
@@ -193,6 +258,33 @@ export const SettingsScreen = ({ onSignedOut }: SettingsScreenProps) => {
             </View>
           )}
         </Section>
+        <Section title={t('sectionThresholds')}>
+          <Text style={styles.muted}>{t('thresholdsHint')}</Text>
+          <Stepper
+            testID="threshold-ticks"
+            label={t('ticksForMeritLabel') as string}
+            value={ticksForMerit}
+            onChange={(next) => setThresholds({ ticksForMerit: next })}
+            decreaseLabel={
+              t('thresholdDecrease', { label: t('ticksForMeritLabel') as string }) as string
+            }
+            increaseLabel={
+              t('thresholdIncrease', { label: t('ticksForMeritLabel') as string }) as string
+            }
+          />
+          <Stepper
+            testID="threshold-crosses"
+            label={t('crossesForDetentionLabel') as string}
+            value={crossesForDetention}
+            onChange={(next) => setThresholds({ crossesForDetention: next })}
+            decreaseLabel={
+              t('thresholdDecrease', { label: t('crossesForDetentionLabel') as string }) as string
+            }
+            increaseLabel={
+              t('thresholdIncrease', { label: t('crossesForDetentionLabel') as string }) as string
+            }
+          />
+        </Section>
         <Section title={t('sectionReasons')}>
           <ReasonsEditor />
         </Section>
@@ -328,4 +420,31 @@ const styles = StyleSheet.create({
   languageLabel: { color: colors.ink, fontFamily: typography.regular, fontSize: 21 },
   languageLabelActive: { color: colors.onPrimary },
   pressed: { transform: [{ scale: 0.97 }] },
+  stepperRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    minHeight: 48,
+    gap: 12,
+  },
+  stepperLabel: { flex: 1, color: colors.ink, fontFamily: typography.regular, fontSize: 21 },
+  stepperControls: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  stepperBtn: {
+    width: 44,
+    height: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 999,
+    backgroundColor: colors.canvas,
+    borderColor: colors.border,
+    borderWidth: 1.5,
+  },
+  stepperBtnDisabled: { opacity: 0.5 },
+  stepperValue: {
+    minWidth: 36,
+    textAlign: 'center',
+    color: colors.ink,
+    fontFamily: typography.regular,
+    fontSize: 23,
+  },
 });

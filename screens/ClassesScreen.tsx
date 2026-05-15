@@ -23,7 +23,7 @@ import { SheetModal } from '../components/SheetModal';
 import { ConfirmDialog, DialogModal, DialogTitle } from '../components/ConfirmDialog';
 import { ProgressBar } from '../components/ProgressBar';
 import { StudentAvatar } from '../components/StudentAvatar';
-import { CROSSES_FOR_DETENTION, TICKS_FOR_MERIT } from '../constants/config';
+import { useThresholds } from '../utils/thresholds';
 import {
   Card,
   IconButton,
@@ -44,6 +44,7 @@ type Props = NativeStackScreenProps<ClassesStackParamList, 'ClassesHome'>;
 
 export const ClassesScreen = ({ navigation }: Props) => {
   const { t } = useT();
+  const { ticksForMerit, crossesForDetention } = useThresholds();
   const [sort, setSort] = useState<ClassSort>('alpha');
   const [query, setQuery] = useState('');
   const [classFilter, setClassFilter] = useState<string | null>(null);
@@ -211,16 +212,16 @@ export const ClassesScreen = ({ navigation }: Props) => {
         <View style={styles.resultRow}>
           <Pill style={styles.resultMetric}>{t('ticksLabel')}</Pill>
           <Text style={styles.resultCount}>
-            {item.ticks}/{TICKS_FOR_MERIT}
+            {item.ticks}/{ticksForMerit}
           </Text>
-          <ProgressBar value={item.ticks} max={TICKS_FOR_MERIT} color={colors.successGreen} />
+          <ProgressBar value={item.ticks} max={ticksForMerit} color={colors.successGreen} />
         </View>
         <View style={styles.resultRow}>
           <Pill style={styles.resultMetric}>{t('crossesLabel')}</Pill>
           <Text style={styles.resultCount}>
-            {item.crosses}/{CROSSES_FOR_DETENTION}
+            {item.crosses}/{crossesForDetention}
           </Text>
-          <ProgressBar value={item.crosses} max={CROSSES_FOR_DETENTION} color={colors.dangerRed} />
+          <ProgressBar value={item.crosses} max={crossesForDetention} color={colors.dangerRed} />
         </View>
         <View style={styles.stats}>
           <Pill tone="pink">{t('meritsPill', { count: item.merits })}</Pill>

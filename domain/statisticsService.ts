@@ -1,4 +1,4 @@
-import { CROSSES_FOR_DETENTION, TICKS_FOR_MERIT } from '../constants/config';
+import { getThresholds } from '../utils/thresholds';
 import { getClasses } from '../models/classModel';
 import { getAllStudents } from '../models/studentModel';
 import { getAllArchives, getAllEvents } from '../models/historyModel';
@@ -108,11 +108,12 @@ export const getClassroomStatistics = async ({
   // Evolution counters over the selected period.
   const periodTicks = countType(periodEvents, 'tick');
   const periodCrosses = countType(periodEvents, 'cross');
+  const { ticksForMerit, crossesForDetention } = getThresholds();
   const periodMerits = periodEvents.filter(
-    (event) => event.type === 'tick' && event.previousTicks === TICKS_FOR_MERIT - 1,
+    (event) => event.type === 'tick' && event.previousTicks === ticksForMerit - 1,
   ).length;
   const periodDetentions = periodEvents.filter(
-    (event) => event.type === 'cross' && event.previousCrosses === CROSSES_FOR_DETENTION - 1,
+    (event) => event.type === 'cross' && event.previousCrosses === crossesForDetention - 1,
   ).length;
 
   // Today snapshot.
