@@ -89,10 +89,6 @@ npm run build:android:production   # production profile → .aab for Play Store
 /__tests__     unit, database and component tests
 ```
 
-## MVC Architecture
-
-Views render the UI and delegate actions to controllers. Controllers apply business rules, then call models. Models are the only layer that touches storage, via `/database/db.js`.
-
 ## Git Workflow
 
 `main` stays stable. `dev` integrates finished features. Each significant feature branches off `dev` as `feature/...`, then merges back after tests.
