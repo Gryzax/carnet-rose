@@ -16,11 +16,12 @@ Use the Supabase `sb_publishable_...` anon/publishable key. Never use or commit 
 
 For the GitHub Pages PWA, add the same values in GitHub:
 
-Settings -> Secrets and variables -> Actions -> Variables
+Settings -> Secrets and variables -> Actions -> Variables / Secrets
 
 - `EXPO_PUBLIC_SUPABASE_URL`
-- `EXPO_PUBLIC_SUPABASE_KEY`
 - `EXPO_PUBLIC_APP_URL`
+
+Store `EXPO_PUBLIC_SUPABASE_KEY` in Actions -> Secrets instead of Variables.
 
 ## Supabase Auth URLs
 

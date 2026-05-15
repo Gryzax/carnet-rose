@@ -35,6 +35,7 @@ EXPO_PUBLIC_APP_URL=
 ```
 
 Never commit `.env`. The anon/publishable key is not a server secret, but data access must be protected by Supabase Row Level Security.
+In GitHub Actions, keep `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_APP_URL` in Variables, and `EXPO_PUBLIC_SUPABASE_KEY` in Secrets.
 
 ## Next Steps
 

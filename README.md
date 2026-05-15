@@ -41,7 +41,8 @@ EXPO_PUBLIC_SUPABASE_KEY=    # use the sb_publishable_... key
 EXPO_PUBLIC_APP_URL=https://gryzax.github.io/carnet-rose/
 ```
 
-For the GitHub Pages PWA, add the same three values in GitHub → Settings → Secrets and variables → Actions → Variables.
+For the GitHub Pages PWA, add `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_APP_URL` in GitHub → Settings → Secrets and variables → Actions → Variables.
+Store `EXPO_PUBLIC_SUPABASE_KEY` in GitHub → Settings → Secrets and variables → Actions → Secrets.
 
 Full provider setup (Supabase Auth URLs, Google Cloud, Apple) is in `docs/supabase-setup.md`. The DB schema and RLS policies are in `docs/supabase-schema.sql` — run it manually in the Supabase SQL Editor.
 
