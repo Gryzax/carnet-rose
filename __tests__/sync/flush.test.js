@@ -2,26 +2,28 @@ jest.mock('../../database/outbox', () => ({
   listOutbox: jest.fn(() => Promise.resolve([])),
   outboxSize: jest.fn(() => Promise.resolve(0)),
   removeEntry: jest.fn(() => Promise.resolve()),
-  bumpAttempts: jest.fn(() => Promise.resolve())
+  bumpAttempts: jest.fn(() => Promise.resolve()),
 }));
 jest.mock('../../net/connectivity', () => ({
-  isOnline: jest.fn(() => true)
+  isOnline: jest.fn(() => true),
 }));
 jest.mock('../../services/remote/context', () => ({
-  getRemoteContext: jest.fn(() => Promise.resolve({ ready: true, user: { id: 'u1' }, session: { accessToken: 't1' } }))
+  getRemoteContext: jest.fn(() =>
+    Promise.resolve({ ready: true, user: { id: 'u1' }, session: { accessToken: 't1' } }),
+  ),
 }));
 jest.mock('../../services/remote/classRemote', () => ({
   pushClass: jest.fn(() => Promise.resolve()),
-  softDeleteClassRemote: jest.fn(() => Promise.resolve())
+  softDeleteClassRemote: jest.fn(() => Promise.resolve()),
 }));
 jest.mock('../../services/remote/studentRemote', () => ({
   pushStudent: jest.fn(() => Promise.resolve()),
-  softDeleteStudentRemote: jest.fn(() => Promise.resolve())
+  softDeleteStudentRemote: jest.fn(() => Promise.resolve()),
 }));
 jest.mock('../../services/remote/historyRemote', () => ({
   pushEvent: jest.fn(() => Promise.resolve()),
   pushArchive: jest.fn(() => Promise.resolve()),
-  softDeleteEventRemote: jest.fn(() => Promise.resolve())
+  softDeleteEventRemote: jest.fn(() => Promise.resolve()),
 }));
 
 import { flushOutbox } from '../../sync/flush';
@@ -32,12 +34,23 @@ import { pushClass, softDeleteClassRemote } from '../../services/remote/classRem
 import { pushStudent } from '../../services/remote/studentRemote';
 import { pushEvent } from '../../services/remote/historyRemote';
 
-const entry = (over) => ({ id: `o-${Math.random()}`, entity: 'class', op: 'upsert', payload: { id: 'c1' }, attempts: 0, ...over });
+const entry = (over) => ({
+  id: `o-${Math.random()}`,
+  entity: 'class',
+  op: 'upsert',
+  payload: { id: 'c1' },
+  attempts: 0,
+  ...over,
+});
 
 beforeEach(() => {
   jest.clearAllMocks();
   isOnline.mockReturnValue(true);
-  getRemoteContext.mockResolvedValue({ ready: true, user: { id: 'u1' }, session: { accessToken: 't1' } });
+  getRemoteContext.mockResolvedValue({
+    ready: true,
+    user: { id: 'u1' },
+    session: { accessToken: 't1' },
+  });
   outboxSize.mockResolvedValue(0);
   listOutbox.mockResolvedValue([]);
 });

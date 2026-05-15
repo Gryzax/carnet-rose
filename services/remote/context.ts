@@ -1,5 +1,9 @@
 import { getCurrentSession, getCurrentUser } from '../auth/authService';
-import { isSupabaseConfigured, supabaseRequest, type SupabaseRequestOptions } from '../supabase/supabaseClient';
+import {
+  isSupabaseConfigured,
+  supabaseRequest,
+  type SupabaseRequestOptions,
+} from '../supabase/supabaseClient';
 import { reportReachable, reportUnreachable } from '../../net/connectivity';
 import type { AuthSession, AuthUser } from '../../types/services';
 
@@ -36,7 +40,7 @@ export const getRemoteContext = async (): Promise<RemoteContext> => {
  */
 export const remoteRequest = async <T = unknown>(
   path: string,
-  options: SupabaseRequestOptions = {}
+  options: SupabaseRequestOptions = {},
 ): Promise<T | null> => {
   let result;
   try {

@@ -2,7 +2,10 @@ const fs = require('fs');
 const path = require('path');
 
 test('workflow PWA expose les variables Supabase au build', () => {
-  const workflow = fs.readFileSync(path.join(__dirname, '..', '..', '.github', 'workflows', 'deploy-pwa.yml'), 'utf8');
+  const workflow = fs.readFileSync(
+    path.join(__dirname, '..', '..', '.github', 'workflows', 'deploy-pwa.yml'),
+    'utf8',
+  );
 
   expect(workflow).toContain('EXPO_PUBLIC_SUPABASE_URL: ${{ vars.EXPO_PUBLIC_SUPABASE_URL }}');
   expect(workflow).toContain('EXPO_PUBLIC_SUPABASE_KEY: ${{ vars.EXPO_PUBLIC_SUPABASE_KEY }}');

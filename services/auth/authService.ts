@@ -1,16 +1,16 @@
 import { Linking, Platform } from 'react-native';
-import { getSupabaseAuthUrl, isSupabaseConfigured, supabaseRequest } from '../supabase/supabaseClient';
+import {
+  getSupabaseAuthUrl,
+  isSupabaseConfigured,
+  supabaseRequest,
+} from '../supabase/supabaseClient';
 import type { AuthResult, AuthSession, AuthUser, SessionResult } from '../../types/services';
 
-export type AuthChangeCallback = (
-  event: string,
-  payload: { user: AuthUser } | null
-) => void;
+export type AuthChangeCallback = (event: string, payload: { user: AuthUser } | null) => void;
 
 let currentUser: AuthUser | null = null;
 const listeners = new Set<AuthChangeCallback>();
 const SESSION_KEY = 'carnet-rose.supabase-session';
-const unavailableMessage = 'La connexion n’est pas encore configurée. Veuillez contacter l’administrateur.';
 
 const DEFAULT_APP_URL = 'https://gryzax.github.io/carnet-rose/';
 
@@ -91,7 +91,11 @@ const extractWebSession = (): AuthSession | null => {
   if (!hash) return null;
   // Strip the token-bearing fragment from the URL as the very first action,
   // before parsing, so it cannot leak into history/analytics/crash reporters.
-  window.history.replaceState({}, document.title, window.location.pathname + window.location.search);
+  window.history.replaceState(
+    {},
+    document.title,
+    window.location.pathname + window.location.search,
+  );
   const params = new URLSearchParams(hash);
   const errorDescription = params.get('error_description') || params.get('error');
   if (errorDescription) {
@@ -103,7 +107,7 @@ const extractWebSession = (): AuthSession | null => {
   const session: AuthSession = {
     accessToken,
     refreshToken: params.get('refresh_token'),
-    expiresAt: params.get('expires_at')
+    expiresAt: params.get('expires_at'),
   };
   if (!isSessionValid(session)) return null;
   storeSession(session);
@@ -122,14 +126,14 @@ if (
 
 const emitAuthChange = (): void => {
   listeners.forEach((callback) =>
-    callback('AUTH_STATE_CHANGED', currentUser ? { user: currentUser } : null)
+    callback('AUTH_STATE_CHANGED', currentUser ? { user: currentUser } : null),
   );
 };
 
 const loadUserFromSession = async (session: AuthSession | null): Promise<AuthResult> => {
   if (!session?.accessToken) return { user: null, error: null };
   const { data, error } = await supabaseRequest<AuthUser>('/auth/v1/user', {
-    accessToken: session.accessToken
+    accessToken: session.accessToken,
   });
   if (error) {
     // The token was refused (expired/revoked/invalid). Drop it so the next
@@ -145,7 +149,11 @@ const loadUserFromSession = async (session: AuthSession | null): Promise<AuthRes
 
 const signInWithProvider = async (provider: string): Promise<AuthResult> => {
   if (!isSupabaseConfigured()) {
-    return { user: null, error: new Error(unavailableMessage), message: unavailableMessage };
+    return {
+      user: null,
+      error: new Error('Sign-in is not configured.'),
+      messageKey: 'unavailableMessage',
+    };
   }
 
   const redirectTo = getAppUrl();
@@ -162,12 +170,12 @@ const signInWithProvider = async (provider: string): Promise<AuthResult> => {
         await Linking.openURL(authUrl);
       }
     }
-    return { user: null, error: null, message: 'Redirection vers Supabase en cours.' };
+    return { user: null, error: null, messageKey: 'redirectInProgress' };
   } catch (error) {
     return {
       user: null,
       error: error instanceof Error ? error : new Error(String(error)),
-      message: "Impossible d'ouvrir la page de connexion Supabase."
+      messageKey: 'signInPageError',
     };
   }
 };
@@ -176,7 +184,7 @@ export const getAuthStatus = (): { enabled: boolean; provider: string } => {
   const enabled = isSupabaseConfigured();
   return {
     enabled,
-    provider: enabled ? 'supabase' : 'unconfigured'
+    provider: enabled ? 'supabase' : 'unconfigured',
   };
 };
 
@@ -226,7 +234,7 @@ export const deleteAccount = async (): Promise<{ error: Error | null }> => {
   const { error } = await supabaseRequest('/rest/v1/rpc/delete_account', {
     method: 'POST',
     accessToken: session.accessToken,
-    body: JSON.stringify({})
+    body: JSON.stringify({}),
   });
   if (error) return { error };
   await signOut();

@@ -3,7 +3,7 @@ import { Platform } from 'react-native';
 import {
   getCurrentUser,
   onAuthStateChange,
-  signOut as authSignOut
+  signOut as authSignOut,
 } from '../services/auth/authService';
 import type { AuthUser } from '../types/services';
 

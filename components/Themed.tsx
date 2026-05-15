@@ -9,7 +9,7 @@ import {
   type TextProps,
   type TextStyle,
   type ViewProps,
-  type ViewStyle
+  type ViewStyle,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -32,10 +32,16 @@ export const useThemeColors = (): ThemeColors => ({
   card: colors.card,
   text: colors.ink,
   muted: colors.muted,
-  border: colors.border
+  border: colors.border,
 });
 
-export const Screen = ({ children, style }: { children: ReactNode; style?: StyleProp<ViewStyle> }) => (
+export const Screen = ({
+  children,
+  style,
+}: {
+  children: ReactNode;
+  style?: StyleProp<ViewStyle>;
+}) => (
   <SafeAreaView edges={['top', 'left', 'right']} style={[styles.screen, style]}>
     {children}
   </SafeAreaView>
@@ -96,7 +102,7 @@ export const Pill = ({
       tone === 'pink' && styles.pillPink,
       tone === 'orange' && styles.pillOrange,
       style,
-      textStyle
+      textStyle,
     ]}
     {...props}
   >
@@ -116,7 +122,7 @@ export const PillButton = ({
   variant = 'sage',
   style,
   disabled = false,
-  testID
+  testID,
 }: {
   children: ReactNode;
   onPress?: () => void;
@@ -139,13 +145,14 @@ export const PillButton = ({
       variant === 'danger' && styles.buttonDanger,
       disabled && styles.disabled,
       pressed && !disabled && styles.pressed,
-      style
+      style,
     ]}
   >
     <Text
       style={[
         styles.buttonText,
-        (variant === 'pink' || variant === 'orange' || variant === 'danger') && styles.buttonTextOnPink
+        (variant === 'pink' || variant === 'orange' || variant === 'danger') &&
+          styles.buttonTextOnPink,
       ]}
     >
       {children}
@@ -159,7 +166,7 @@ export const IconButton = ({
   onPress,
   style,
   testID,
-  accessibilityLabel
+  accessibilityLabel,
 }: {
   icon: IoniconName;
   label?: string;
@@ -189,7 +196,7 @@ export const SegmentedControl = <V extends string | number>({
   options,
   value,
   onChange,
-  style
+  style,
 }: {
   options: SegmentOption<V>[];
   value: V;
@@ -205,9 +212,15 @@ export const SegmentedControl = <V extends string | number>({
           onPress={() => onChange(option.value)}
           accessibilityRole="button"
           accessibilityState={{ selected: active }}
-          style={({ pressed }) => [styles.segment, active && styles.segmentActive, pressed && styles.pressed]}
+          style={({ pressed }) => [
+            styles.segment,
+            active && styles.segmentActive,
+            pressed && styles.pressed,
+          ]}
         >
-          <Text style={[styles.segmentText, active && styles.segmentTextActive]}>{option.label}</Text>
+          <Text style={[styles.segmentText, active && styles.segmentTextActive]}>
+            {option.label}
+          </Text>
         </Pressable>
       );
     })}
@@ -248,7 +261,7 @@ export const JournalInput = forwardRef<TextInput, JournalInputProps>(
         )}
       </View>
     );
-  }
+  },
 );
 JournalInput.displayName = 'JournalInput';
 
@@ -272,12 +285,12 @@ export const CatMascot = () => (
 const baseText: TextStyle = {
   fontFamily: typography.regular,
   color: colors.ink,
-  letterSpacing: 0
+  letterSpacing: 0,
 };
 
 const bordered: ViewStyle = {
   borderColor: colors.border,
-  borderWidth: 1.5
+  borderWidth: 1.5,
 };
 
 const styles = StyleSheet.create({
@@ -286,16 +299,59 @@ const styles = StyleSheet.create({
   // No horizontal padding here: screens add it on their own scroll content so
   // that full-bleed rows (e.g. swipe-to-delete) can reach the screen edges.
   screen: { flex: 1, backgroundColor: colors.canvas, paddingBottom: spacing.md },
-  washi: { position: 'absolute', backgroundColor: colors.orange, opacity: 0.28, transform: [{ rotate: '-8deg' }], pointerEvents: 'none' },
+  washi: {
+    position: 'absolute',
+    backgroundColor: colors.orange,
+    opacity: 0.28,
+    transform: [{ rotate: '-8deg' }],
+    pointerEvents: 'none',
+  },
   washiTop: { width: 132, height: 28, top: 14, right: -18 },
   title: { ...baseText, fontSize: 34, lineHeight: 40, marginBottom: spacing.md },
-  card: { backgroundColor: colors.card, borderRadius: radii.md, padding: spacing.md, marginBottom: spacing.md, ...bordered },
-  cardWashi: { position: 'absolute', top: -10, alignSelf: 'center', width: 86, height: 24, borderRadius: 3, backgroundColor: colors.orange, opacity: 0.84, transform: [{ rotate: '-4deg' }], pointerEvents: 'none' },
-  pill: { ...baseText, alignSelf: 'flex-start', overflow: 'hidden', borderRadius: radii.full, backgroundColor: colors.sage, paddingHorizontal: 12, paddingVertical: 5, fontSize: 15, textTransform: 'uppercase', ...bordered },
+  card: {
+    backgroundColor: colors.card,
+    borderRadius: radii.md,
+    padding: spacing.md,
+    marginBottom: spacing.md,
+    ...bordered,
+  },
+  cardWashi: {
+    position: 'absolute',
+    top: -10,
+    alignSelf: 'center',
+    width: 86,
+    height: 24,
+    borderRadius: 3,
+    backgroundColor: colors.orange,
+    opacity: 0.84,
+    transform: [{ rotate: '-4deg' }],
+    pointerEvents: 'none',
+  },
+  pill: {
+    ...baseText,
+    alignSelf: 'flex-start',
+    overflow: 'hidden',
+    borderRadius: radii.full,
+    backgroundColor: colors.sage,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    fontSize: 15,
+    textTransform: 'uppercase',
+    ...bordered,
+  },
   pillPink: { backgroundColor: colors.pink, color: colors.white },
   pillOrange: { backgroundColor: colors.orangeSoft },
   sparkle: { color: colors.orange, fontSize: 18, lineHeight: 22 },
-  button: { minHeight: 48, borderRadius: radii.sm, backgroundColor: colors.sage, alignItems: 'center', justifyContent: 'center', paddingHorizontal: spacing.md, paddingVertical: 12, ...bordered },
+  button: {
+    minHeight: 48,
+    borderRadius: radii.sm,
+    backgroundColor: colors.sage,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: spacing.md,
+    paddingVertical: 12,
+    ...bordered,
+  },
   buttonPink: { backgroundColor: colors.pink },
   buttonLight: { backgroundColor: colors.card },
   buttonOrange: { backgroundColor: colors.orange },
@@ -304,14 +360,46 @@ const styles = StyleSheet.create({
   buttonTextOnPink: { color: colors.white },
   disabled: { opacity: 0.55 },
   pressed: { transform: [{ scale: 0.97 }] },
-  iconButton: { minHeight: 44, borderRadius: radii.full, paddingHorizontal: 12, paddingVertical: 8, flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: colors.lightPink, ...bordered },
+  iconButton: {
+    minHeight: 44,
+    borderRadius: radii.full,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: colors.lightPink,
+    ...bordered,
+  },
   iconButtonText: { ...baseText, fontSize: 17 },
-  segmented: { flexDirection: 'row', borderRadius: radii.full, padding: 3, gap: 2, backgroundColor: colors.card, ...bordered },
-  segment: { flex: 1, minHeight: 44, alignItems: 'center', justifyContent: 'center', borderRadius: radii.full, paddingHorizontal: 10 },
+  segmented: {
+    flexDirection: 'row',
+    borderRadius: radii.full,
+    padding: 3,
+    gap: 2,
+    backgroundColor: colors.card,
+    ...bordered,
+  },
+  segment: {
+    flex: 1,
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: radii.full,
+    paddingHorizontal: 10,
+  },
   segmentActive: { backgroundColor: colors.pink },
   segmentText: { ...baseText, fontSize: 17, textTransform: 'uppercase' },
   segmentTextActive: { color: colors.white },
-  input: { ...baseText, minHeight: 48, backgroundColor: colors.card, borderRadius: radii.md, paddingHorizontal: spacing.md, fontSize: 20, ...bordered },
+  input: {
+    ...baseText,
+    minHeight: 48,
+    backgroundColor: colors.card,
+    borderRadius: radii.md,
+    paddingHorizontal: spacing.md,
+    fontSize: 20,
+    ...bordered,
+  },
   inputWrap: { position: 'relative', justifyContent: 'center' },
   inputClearable: { paddingRight: 44 },
   inputClear: {
@@ -322,15 +410,63 @@ const styles = StyleSheet.create({
     borderRadius: radii.full,
     backgroundColor: colors.neutralSoft,
     alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: 'center',
   },
-  infoIcon: { width: 28, height: 28, borderRadius: 14, borderWidth: 1.5, borderColor: colors.border, backgroundColor: colors.orangeSoft, alignItems: 'center', justifyContent: 'center' },
+  infoIcon: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    borderWidth: 1.5,
+    borderColor: colors.border,
+    backgroundColor: colors.orangeSoft,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   infoText: { ...baseText, fontSize: 19, lineHeight: 22 },
-  cat: { position: 'absolute', right: 12, top: -19, width: 42, height: 34, alignItems: 'center', zIndex: 5, pointerEvents: 'none' },
-  catEar: { position: 'absolute', top: 1, width: 14, height: 14, backgroundColor: colors.card, borderColor: colors.border, borderWidth: 1.5, transform: [{ rotate: '45deg' }] },
+  cat: {
+    position: 'absolute',
+    right: 12,
+    top: -19,
+    width: 42,
+    height: 34,
+    alignItems: 'center',
+    zIndex: 5,
+    pointerEvents: 'none',
+  },
+  catEar: {
+    position: 'absolute',
+    top: 1,
+    width: 14,
+    height: 14,
+    backgroundColor: colors.card,
+    borderColor: colors.border,
+    borderWidth: 1.5,
+    transform: [{ rotate: '45deg' }],
+  },
   catEarLeft: { left: 5 },
   catEarRight: { right: 5 },
-  catHead: { position: 'absolute', bottom: 0, width: 32, height: 26, borderRadius: 13, backgroundColor: colors.card, borderColor: colors.border, borderWidth: 1.5, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
-  catPatch: { position: 'absolute', top: -3, right: 2, width: 13, height: 15, borderRadius: 7, backgroundColor: colors.orangeSoft, transform: [{ rotate: '14deg' }] },
-  catText: { ...baseText, fontSize: 11, lineHeight: 13 }
+  catHead: {
+    position: 'absolute',
+    bottom: 0,
+    width: 32,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: colors.card,
+    borderColor: colors.border,
+    borderWidth: 1.5,
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  catPatch: {
+    position: 'absolute',
+    top: -3,
+    right: 2,
+    width: 13,
+    height: 15,
+    borderRadius: 7,
+    backgroundColor: colors.orangeSoft,
+    transform: [{ rotate: '14deg' }],
+  },
+  catText: { ...baseText, fontSize: 11, lineHeight: 13 },
 });

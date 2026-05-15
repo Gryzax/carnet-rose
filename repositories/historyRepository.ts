@@ -3,14 +3,14 @@ import {
   putArchive,
   putEvent,
   replaceAllArchives,
-  replaceAllEvents
+  replaceAllEvents,
 } from '../models/historyModel';
 import {
   fetchArchives,
   fetchEvents,
   pushArchive,
   pushEvent,
-  softDeleteEventRemote
+  softDeleteEventRemote,
 } from '../services/remote/historyRemote';
 import { invalidate } from '../lib/queryClient';
 import { flushThenPull, pushOrQueue } from './shared';

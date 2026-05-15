@@ -18,7 +18,7 @@ const openDb = async (): Promise<SQLite.SQLiteDatabase> => {
   await conn.execAsync('PRAGMA journal_mode = WAL;');
   for (const table of TABLES) {
     await conn.execAsync(
-      `CREATE TABLE IF NOT EXISTS ${table} (id TEXT PRIMARY KEY NOT NULL, data TEXT NOT NULL);`
+      `CREATE TABLE IF NOT EXISTS ${table} (id TEXT PRIMARY KEY NOT NULL, data TEXT NOT NULL);`,
     );
   }
   return conn;
@@ -40,7 +40,7 @@ const store: CacheStore = {
     const conn = await getConn();
     const row = await conn.getFirstAsync<{ data: string }>(
       `SELECT data FROM ${table} WHERE id = ?`,
-      id
+      id,
     );
     return row ? (JSON.parse(row.data) as T) : null;
   },
@@ -50,7 +50,7 @@ const store: CacheStore = {
     await conn.runAsync(
       `INSERT OR REPLACE INTO ${table} (id, data) VALUES (?, ?)`,
       row.id,
-      JSON.stringify(row)
+      JSON.stringify(row),
     );
   },
 
@@ -60,7 +60,7 @@ const store: CacheStore = {
       await conn.runAsync(
         `INSERT OR REPLACE INTO ${table} (id, data) VALUES (?, ?)`,
         row.id,
-        JSON.stringify(row)
+        JSON.stringify(row),
       );
     }
   },
@@ -77,7 +77,7 @@ const store: CacheStore = {
       await conn.runAsync(
         `INSERT OR REPLACE INTO ${table} (id, data) VALUES (?, ?)`,
         row.id,
-        JSON.stringify(row)
+        JSON.stringify(row),
       );
     }
   },
@@ -87,7 +87,7 @@ const store: CacheStore = {
     for (const table of TABLES) {
       await conn.runAsync(`DELETE FROM ${table}`);
     }
-  }
+  },
 };
 
 export const getStore = async (): Promise<CacheStore> => {

@@ -2,10 +2,7 @@
   "compilerOptions": {
     "target": "esnext",
     "module": "esnext",
-    "lib": [
-      "esnext",
-      "dom"
-    ],
+    "lib": ["esnext", "dom"],
     "jsx": "react-jsx",
     "moduleResolution": "bundler",
     "allowJs": true,
@@ -20,11 +17,7 @@
     "strict": true,
     "noUncheckedIndexedAccess": true,
     "noFallthroughCasesInSwitch": true,
-    "types": [
-      "react",
-      "jest",
-      "node"
-    ]
+    "types": ["react", "jest", "node"]
   },
   "include": [
     "App.tsx",
@@ -48,11 +41,6 @@
     "test-utils/**/*",
     "jest.setup.ts"
   ],
-  "exclude": [
-    "node_modules",
-    "carnet-rose",
-    "android",
-    "ios"
-  ],
+  "exclude": ["node_modules", "carnet-rose", "android", "ios"],
   "extends": "expo/tsconfig.base"
 }

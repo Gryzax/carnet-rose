@@ -44,12 +44,12 @@ export const outboxSize = async (): Promise<number> => (await listOutbox()).leng
 export const enqueue = async (
   entity: OutboxEntity,
   op: OutboxOp,
-  payload: { id: string }
+  payload: { id: string },
 ): Promise<void> => {
   const store = await getStore();
   const existing = await store.all<OutboxEntry>('outbox');
   const sameRow = existing.filter(
-    (entry) => entry.entity === entity && entry.payload.id === payload.id
+    (entry) => entry.entity === entity && entry.payload.id === payload.id,
   );
 
   for (const stale of sameRow) await store.remove('outbox', stale.id);
@@ -66,7 +66,7 @@ export const enqueue = async (
     op,
     payload,
     createdAt: nowIso(),
-    attempts: 0
+    attempts: 0,
   };
   await store.put('outbox', entry);
 };

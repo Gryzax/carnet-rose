@@ -6,11 +6,11 @@ Supabase is the chosen backend for Carnet Rose: generous free tier, PostgreSQL, 
 
 ## Comparison
 
-| Option | Strengths | Limits |
-| --- | --- | --- |
-| Supabase | PostgreSQL, free tier, Google/Apple auth, RLS, REST API, realtime path later | Careful RLS policies and conflict handling needed for offline sync |
-| Firebase | Mature auth, good free tier, strong mobile support | Less relational data model, migration less direct, separate rules skill set |
-| Appwrite Cloud | Open-source style, auth and database included | Smaller ecosystem, less direct PostgreSQL fit |
+| Option         | Strengths                                                                    | Limits                                                                      |
+| -------------- | ---------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| Supabase       | PostgreSQL, free tier, Google/Apple auth, RLS, REST API, realtime path later | Careful RLS policies and conflict handling needed for offline sync          |
+| Firebase       | Mature auth, good free tier, strong mobile support                           | Less relational data model, migration less direct, separate rules skill set |
+| Appwrite Cloud | Open-source style, auth and database included                                | Smaller ecosystem, less direct PostgreSQL fit                               |
 
 ## Architecture (current)
 

@@ -1,9 +1,14 @@
 import { Linking } from 'react-native';
 
 jest.mock('../../services/supabase/supabaseClient', () => ({
-  getSupabaseAuthUrl: jest.fn((provider, redirectTo) => `https://frmiyddfipejirtbzoxr.supabase.co/auth/v1/authorize?provider=${provider}&redirect_to=${encodeURIComponent(redirectTo)}`),
+  getSupabaseAuthUrl: jest.fn(
+    (provider, redirectTo) =>
+      `https://frmiyddfipejirtbzoxr.supabase.co/auth/v1/authorize?provider=${provider}&redirect_to=${encodeURIComponent(redirectTo)}`,
+  ),
   isSupabaseConfigured: jest.fn(() => true),
-  supabaseRequest: jest.fn(() => Promise.resolve({ data: { id: 'user-1', email: 'demo@example.com' }, error: null }))
+  supabaseRequest: jest.fn(() =>
+    Promise.resolve({ data: { id: 'user-1', email: 'demo@example.com' }, error: null }),
+  ),
 }));
 
 const supabaseClient = require('../../services/supabase/supabaseClient');
@@ -19,7 +24,11 @@ test('Google utilise Supabase OAuth', async () => {
 
   await signInWithGoogle();
 
-  expect(Linking.openURL).toHaveBeenCalledWith(expect.stringContaining('https://frmiyddfipejirtbzoxr.supabase.co/auth/v1/authorize?provider=google'));
+  expect(Linking.openURL).toHaveBeenCalledWith(
+    expect.stringContaining(
+      'https://frmiyddfipejirtbzoxr.supabase.co/auth/v1/authorize?provider=google',
+    ),
+  );
 });
 
 test('Apple utilise Supabase OAuth', async () => {
@@ -27,7 +36,11 @@ test('Apple utilise Supabase OAuth', async () => {
 
   await signInWithApple();
 
-  expect(Linking.openURL).toHaveBeenCalledWith(expect.stringContaining('https://frmiyddfipejirtbzoxr.supabase.co/auth/v1/authorize?provider=apple'));
+  expect(Linking.openURL).toHaveBeenCalledWith(
+    expect.stringContaining(
+      'https://frmiyddfipejirtbzoxr.supabase.co/auth/v1/authorize?provider=apple',
+    ),
+  );
 });
 
 describe('redirect OAuth (getAppUrl)', () => {
@@ -70,12 +83,13 @@ describe('redirect OAuth (getAppUrl)', () => {
   });
 });
 
-test('provider non configure ou Supabase absent retourne une erreur francaise sans crash', async () => {
+test('provider non configure ou Supabase absent retourne une erreur sans crash', async () => {
   supabaseClient.isSupabaseConfigured.mockReturnValue(false);
   const { signInWithGoogle } = require('../../services/auth/authService');
 
   const result = await signInWithGoogle();
 
   expect(result.user).toBeNull();
-  expect(result.message).toBe('La connexion n’est pas encore configurée. Veuillez contacter l’administrateur.');
+  expect(result.error).toBeInstanceOf(Error);
+  expect(result.messageKey).toBe('unavailableMessage');
 });

@@ -10,15 +10,15 @@ export const useClassMutations = () => {
 
   const rename = useMutation({
     mutationFn: ({ classRow, name }: { classRow: ClassRow | string; name: string }) =>
-      updateClass(classRow, name)
+      updateClass(classRow, name),
   });
 
   const remove = useMutation({
-    mutationFn: (classRow: ClassRow | string) => deleteClass(classRow)
+    mutationFn: (classRow: ClassRow | string) => deleteClass(classRow),
   });
 
   const markUsed = useMutation({
-    mutationFn: (classRow: ClassRow | string) => markClassUsed(classRow)
+    mutationFn: (classRow: ClassRow | string) => markClassUsed(classRow),
   });
 
   return { create, rename, remove, markUsed };

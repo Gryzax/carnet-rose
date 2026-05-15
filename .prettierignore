@@ -1,0 +1,9 @@
+node_modules/
+coverage/
+dist/
+.expo/
+android/
+ios/
+carnet-rose/
+package-lock.json
+*.log

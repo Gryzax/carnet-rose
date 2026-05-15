@@ -16,7 +16,7 @@ export const pushOrQueue = async (
   entity: OutboxEntity,
   op: OutboxOp,
   payload: Payload,
-  push: (ctx: ReadyRemoteContext) => Promise<void>
+  push: (ctx: ReadyRemoteContext) => Promise<void>,
 ): Promise<void> => {
   if (isOnline()) {
     const ctx = await getRemoteContext();
@@ -42,7 +42,7 @@ export const pushOrQueue = async (
  */
 export const flushThenPull = async <T>(
   fetch: (ctx: ReadyRemoteContext) => Promise<T[]>,
-  replaceAll: (rows: T[]) => Promise<void>
+  replaceAll: (rows: T[]) => Promise<void>,
 ): Promise<boolean> => {
   const remaining = await flushOutbox();
   if (remaining > 0) return false;

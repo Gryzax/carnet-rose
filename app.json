@@ -24,9 +24,6 @@
     "experiments": {
       "baseUrl": "/carnet-rose"
     },
-    "plugins": [
-      "expo-font",
-      "expo-sqlite"
-    ]
+    "plugins": ["expo-font", "expo-sqlite"]
   }
 }

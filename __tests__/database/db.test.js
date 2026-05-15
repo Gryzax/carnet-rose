@@ -20,7 +20,7 @@ test('seedDemo crée deux classes et dix élèves avec des UUID', async () => {
 
 test('seedDemo est ignoré si le cache contient déjà des classes', async () => {
   const store = createMemStore({
-    classes: [{ id: 'c1', name: 'Déjà là', createdAt: 'now', lastUsedAt: 'now' }]
+    classes: [{ id: 'c1', name: 'Déjà là', createdAt: 'now', lastUsedAt: 'now' }],
   });
   await seedDemo(store);
 

@@ -19,10 +19,10 @@ export const useHistory = (student: StudentRow | null | undefined) => {
     queryFn: async () => {
       const [history, archives] = await Promise.all([
         getCurrentHistory(id as string, trimester as number),
-        getArchives(id as string)
+        getArchives(id as string),
       ]);
       return { history, archives };
-    }
+    },
   });
 
   useEffect(() => {
@@ -33,6 +33,6 @@ export const useHistory = (student: StudentRow | null | undefined) => {
     history: data?.history ?? [],
     archives: data?.archives ?? [],
     loading: isLoading,
-    refresh: refetch
+    refresh: refetch,
   };
 };

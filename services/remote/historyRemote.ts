@@ -53,12 +53,12 @@ export const mapEventToSupabase = (event: EventRow, userId: string) => ({
     newCrosses: event.newCrosses,
     previousForgets: event.previousForgets,
     newForgets: event.newForgets,
-    cancelled: event.cancelled || 0
+    cancelled: event.cancelled || 0,
   },
   occurred_at: event.createdAt,
   created_at: event.createdAt,
   updated_at: nowIso(),
-  deleted_at: null
+  deleted_at: null,
 });
 
 export const mapEventFromSupabase = (row: SupabaseEvent): EventRow => {
@@ -77,7 +77,7 @@ export const mapEventFromSupabase = (row: SupabaseEvent): EventRow => {
     newCrosses: payload.newCrosses || 0,
     previousForgets: payload.previousForgets || 0,
     newForgets: payload.newForgets || 0,
-    cancelled: payload.cancelled ? 1 : 0
+    cancelled: payload.cancelled ? 1 : 0,
   };
 };
 
@@ -94,7 +94,7 @@ export const mapArchiveToSupabase = (archive: ArchiveRow, userId: string) => ({
   archived_at: archive.archivedAt,
   created_at: archive.archivedAt,
   updated_at: nowIso(),
-  deleted_at: null
+  deleted_at: null,
 });
 
 export const mapArchiveFromSupabase = (row: SupabaseArchive): ArchiveRow => ({
@@ -105,13 +105,13 @@ export const mapArchiveFromSupabase = (row: SupabaseArchive): ArchiveRow => ({
   detentions: row.total_detentions || 0,
   totalTicks: row.total_ticks || 0,
   totalCrosses: row.total_crosses || 0,
-  archivedAt: row.archived_at
+  archivedAt: row.archived_at,
 });
 
 export const fetchEvents = async (ctx: ReadyRemoteContext): Promise<EventRow[]> => {
   const rows = await remoteRequest<SupabaseEvent[]>(
     `/rest/v1/events?user_id=eq.${encodeURIComponent(ctx.user.id)}&deleted_at=is.null&select=local_id,student_local_id,event_type,reason,term,payload,occurred_at,deleted_at`,
-    { accessToken: ctx.session.accessToken }
+    { accessToken: ctx.session.accessToken },
   );
   return (rows || []).map(mapEventFromSupabase);
 };
@@ -119,7 +119,7 @@ export const fetchEvents = async (ctx: ReadyRemoteContext): Promise<EventRow[]> 
 export const fetchArchives = async (ctx: ReadyRemoteContext): Promise<ArchiveRow[]> => {
   const rows = await remoteRequest<SupabaseArchive[]>(
     `/rest/v1/term_archives?user_id=eq.${encodeURIComponent(ctx.user.id)}&deleted_at=is.null&select=local_id,term,total_merits,total_detentions,total_ticks,total_crosses,payload,archived_at,deleted_at`,
-    { accessToken: ctx.session.accessToken }
+    { accessToken: ctx.session.accessToken },
   );
   return (rows || []).map(mapArchiveFromSupabase);
 };
@@ -129,13 +129,13 @@ export const pushEvent = async (ctx: ReadyRemoteContext, event: EventRow): Promi
     method: 'POST',
     accessToken: ctx.session.accessToken,
     headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
-    body: JSON.stringify(mapEventToSupabase(event, ctx.user.id))
+    body: JSON.stringify(mapEventToSupabase(event, ctx.user.id)),
   });
 };
 
 export const softDeleteEventRemote = async (
   ctx: ReadyRemoteContext,
-  eventId: string
+  eventId: string,
 ): Promise<void> => {
   await remoteRequest(
     `/rest/v1/events?user_id=eq.${encodeURIComponent(ctx.user.id)}&local_id=eq.${encodeURIComponent(eventId)}`,
@@ -143,8 +143,8 @@ export const softDeleteEventRemote = async (
       method: 'PATCH',
       accessToken: ctx.session.accessToken,
       headers: { Prefer: 'return=minimal' },
-      body: JSON.stringify({ deleted_at: nowIso(), updated_at: nowIso() })
-    }
+      body: JSON.stringify({ deleted_at: nowIso(), updated_at: nowIso() }),
+    },
   );
 };
 
@@ -153,6 +153,6 @@ export const pushArchive = async (ctx: ReadyRemoteContext, archive: ArchiveRow):
     method: 'POST',
     accessToken: ctx.session.accessToken,
     headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
-    body: JSON.stringify(mapArchiveToSupabase(archive, ctx.user.id))
+    body: JSON.stringify(mapArchiveToSupabase(archive, ctx.user.id)),
   });
 };

@@ -26,7 +26,7 @@ interface SwipeableHistoryItemProps {
 export const SwipeableHistoryItem = ({
   onDelete,
   deleteLabel,
-  children
+  children,
 }: SwipeableHistoryItemProps) => {
   const translateX = useRef(new Animated.Value(0)).current;
   const offset = useRef(0);
@@ -34,7 +34,11 @@ export const SwipeableHistoryItem = ({
 
   const settle = (toValue: number) => {
     offset.current = toValue;
-    Animated.spring(translateX, { toValue, useNativeDriver: USE_NATIVE_DRIVER, bounciness: 0 }).start();
+    Animated.spring(translateX, {
+      toValue,
+      useNativeDriver: USE_NATIVE_DRIVER,
+      bounciness: 0,
+    }).start();
   };
 
   const swipeAway = () => {
@@ -62,8 +66,8 @@ export const SwipeableHistoryItem = ({
         } else {
           settle(next < -DELETE_WIDTH / 2 ? -DELETE_WIDTH : 0);
         }
-      }
-    })
+      },
+    }),
   ).current;
 
   return (
@@ -103,7 +107,7 @@ const styles = StyleSheet.create({
   wrapper: {
     marginBottom: 8,
     marginHorizontal: -GUTTER,
-    overflow: 'hidden'
+    overflow: 'hidden',
   },
   card: { marginHorizontal: GUTTER },
   // Inset to exactly the card's resting footprint so the card fully covers the
@@ -119,13 +123,13 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
     justifyContent: 'center',
     paddingRight: (DELETE_WIDTH - 44) / 2,
-    pointerEvents: 'box-none'
+    pointerEvents: 'box-none',
   },
   deleteButton: {
     width: 44,
     height: 44,
     borderRadius: 22,
     alignItems: 'center',
-    justifyContent: 'center'
-  }
+    justifyContent: 'center',
+  },
 });

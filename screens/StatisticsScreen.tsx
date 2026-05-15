@@ -6,7 +6,7 @@ import {
   StyleSheet,
   Text,
   View,
-  type DimensionValue
+  type DimensionValue,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
@@ -15,7 +15,16 @@ import type { StatsPeriod } from '../domain/statisticsController';
 import { EmptyState } from '../components/EmptyState';
 import { StudentAvatar } from '../components/StudentAvatar';
 import { SheetModal } from '../components/SheetModal';
-import { Card, Pill, PillButton, Screen, Sparkle, Title, WashiTape, type IoniconName } from '../components/Themed';
+import {
+  Card,
+  Pill,
+  PillButton,
+  Screen,
+  Sparkle,
+  Title,
+  WashiTape,
+  type IoniconName,
+} from '../components/Themed';
 import { useT } from '../utils/i18n';
 import { useStatistics } from '../hooks/useStatistics';
 import type { AppTabsParamList } from '../navigation/types';
@@ -42,19 +51,19 @@ const PERIOD_VALUES: StatsPeriod[] = ['week', 'month', 'trimester'];
 const PERIOD_NOUN_KEY: Record<StatsPeriod, string> = {
   week: 'periodNounWeek',
   month: 'periodNounMonth',
-  trimester: 'periodNounTrimester'
+  trimester: 'periodNounTrimester',
 };
 const PERIOD_LABEL_KEY: Record<StatsPeriod, string> = {
   week: 'periodWeek',
   month: 'periodMonth',
-  trimester: 'periodTrimester'
+  trimester: 'periodTrimester',
 };
 
 const CLIMATE_TONE: Record<string, string> = {
   success: colors.successGreen,
   warning: colors.warningOrange,
   danger: colors.dangerRed,
-  neutral: colors.sage
+  neutral: colors.sage,
 };
 
 // --- Small building blocks -------------------------------------------------
@@ -83,7 +92,11 @@ const Segmented = ({ options, value, onChange }: SegmentedProps) => (
           accessibilityState={{ selected: active }}
           accessibilityLabel={option.label}
           onPress={() => onChange(option.value)}
-          style={({ pressed }) => [styles.segment, active && styles.segmentActive, pressed && styles.pressed]}
+          style={({ pressed }) => [
+            styles.segment,
+            active && styles.segmentActive,
+            pressed && styles.pressed,
+          ]}
         >
           <Text style={[styles.segmentText, active && styles.textOnPink]}>{option.label}</Text>
         </Pressable>
@@ -191,16 +204,16 @@ export const StatisticsScreen = ({ navigation }: Props) => {
 
   const periodOptions = useMemo(
     () => PERIOD_VALUES.map((value) => ({ value, label: t(PERIOD_LABEL_KEY[value]) as string })),
-    [t]
+    [t],
   );
   const allClassesLabel = t('allClasses') as string;
   const classOptions = useMemo<{ id: string | null; name: string }[]>(
     () => [{ id: null, name: allClassesLabel }, ...(stats?.classes || [])],
-    [stats, allClassesLabel]
+    [stats, allClassesLabel],
   );
   const selectedClassName = useMemo(
     () => classOptions.find((c) => c.id === classId)?.name || allClassesLabel,
-    [classOptions, classId, allClassesLabel]
+    [classOptions, classId, allClassesLabel],
   );
 
   const openStudent = (student: StatStudent) => {
@@ -211,7 +224,7 @@ export const StatisticsScreen = ({ navigation }: Props) => {
   const quickEmptyLabel = {
     toWatch: t('emptyToWatch'),
     forgottenNotebooks: t('emptyForgotten'),
-    noRecentEvent: t('emptyNoEvent')
+    noRecentEvent: t('emptyNoEvent'),
   }[quickList];
 
   const topStudents: StatStudent[] = stats ? stats.top[topTab] : [];
@@ -223,7 +236,7 @@ export const StatisticsScreen = ({ navigation }: Props) => {
     evolution.ticks,
     evolution.crosses,
     evolution.merits,
-    evolution.detentions
+    evolution.detentions,
   );
 
   const selectedArchive = stats?.archives.find((a) => a.trimester === archiveTrimester) || null;
@@ -270,12 +283,16 @@ export const StatisticsScreen = ({ navigation }: Props) => {
             <Card washi>
               <SectionLabel>{t('statsClimateSection')}</SectionLabel>
               <View style={styles.climateHead}>
-                <View style={[styles.climateDot, { backgroundColor: CLIMATE_TONE[stats.climate.tone] }]} />
+                <View
+                  style={[styles.climateDot, { backgroundColor: CLIMATE_TONE[stats.climate.tone] }]}
+                />
                 <Text style={styles.climateLabel}>{t(`climateLabel_${stats.climate.status}`)}</Text>
               </View>
               <View style={styles.recommendation}>
                 <Sparkle />
-                <Text style={styles.recommendationText}>{t(`climateRec_${stats.climate.status}`)}</Text>
+                <Text style={styles.recommendationText}>
+                  {t(`climateRec_${stats.climate.status}`)}
+                </Text>
               </View>
             </Card>
 
@@ -337,7 +354,11 @@ export const StatisticsScreen = ({ navigation }: Props) => {
                   {t('quickNoEvent')}
                 </PillButton>
               </View>
-              <StudentList students={quickStudents} emptyLabel={quickEmptyLabel} onSelect={openStudent} />
+              <StudentList
+                students={quickStudents}
+                emptyLabel={quickEmptyLabel}
+                onSelect={openStudent}
+              />
             </Card>
 
             {/* Top 3 */}
@@ -353,7 +374,7 @@ export const StatisticsScreen = ({ navigation }: Props) => {
                   style={({ pressed }) => [
                     styles.topTab,
                     topTab === 'encourage' && styles.topTabActive,
-                    pressed && styles.pressed
+                    pressed && styles.pressed,
                   ]}
                 >
                   <Text style={[styles.topTabText, topTab === 'encourage' && styles.textOnPink]}>
@@ -369,7 +390,7 @@ export const StatisticsScreen = ({ navigation }: Props) => {
                   style={({ pressed }) => [
                     styles.topTab,
                     topTab === 'reframe' && styles.topTabActive,
-                    pressed && styles.pressed
+                    pressed && styles.pressed,
                   ]}
                 >
                   <Text style={[styles.topTabText, topTab === 'reframe' && styles.textOnPink]}>
@@ -377,7 +398,11 @@ export const StatisticsScreen = ({ navigation }: Props) => {
                   </Text>
                 </Pressable>
               </View>
-              <StudentList students={topStudents} emptyLabel={topEmptyLabel} onSelect={openStudent} />
+              <StudentList
+                students={topStudents}
+                emptyLabel={topEmptyLabel}
+                onSelect={openStudent}
+              />
             </Card>
 
             {/* Evolution */}
@@ -434,7 +459,7 @@ export const StatisticsScreen = ({ navigation }: Props) => {
                         style={({ pressed }) => [
                           styles.archivePill,
                           active && styles.archivePillActive,
-                          pressed && styles.pressed
+                          pressed && styles.pressed,
                         ]}
                       >
                         <Text style={[styles.archivePillText, active && styles.textOnPink]}>
@@ -450,13 +475,13 @@ export const StatisticsScreen = ({ navigation }: Props) => {
                       {t('archiveSummaryText', {
                         students: selectedArchive.students,
                         merits: selectedArchive.merits,
-                        detentions: selectedArchive.detentions
+                        detentions: selectedArchive.detentions,
                       })}
                     </Text>
                     <Text style={styles.archiveSummaryMeta}>
                       {t('archiveSummaryMeta', {
                         ticks: selectedArchive.ticks,
-                        crosses: selectedArchive.crosses
+                        crosses: selectedArchive.crosses,
                       })}
                     </Text>
                   </View>
@@ -493,10 +518,12 @@ export const StatisticsScreen = ({ navigation }: Props) => {
                   style={({ pressed }) => [
                     styles.sheetOption,
                     active && styles.sheetOptionActive,
-                    pressed && styles.pressed
+                    pressed && styles.pressed,
                   ]}
                 >
-                  <Text style={[styles.sheetOptionText, active && styles.textOnPink]}>{option.name}</Text>
+                  <Text style={[styles.sheetOptionText, active && styles.textOnPink]}>
+                    {option.name}
+                  </Text>
                   {active && <Ionicons name="checkmark" size={20} color={colors.onPrimary} />}
                 </Pressable>
               );
@@ -517,13 +544,38 @@ const styles = StyleSheet.create({
   textOnPink: { color: colors.onPrimary },
 
   // Period segmented control
-  segmented: { flexDirection: 'row', borderRadius: 999, padding: 3, gap: 2, backgroundColor: colors.card, marginBottom: 12, ...bordered },
-  segment: { flex: 1, minHeight: 44, alignItems: 'center', justifyContent: 'center', borderRadius: 999, paddingHorizontal: 8 },
+  segmented: {
+    flexDirection: 'row',
+    borderRadius: 999,
+    padding: 3,
+    gap: 2,
+    backgroundColor: colors.card,
+    marginBottom: 12,
+    ...bordered,
+  },
+  segment: {
+    flex: 1,
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 999,
+    paddingHorizontal: 8,
+  },
   segmentActive: { backgroundColor: colors.pink },
   segmentText: { ...baseText, fontSize: 17, textTransform: 'uppercase' },
 
   // Class dropdown
-  dropdown: { flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: 48, backgroundColor: colors.card, borderRadius: 16, paddingHorizontal: 14, marginBottom: 16, ...bordered },
+  dropdown: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    minHeight: 48,
+    backgroundColor: colors.card,
+    borderRadius: 16,
+    paddingHorizontal: 14,
+    marginBottom: 16,
+    ...bordered,
+  },
   dropdownText: { ...baseText, fontSize: 19, flex: 1 },
 
   loading: { paddingVertical: 48, alignItems: 'center' },
@@ -540,7 +592,14 @@ const styles = StyleSheet.create({
 
   // Today tiles
   tileGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-  tile: { width: '47%', flexGrow: 1, backgroundColor: colors.canvas, borderRadius: 16, padding: 12, ...bordered },
+  tile: {
+    width: '47%',
+    flexGrow: 1,
+    backgroundColor: colors.canvas,
+    borderRadius: 16,
+    padding: 12,
+    ...bordered,
+  },
   tileHead: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 },
   tileValue: { ...baseText, fontSize: 30, lineHeight: 34 },
   tileLabel: { ...baseText, color: colors.muted, fontSize: 16, textTransform: 'uppercase' },
@@ -551,7 +610,17 @@ const styles = StyleSheet.create({
 
   // Student rows / lists
   studentList: { gap: 8 },
-  studentRow: { flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: 52, backgroundColor: colors.canvas, borderRadius: 16, paddingHorizontal: 10, paddingVertical: 8, ...bordered },
+  studentRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    minHeight: 52,
+    backgroundColor: colors.canvas,
+    borderRadius: 16,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    ...bordered,
+  },
   studentText: { flex: 1 },
   studentName: { ...baseText, fontSize: 19 },
   studentMeta: { ...baseText, color: colors.muted, fontSize: 16 },
@@ -559,8 +628,23 @@ const styles = StyleSheet.create({
   inlineEmptyText: { ...baseText, color: colors.muted, fontSize: 18, flex: 1 },
 
   // Top 3 tabs
-  topTabs: { flexDirection: 'row', borderRadius: 999, padding: 3, gap: 2, backgroundColor: colors.card, marginBottom: 12, ...bordered },
-  topTab: { flex: 1, minHeight: 44, alignItems: 'center', justifyContent: 'center', borderRadius: 999, paddingHorizontal: 8 },
+  topTabs: {
+    flexDirection: 'row',
+    borderRadius: 999,
+    padding: 3,
+    gap: 2,
+    backgroundColor: colors.card,
+    marginBottom: 12,
+    ...bordered,
+  },
+  topTab: {
+    flex: 1,
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 999,
+    paddingHorizontal: 8,
+  },
   topTabActive: { backgroundColor: colors.pink },
   topTabText: { ...baseText, fontSize: 17 },
 
@@ -569,13 +653,28 @@ const styles = StyleSheet.create({
   evoChart: { gap: 12 },
   evoRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   evoLabel: { ...baseText, fontSize: 17, width: 78 },
-  evoTrack: { flex: 1, height: 22, borderRadius: 999, backgroundColor: colors.canvas, overflow: 'hidden', ...bordered },
+  evoTrack: {
+    flex: 1,
+    height: 22,
+    borderRadius: 999,
+    backgroundColor: colors.canvas,
+    overflow: 'hidden',
+    ...bordered,
+  },
   evoFill: { height: '100%', borderRadius: 999 },
   evoValue: { ...baseText, fontSize: 19, width: 30, textAlign: 'right' },
 
   // Archives
   archivePills: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 12 },
-  archivePill: { borderRadius: 999, minHeight: 44, justifyContent: 'center', paddingHorizontal: 14, paddingVertical: 7, backgroundColor: colors.card, ...bordered },
+  archivePill: {
+    borderRadius: 999,
+    minHeight: 44,
+    justifyContent: 'center',
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    backgroundColor: colors.card,
+    ...bordered,
+  },
   archivePillActive: { backgroundColor: colors.pink },
   archivePillText: { ...baseText, fontSize: 16, textTransform: 'uppercase' },
   archiveSummary: { gap: 4 },
@@ -586,7 +685,17 @@ const styles = StyleSheet.create({
   // Class picker sheet
   sheet: { gap: 8 },
   sheetTitle: { ...baseText, fontSize: 26, marginBottom: 4 },
-  sheetOption: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', minHeight: 48, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 10, backgroundColor: colors.canvas, ...bordered },
+  sheetOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    minHeight: 48,
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    backgroundColor: colors.canvas,
+    ...bordered,
+  },
   sheetOptionActive: { backgroundColor: colors.pink },
-  sheetOptionText: { ...baseText, fontSize: 19 }
+  sheetOptionText: { ...baseText, fontSize: 19 },
 });

@@ -17,8 +17,16 @@ export const seedDemo = async (store?: CacheStore): Promise<void> => {
 
   const classNames = ['6e Rose', '5e Pivoine'];
   const studentNames: [string, string][] = [
-    ['Emma', 'Martin'], ['Lucas', 'Bernard'], ['Ines', 'Petit'], ['Noah', 'Robert'], ['Lina', 'Durand'],
-    ['Hugo', 'Moreau'], ['Chloe', 'Simon'], ['Adam', 'Laurent'], ['Zoe', 'Lefevre'], ['Nina', 'Michel']
+    ['Emma', 'Martin'],
+    ['Lucas', 'Bernard'],
+    ['Ines', 'Petit'],
+    ['Noah', 'Robert'],
+    ['Lina', 'Durand'],
+    ['Hugo', 'Moreau'],
+    ['Chloe', 'Simon'],
+    ['Adam', 'Laurent'],
+    ['Zoe', 'Lefevre'],
+    ['Nina', 'Michel'],
   ];
 
   for (let c = 0; c < classNames.length; c += 1) {
@@ -26,7 +34,7 @@ export const seedDemo = async (store?: CacheStore): Promise<void> => {
       id: uuid(),
       name: classNames[c]!,
       createdAt: nowIso(),
-      lastUsedAt: nowIso()
+      lastUsedAt: nowIso(),
     };
     await cache.put('classes', classRow);
     for (let i = 0; i < 5; i += 1) {
@@ -41,7 +49,7 @@ export const seedDemo = async (store?: CacheStore): Promise<void> => {
         merits: Math.floor(i / 3),
         detentions: c === 1 && i === 4 ? 1 : 0,
         forgets: (i + c) % 3,
-        currentTrimester: 1
+        currentTrimester: 1,
       };
       await cache.put('students', student);
     }

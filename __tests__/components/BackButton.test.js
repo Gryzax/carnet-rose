@@ -2,7 +2,7 @@ import { fireEvent, render } from '@testing-library/react-native';
 import { BackButton } from '../../components/BackButton';
 
 jest.mock('@expo/vector-icons', () => ({
-  Ionicons: 'Ionicons'
+  Ionicons: 'Ionicons',
 }));
 
 test('BackButton appelle goBack quand un historique existe', () => {

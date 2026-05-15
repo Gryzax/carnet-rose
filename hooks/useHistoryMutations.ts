@@ -4,7 +4,7 @@ import {
   addForgot,
   addTick,
   deleteEvent,
-  undoLastAction
+  undoLastAction,
 } from '../domain/studentController';
 import type { StudentRow } from '../types/domain';
 
@@ -13,16 +13,16 @@ import type { StudentRow } from '../types/domain';
 export const useHistoryMutations = () => {
   const tick = useMutation({
     mutationFn: ({ student, reason }: { student: StudentRow; reason?: string }) =>
-      addTick(student, reason)
+      addTick(student, reason),
   });
 
   const cross = useMutation({
     mutationFn: ({ student, reason }: { student: StudentRow; reason?: string }) =>
-      addCross(student, reason)
+      addCross(student, reason),
   });
 
   const forgot = useMutation({
-    mutationFn: ({ student }: { student: StudentRow }) => addForgot(student)
+    mutationFn: ({ student }: { student: StudentRow }) => addForgot(student),
   });
 
   const undo = useMutation({ mutationFn: (studentId: string) => undoLastAction(studentId) });

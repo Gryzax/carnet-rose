@@ -2,6 +2,7 @@ import type { ReactElement, ReactNode } from 'react';
 import { render as rtlRender, type RenderOptions } from '@testing-library/react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from '../providers/AuthContext';
+import { ReasonsProvider } from '../utils/reasons';
 
 // A fresh client per render keeps test cases isolated, and `retry: false`
 // makes a failing queryFn surface immediately instead of after backoff.
@@ -11,15 +12,17 @@ export const createTestQueryClient = (): QueryClient =>
       // gcTime: Infinity avoids the finite GC setTimeout that would otherwise
       // keep the Jest worker alive after the test finishes.
       queries: { retry: false, gcTime: Infinity },
-      mutations: { retry: false, gcTime: Infinity }
-    }
+      mutations: { retry: false, gcTime: Infinity },
+    },
   });
 
 // Mirrors providers/AppProviders, minus NavigationContainer (screens under test
 // receive a mock `navigation` prop directly).
 const AllProviders = ({ children }: { children: ReactNode }) => (
   <QueryClientProvider client={createTestQueryClient()}>
-    <AuthProvider>{children}</AuthProvider>
+    <ReasonsProvider>
+      <AuthProvider>{children}</AuthProvider>
+    </ReasonsProvider>
   </QueryClientProvider>
 );
 

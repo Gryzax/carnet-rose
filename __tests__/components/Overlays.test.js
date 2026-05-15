@@ -5,7 +5,9 @@ import { EmptyState } from '../../components/EmptyState';
 
 test('ouverture et fermeture des modales', () => {
   const onClose = jest.fn();
-  const { getByText, getByTestId } = render(<ReasonSheet visible reasons={['Participation']} onSelect={jest.fn()} onClose={onClose} />);
+  const { getByText, getByTestId } = render(
+    <ReasonSheet visible reasons={['Participation']} onSelect={jest.fn()} onClose={onClose} />,
+  );
   expect(getByText('Choose a reason')).toBeTruthy();
   expect(getByTestId('reason-sheet-scroll')).toBeTruthy();
   fireEvent.press(getByTestId('sheet-backdrop'));
@@ -24,7 +26,14 @@ test('snackbar Undo', () => {
 
 test('EmptyState affiche action optionnelle', () => {
   const onAction = jest.fn();
-  const { getByText, getByTestId } = render(<EmptyState title="Aucune classe" message="Creez une classe" actionLabel="Ajouter" onAction={onAction} />);
+  const { getByText, getByTestId } = render(
+    <EmptyState
+      title="Aucune classe"
+      message="Creez une classe"
+      actionLabel="Ajouter"
+      onAction={onAction}
+    />,
+  );
   expect(getByTestId('empty-state')).toBeTruthy();
   fireEvent.press(getByText('Ajouter'));
   expect(onAction).toHaveBeenCalled();

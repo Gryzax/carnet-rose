@@ -9,7 +9,7 @@ export type Language = (typeof SUPPORTED_LANGUAGES)[number];
 export const LANGUAGE_LABELS: Record<Language, string> = {
   en: 'English',
   fr: 'Français',
-  es: 'Español'
+  es: 'Español',
 };
 
 export type TranslationValue = string | string[];
@@ -82,7 +82,8 @@ export const translations = {
     meritsPill: 'Merits {count}',
     detentionsPill: 'Detentions {count}',
     deleteClassTitle: 'Delete class',
-    deleteClassMessage: 'This class, its students, their history and term archives will be permanently deleted.',
+    deleteClassMessage:
+      'This class, its students, their history and term archives will be permanently deleted.',
 
     // Class dashboard
     studentsAndRisk: '{count} students · {risk} need a little attention',
@@ -112,6 +113,8 @@ export const translations = {
     continueApple: 'Continue with Apple',
     connecting: 'Connecting…',
     connectionFailed: 'Couldn’t sign in right now. Please try again.',
+    redirectInProgress: 'Redirecting to sign-in…',
+    signInPageError: 'Couldn’t open the sign-in page. Please try again.',
 
     // Settings
     settingsTitle: 'Settings',
@@ -126,13 +129,14 @@ export const translations = {
     aboutTagline: 'Your classroom companion',
     sectionData: 'Data',
     sectionPreferences: 'Preferences',
-    sectionDangerZone: 'Danger zone',
+    sectionDangerZone: 'Privacy',
     exportData: 'Export my data',
     exportDataTitle: 'Export my data',
     comingSoon: 'Coming soon — stay tuned!',
     deleteAccount: 'Delete my account',
     deleteAccountTitle: 'Delete my account?',
-    deleteAccountWarning: 'This permanently erases your account and all synced data. This cannot be undone.',
+    deleteAccountWarning:
+      'This permanently erases your account and all synced data. This cannot be undone.',
     deleteAccountWord: 'DELETE',
     deleteAccountConfirm: 'Delete forever',
     deleteAccountError: 'Couldn’t delete your account right now. Please try again.',
@@ -140,9 +144,11 @@ export const translations = {
     languageHint: 'Pick the language that feels like home.',
     sectionTrimester: 'Term',
     endTrimester: 'Wrap up the term',
-    trimesterArchived: 'Term archived: {students} students, {merits} merits, {detentions} detentions. Nicely done!',
+    trimesterArchived:
+      'Term archived: {students} students, {merits} merits, {detentions} detentions. Nicely done!',
     confirmEndTrimesterTitle: 'Wrap up the term?',
-    allClassesSummary: 'All classes: {merits} merits, {detentions} detentions, {students} students.',
+    allClassesSummary:
+      'All classes: {merits} merits, {detentions} detentions, {students} students.',
     typeConfirmToContinue: 'Type {word} to continue.',
     confirmWord: 'CONFIRM',
     iConfirm: 'Yes, wrap it up',
@@ -185,6 +191,22 @@ export const translations = {
     tickReasons: ['Participation', 'Lesson learned', 'Great work', 'Effort'],
     crossReasons: ['Homework not done', 'Lesson not learned', 'Work below par', 'Behaviour'],
     chooseReason: 'Choose a reason',
+
+    // Reason customisation (Settings)
+    sectionReasons: 'Ticks & crosses',
+    reasonsHint: 'Tailor the reasons you pick from. Hide the ones you never use, add your own.',
+    reasonsTicksTab: 'Ticks',
+    reasonsCrossesTab: 'Crosses',
+    reasonsDefaults: 'Default reasons',
+    reasonsCustom: 'My reasons',
+    reasonsNoCustom: 'No custom reasons yet — add one below.',
+    reasonAddPlaceholder: 'New reason',
+    reasonAdd: 'Add reason',
+    reasonShow: 'Show “{reason}”',
+    reasonHide: 'Hide “{reason}”',
+    reasonRename: 'Rename “{reason}”',
+    reasonDelete: 'Delete “{reason}”',
+    reasonRenameTitle: 'Rename reason',
 
     // Snackbar / alerts
     actionSaved: 'Saved!',
@@ -260,7 +282,7 @@ export const translations = {
     metaNoEvent: 'No activity yet',
     metaDaysSince: 'Nothing for {days}d',
     metaEncourage: '{merits} merits · {ticks} ticks',
-    metaReframe: '{detentions} detentions · {crosses} crosses'
+    metaReframe: '{detentions} detentions · {crosses} crosses',
   },
 
   fr: {
@@ -278,7 +300,8 @@ export const translations = {
     landingFeature2Body:
       'Récompensez les efforts avec des ticks, signalez les écarts avec des croix. 4 ticks font un mérite, 4 croix une retenue.',
     landingFeature3Title: 'Historique et archives',
-    landingFeature3Body: 'Chaque évènement est conservé, et chaque trimestre est soigneusement archivé.',
+    landingFeature3Body:
+      'Chaque évènement est conservé, et chaque trimestre est soigneusement archivé.',
     landingFeature4Title: 'Statistiques et climat',
     landingFeature4Body:
       'Visualisez le climat de classe, vos meilleurs élèves et ceux à accompagner de près.',
@@ -326,7 +349,8 @@ export const translations = {
     meritsPill: 'Mérites {count}',
     detentionsPill: 'Retenues {count}',
     deleteClassTitle: 'Supprimer la classe',
-    deleteClassMessage: 'Cette classe, ses élèves, leur historique et leurs archives trimestrielles seront supprimés définitivement.',
+    deleteClassMessage:
+      'Cette classe, ses élèves, leur historique et leurs archives trimestrielles seront supprimés définitivement.',
 
     studentsAndRisk: '{count} élèves · {risk} à accompagner de près',
     searchStudents: 'Rechercher un élève',
@@ -341,7 +365,8 @@ export const translations = {
     lastName: 'Nom',
     cannotAddStudent: 'Impossible d’ajouter l’élève.',
     deleteStudentTitle: 'Supprimer l’élève',
-    deleteStudentMessage: 'Son historique et ses archives trimestrielles seront supprimés définitivement.',
+    deleteStudentMessage:
+      'Son historique et ses archives trimestrielles seront supprimés définitivement.',
     editStudentTitle: 'Modifier l’élève',
     cannotEditStudent: 'Impossible de modifier l’élève.',
     studentActions: 'Actions sur l’élève',
@@ -349,11 +374,14 @@ export const translations = {
 
     loginPrompt: 'Connecte-toi pour continuer',
     connectionUnavailable: 'Connexion indisponible',
-    unavailableMessage: 'La connexion n’est pas encore configurée. Veuillez contacter l’administrateur.',
+    unavailableMessage:
+      'La connexion n’est pas encore configurée. Veuillez contacter l’administrateur.',
     continueGoogle: 'Continuer avec Google',
     continueApple: 'Continuer avec Apple',
     connecting: 'Connexion…',
     connectionFailed: 'Connexion impossible pour le moment. Réessayez.',
+    redirectInProgress: 'Redirection vers la connexion…',
+    signInPageError: 'Impossible d’ouvrir la page de connexion. Réessayez.',
 
     settingsTitle: 'Réglages',
     sectionAccount: 'Compte',
@@ -362,18 +390,20 @@ export const translations = {
     signOut: 'Se déconnecter',
     syncNowTitle: 'Synchroniser maintenant',
     syncDone: 'Synchronisation terminée ! ✨',
-    syncFailed: 'Synchronisation impossible pour le moment — vos données restent bien sauvegardées sur cet appareil.',
+    syncFailed:
+      'Synchronisation impossible pour le moment — vos données restent bien sauvegardées sur cet appareil.',
     sectionAbout: 'À propos',
     aboutTagline: 'Votre compagnon de classe',
     sectionData: 'Données',
     sectionPreferences: 'Préférences',
-    sectionDangerZone: 'Zone sensible',
+    sectionDangerZone: 'Confidentialité',
     exportData: 'Exporter mes données',
     exportDataTitle: 'Exporter mes données',
     comingSoon: 'Bientôt disponible — restez à l’écoute !',
     deleteAccount: 'Supprimer mon compte',
     deleteAccountTitle: 'Supprimer mon compte ?',
-    deleteAccountWarning: 'Cela efface définitivement votre compte et toutes les données synchronisées. Action irréversible.',
+    deleteAccountWarning:
+      'Cela efface définitivement votre compte et toutes les données synchronisées. Action irréversible.',
     deleteAccountWord: 'SUPPRIMER',
     deleteAccountConfirm: 'Supprimer définitivement',
     deleteAccountError: 'Impossible de supprimer votre compte pour le moment. Réessayez.',
@@ -381,9 +411,11 @@ export const translations = {
     languageHint: 'Choisissez la langue qui vous met à l’aise.',
     sectionTrimester: 'Trimestre',
     endTrimester: 'Clôturer le trimestre',
-    trimesterArchived: 'Trimestre archivé : {students} élèves, {merits} mérites, {detentions} retenues. Beau travail !',
+    trimesterArchived:
+      'Trimestre archivé : {students} élèves, {merits} mérites, {detentions} retenues. Beau travail !',
     confirmEndTrimesterTitle: 'Clôturer le trimestre ?',
-    allClassesSummary: 'Toutes les classes : {merits} mérites, {detentions} retenues, {students} élèves.',
+    allClassesSummary:
+      'Toutes les classes : {merits} mérites, {detentions} retenues, {students} élèves.',
     typeConfirmToContinue: 'Saisissez {word} pour continuer.',
     confirmWord: 'CONFIRMER',
     iConfirm: 'Oui, je clôture',
@@ -403,11 +435,11 @@ export const translations = {
     crossesPill: 'Croix {value}/{max}',
     meritsPlainPill: 'Mérites {count}',
     detentionsPlainPill: 'Retenues {count}',
-    forgetsPill: 'Carnet oublié {count}',
-    forgetsPlainPill: 'Carnets oubliés {count}',
+    forgetsPill: 'Cahiers oubliés {count}',
+    forgetsPlainPill: 'Cahiers oubliés {count}',
     tickAction: 'TICK',
     crossAction: 'CROIX',
-    forgotAction: 'Carnet oublié',
+    forgotAction: 'Cahier oublié',
     counterLegend: '{ticks} ticks → 1 mérite · {crosses} croix → 1 retenue',
     currentTermHistory: 'HISTORIQUE DU TRIMESTRE COURANT',
     emptyHistoryTitle: 'Aucun historique',
@@ -418,11 +450,27 @@ export const translations = {
     deleteHistoryMessage: 'Cette entrée de l’historique sera supprimée définitivement.',
     typeTick: 'Tick',
     typeCross: 'Croix',
-    typeForgot: 'Carnet oublié',
+    typeForgot: 'Cahier oublié',
 
     tickReasons: ['Participation', 'Leçon sue', 'Bon travail', 'Effort'],
     crossReasons: ['Devoirs non faits', 'Leçon non sue', 'Travail insuffisant', 'Comportement'],
     chooseReason: 'Choisir une raison',
+
+    sectionReasons: 'Ticks et croix',
+    reasonsHint:
+      'Personnalisez les raisons proposées. Masquez celles que vous n’utilisez jamais, ajoutez les vôtres.',
+    reasonsTicksTab: 'Ticks',
+    reasonsCrossesTab: 'Croix',
+    reasonsDefaults: 'Raisons par défaut',
+    reasonsCustom: 'Mes raisons',
+    reasonsNoCustom: 'Aucune raison personnalisée — ajoutez-en une ci-dessous.',
+    reasonAddPlaceholder: 'Nouvelle raison',
+    reasonAdd: 'Ajouter la raison',
+    reasonShow: 'Afficher « {reason} »',
+    reasonHide: 'Masquer « {reason} »',
+    reasonRename: 'Renommer « {reason} »',
+    reasonDelete: 'Supprimer « {reason} »',
+    reasonRenameTitle: 'Renommer la raison',
 
     actionSaved: 'Enregistré !',
     undo: 'Annuler',
@@ -430,12 +478,13 @@ export const translations = {
     snackTickAdded: 'Tick ajouté à {name} ⭐',
     snackCrossCancelledTick: 'Croix ajoutée et un tick retiré pour {name}',
     snackCrossAdded: 'Croix ajoutée à {name}',
-    snackForgotAdded: 'Carnet oublié noté pour {name}',
+    snackForgotAdded: 'Cahier oublié noté pour {name}',
     meritObtainedTitle: 'Mérite obtenu ! 🎉',
     meritCopy: 'Félicitations à {name} ! Élève sérieux, participatif et impliqué.',
     copyMessage: 'Copier le message',
     detentionTriggeredTitle: 'Retenue déclenchée',
-    detentionCopy: '{name} a accumulé 4 croix. Travail non fait à plusieurs reprises malgré les rappels.',
+    detentionCopy:
+      '{name} a accumulé 4 croix. Travail non fait à plusieurs reprises malgré les rappels.',
 
     longPressToDelete: 'Appui long pour supprimer',
     ticksLabel: 'TICKS',
@@ -455,11 +504,13 @@ export const translations = {
     climateLabel_stable: 'Climat stable',
     climateRec_stable: 'Rien d’urgent — gardez le cap et restez attentif aux élèves silencieux.',
     climateLabel_attention: 'À surveiller',
-    climateRec_attention: 'Quelques tensions montent. Prenez un moment avec les élèves à surveiller.',
+    climateRec_attention:
+      'Quelques tensions montent. Prenez un moment avec les élèves à surveiller.',
     climateLabel_tense: 'Climat tendu',
     climateRec_tense: 'Beaucoup de croix récemment. Reposez le cadre et reclarifiez les règles.',
     'climateLabel_low-positive': 'Pas assez de renforcement positif',
-    'climateRec_low-positive': 'Pensez à distribuer des ticks : le positif est en retrait cette période.',
+    'climateRec_low-positive':
+      'Pensez à distribuer des ticks : le positif est en retrait cette période.',
     climateLabel_empty: 'Pas encore de données',
     climateRec_empty: 'Notez quelques élèves pour faire apparaître le climat de la classe.',
     statsClimateSection: 'Climat de classe',
@@ -467,13 +518,13 @@ export const translations = {
     tileToWatch: 'À surveiller',
     tileTicksGiven: 'Ticks donnés',
     tileCrossesGiven: 'Croix données',
-    tileForgotten: 'Carnets oubliés',
+    tileForgotten: 'Cahiers oubliés',
     statsQuickSection: 'Action rapide',
     quickToWatch: 'Élèves à surveiller',
-    quickForgotten: 'Carnets oubliés',
+    quickForgotten: 'Cahiers oubliés',
     quickNoEvent: 'Sans évènement récent',
     emptyToWatch: 'Aucun élève à surveiller — belle classe !',
-    emptyForgotten: 'Aucun carnet oublié sur la période.',
+    emptyForgotten: 'Aucun cahier oublié sur la période.',
     emptyNoEvent: 'Tous les élèves ont été notés récemment.',
     statsTop3Section: 'Top 3',
     topEncourageTab: 'À encourager',
@@ -492,11 +543,11 @@ export const translations = {
     archiveSummaryMeta: '{ticks} ticks · {crosses} croix au total',
     archiveHint: 'Touchez un trimestre pour revoir son bilan.',
     metaCrossesOngoing: '{count} croix en cours',
-    metaForgottenNotebook: 'Carnet oublié cette période',
+    metaForgottenNotebook: 'Cahier oublié cette période',
     metaNoEvent: 'Aucun évènement',
     metaDaysSince: 'Rien depuis {days} j',
     metaEncourage: '{merits} mérites · {ticks} ticks',
-    metaReframe: '{detentions} retenues · {crosses} croix'
+    metaReframe: '{detentions} retenues · {crosses} croix',
   },
 
   es: {
@@ -562,7 +613,8 @@ export const translations = {
     meritsPill: 'Méritos {count}',
     detentionsPill: 'Sanciones {count}',
     deleteClassTitle: 'Eliminar la clase',
-    deleteClassMessage: 'Esta clase, sus alumnos, su historial y sus archivos trimestrales se eliminarán de forma permanente.',
+    deleteClassMessage:
+      'Esta clase, sus alumnos, su historial y sus archivos trimestrales se eliminarán de forma permanente.',
 
     studentsAndRisk: '{count} alumnos · {risk} merecen un poco de atención',
     searchStudents: 'Buscar un alumno',
@@ -577,7 +629,8 @@ export const translations = {
     lastName: 'Apellido',
     cannotAddStudent: 'No se pudo añadir al alumno.',
     deleteStudentTitle: 'Eliminar al alumno',
-    deleteStudentMessage: 'Su historial y sus archivos trimestrales se eliminarán de forma permanente.',
+    deleteStudentMessage:
+      'Su historial y sus archivos trimestrales se eliminarán de forma permanente.',
     editStudentTitle: 'Editar al alumno',
     cannotEditStudent: 'No se pudo actualizar al alumno.',
     studentActions: 'Acciones del alumno',
@@ -585,11 +638,14 @@ export const translations = {
 
     loginPrompt: 'Inicia sesión para continuar',
     connectionUnavailable: 'Inicio de sesión no disponible',
-    unavailableMessage: 'El inicio de sesión aún no está configurado. Ponte en contacto con el administrador.',
+    unavailableMessage:
+      'El inicio de sesión aún no está configurado. Ponte en contacto con el administrador.',
     continueGoogle: 'Continuar con Google',
     continueApple: 'Continuar con Apple',
     connecting: 'Conectando…',
     connectionFailed: 'No se pudo iniciar sesión ahora mismo. Inténtalo de nuevo.',
+    redirectInProgress: 'Redirigiendo al inicio de sesión…',
+    signInPageError: 'No se pudo abrir la página de inicio de sesión. Inténtalo de nuevo.',
 
     settingsTitle: 'Ajustes',
     sectionAccount: 'Cuenta',
@@ -603,13 +659,14 @@ export const translations = {
     aboutTagline: 'Tu compañero de aula',
     sectionData: 'Datos',
     sectionPreferences: 'Preferencias',
-    sectionDangerZone: 'Zona de peligro',
+    sectionDangerZone: 'Privacidad',
     exportData: 'Exportar mis datos',
     exportDataTitle: 'Exportar mis datos',
     comingSoon: 'Próximamente — ¡no te lo pierdas!',
     deleteAccount: 'Eliminar mi cuenta',
     deleteAccountTitle: '¿Eliminar mi cuenta?',
-    deleteAccountWarning: 'Esto borra permanentemente tu cuenta y todos los datos sincronizados. No se puede deshacer.',
+    deleteAccountWarning:
+      'Esto borra permanentemente tu cuenta y todos los datos sincronizados. No se puede deshacer.',
     deleteAccountWord: 'ELIMINAR',
     deleteAccountConfirm: 'Eliminar para siempre',
     deleteAccountError: 'No se pudo eliminar tu cuenta ahora mismo. Inténtalo de nuevo.',
@@ -617,9 +674,11 @@ export const translations = {
     languageHint: 'Elige el idioma con el que te sientas como en casa.',
     sectionTrimester: 'Trimestre',
     endTrimester: 'Cerrar el trimestre',
-    trimesterArchived: 'Trimestre archivado: {students} alumnos, {merits} méritos, {detentions} sanciones. ¡Bien hecho!',
+    trimesterArchived:
+      'Trimestre archivado: {students} alumnos, {merits} méritos, {detentions} sanciones. ¡Bien hecho!',
     confirmEndTrimesterTitle: '¿Cerrar el trimestre?',
-    allClassesSummary: 'Todas las clases: {merits} méritos, {detentions} sanciones, {students} alumnos.',
+    allClassesSummary:
+      'Todas las clases: {merits} méritos, {detentions} sanciones, {students} alumnos.',
     typeConfirmToContinue: 'Escribe {word} para continuar.',
     confirmWord: 'CONFIRMAR',
     iConfirm: 'Sí, lo cierro',
@@ -657,8 +716,28 @@ export const translations = {
     typeForgot: 'Cuaderno olvidado',
 
     tickReasons: ['Participación', 'Lección aprendida', 'Buen trabajo', 'Esfuerzo'],
-    crossReasons: ['Deberes sin hacer', 'Lección no aprendida', 'Trabajo insuficiente', 'Comportamiento'],
+    crossReasons: [
+      'Deberes sin hacer',
+      'Lección no aprendida',
+      'Trabajo insuficiente',
+      'Comportamiento',
+    ],
     chooseReason: 'Elige un motivo',
+
+    sectionReasons: 'Marcas y cruces',
+    reasonsHint: 'Personaliza los motivos que eliges. Oculta los que nunca usas, añade los tuyos.',
+    reasonsTicksTab: 'Marcas',
+    reasonsCrossesTab: 'Cruces',
+    reasonsDefaults: 'Motivos predeterminados',
+    reasonsCustom: 'Mis motivos',
+    reasonsNoCustom: 'Aún no hay motivos personalizados — añade uno abajo.',
+    reasonAddPlaceholder: 'Nuevo motivo',
+    reasonAdd: 'Añadir motivo',
+    reasonShow: 'Mostrar «{reason}»',
+    reasonHide: 'Ocultar «{reason}»',
+    reasonRename: 'Renombrar «{reason}»',
+    reasonDelete: 'Eliminar «{reason}»',
+    reasonRenameTitle: 'Renombrar motivo',
 
     actionSaved: '¡Guardado!',
     undo: 'Deshacer',
@@ -671,7 +750,8 @@ export const translations = {
     meritCopy: '¡Enhorabuena a {name}! Un alumno aplicado, participativo e implicado.',
     copyMessage: 'Copiar mensaje',
     detentionTriggeredTitle: 'Sanción activada',
-    detentionCopy: '{name} ha acumulado 4 cruces. Trabajo sin hacer en varias ocasiones a pesar de los recordatorios.',
+    detentionCopy:
+      '{name} ha acumulado 4 cruces. Trabajo sin hacer en varias ocasiones a pesar de los recordatorios.',
 
     longPressToDelete: 'Mantén pulsado para eliminar',
     ticksLabel: 'MARCAS',
@@ -687,7 +767,8 @@ export const translations = {
     allClasses: 'Todas las clases',
     chooseClass: 'Elige una clase',
     climateLabel_positive: 'Ambiente positivo',
-    climateRec_positive: '¡Bonita dinámica! Reconoce a un alumno discreto para mantener el impulso.',
+    climateRec_positive:
+      '¡Bonita dinámica! Reconoce a un alumno discreto para mantener el impulso.',
     climateLabel_stable: 'Ambiente estable',
     climateRec_stable: 'Nada urgente — mantén el rumbo y atiende a los alumnos callados.',
     climateLabel_attention: 'A vigilar',
@@ -732,8 +813,8 @@ export const translations = {
     metaNoEvent: 'Sin actividad',
     metaDaysSince: 'Nada desde hace {days} d',
     metaEncourage: '{merits} méritos · {ticks} marcas',
-    metaReframe: '{detentions} sanciones · {crosses} cruces'
-  }
+    metaReframe: '{detentions} sanciones · {crosses} cruces',
+  },
 } satisfies Record<Language, Record<string, TranslationValue>>;
 
 // The English table is the source of truth for available keys.

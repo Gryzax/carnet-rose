@@ -4,7 +4,15 @@ import { ProgressBar } from '../../components/ProgressBar';
 import { StudentAvatar, getStudentInitials } from '../../components/StudentAvatar';
 import { StudentCard, getStudentStateColor } from '../../components/StudentCard';
 
-const student = { id: 1, firstName: 'Emma', lastName: 'Martin', ticks: 1, crosses: 0, merits: 2, detentions: 1 };
+const student = {
+  id: 1,
+  firstName: 'Emma',
+  lastName: 'Martin',
+  ticks: 1,
+  crosses: 0,
+  merits: 2,
+  detentions: 1,
+};
 
 test('rendu de StudentCard', () => {
   const { getByText } = render(<StudentCard student={student} />);
@@ -38,7 +46,7 @@ test('progress bars', () => {
 
 test('progress bar with label is exposed to screen readers', () => {
   const { getByRole } = render(
-    <ProgressBar value={2} max={4} color={colors.primaryPink} label="Ticks 2/4" />
+    <ProgressBar value={2} max={4} color={colors.primaryPink} label="Ticks 2/4" />,
   );
   const bar = getByRole('progressbar');
   expect(bar.props.accessibilityValue).toEqual({ min: 0, max: 4, now: 2 });

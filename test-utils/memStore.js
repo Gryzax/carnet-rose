@@ -9,7 +9,7 @@ const createMemStore = (seed = {}) => {
     events: [],
     term_archives: [],
     outbox: [],
-    ...seed
+    ...seed,
   };
   const clone = (rows) => rows.map((row) => ({ ...row }));
   return {
@@ -37,7 +37,7 @@ const createMemStore = (seed = {}) => {
     }),
     replaceAll: jest.fn(async (table, rows) => {
       tables[table] = clone(rows);
-    })
+    }),
   };
 };
 

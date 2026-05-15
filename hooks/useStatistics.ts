@@ -7,7 +7,7 @@ import { queryKeys } from '../lib/queryClient';
 export const useStatistics = (period: StatsPeriod, classId: string | null) => {
   const { data, isLoading } = useQuery({
     queryKey: queryKeys.statistics(period, classId),
-    queryFn: () => getClassroomStatistics({ period, classId })
+    queryFn: () => getClassroomStatistics({ period, classId }),
   });
 
   return { stats: data ?? null, loading: isLoading };

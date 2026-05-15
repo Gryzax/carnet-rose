@@ -11,7 +11,7 @@ export const useClasses = (sort: ClassSort = 'alpha') => {
   // student repository) — TanStack matches that against the `classes` prefix.
   const { data, isLoading, refetch } = useQuery({
     queryKey: queryKeys.classes(sort),
-    queryFn: () => loadClasses(sort)
+    queryFn: () => loadClasses(sort),
   });
 
   // Cache-first: the query above shows the local cache immediately; this pulls

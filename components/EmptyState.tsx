@@ -16,7 +16,7 @@ export const EmptyState = ({
   title,
   message,
   actionLabel,
-  onAction
+  onAction,
 }: EmptyStateProps) => (
   <Card testID="empty-state" style={styles.container} washi mascot>
     <View style={styles.icon}>
@@ -36,8 +36,30 @@ export const EmptyState = ({
 
 const styles = StyleSheet.create({
   container: { alignItems: 'center', justifyContent: 'center', padding: 24, marginVertical: 18 },
-  icon: { width: 64, height: 64, borderRadius: 32, backgroundColor: colors.sage, borderColor: colors.border, borderWidth: 1.5, alignItems: 'center', justifyContent: 'center', marginBottom: 14 },
-  title: { fontFamily: 'PatrickHand_400Regular', color: colors.ink, fontSize: 26, textAlign: 'center' },
-  message: { fontFamily: 'PatrickHand_400Regular', color: colors.muted, fontSize: 19, textAlign: 'center', lineHeight: 24, marginTop: 6 },
-  action: { marginTop: 16, alignSelf: 'stretch' }
+  icon: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: colors.sage,
+    borderColor: colors.border,
+    borderWidth: 1.5,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 14,
+  },
+  title: {
+    fontFamily: 'PatrickHand_400Regular',
+    color: colors.ink,
+    fontSize: 26,
+    textAlign: 'center',
+  },
+  message: {
+    fontFamily: 'PatrickHand_400Regular',
+    color: colors.muted,
+    fontSize: 19,
+    textAlign: 'center',
+    lineHeight: 24,
+    marginTop: 6,
+  },
+  action: { marginTop: 16, alignSelf: 'stretch' },
 });

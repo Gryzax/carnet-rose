@@ -13,7 +13,7 @@ export const getSupabaseAuthUrl = (provider: string, redirectTo: string): string
   if (!isSupabaseConfigured()) return null;
   const params = new URLSearchParams({
     provider,
-    redirect_to: redirectTo
+    redirect_to: redirectTo,
   });
   return `${getSupabaseUrl()}/auth/v1/authorize?${params.toString()}`;
 };
@@ -24,7 +24,7 @@ export interface SupabaseRequestOptions extends RequestInit {
 
 export const supabaseRequest = async <T = unknown>(
   path: string,
-  options: SupabaseRequestOptions = {}
+  options: SupabaseRequestOptions = {},
 ): Promise<SupabaseResult<T>> => {
   if (!isSupabaseConfigured()) {
     return { data: null, error: new Error('Supabase is not configured.') };
@@ -37,8 +37,8 @@ export const supabaseRequest = async <T = unknown>(
       apikey: supabaseAnonKey,
       Authorization: `Bearer ${accessToken || supabaseAnonKey}`,
       'Content-Type': 'application/json',
-      ...((headers as Record<string, string>) || {})
-    }
+      ...((headers as Record<string, string>) || {}),
+    },
   });
 
   const data = (await response.json().catch(() => null)) as (T & { message?: string }) | null;

@@ -1,5 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
-import { BottomTabBar, createBottomTabNavigator, type BottomTabBarProps } from '@react-navigation/bottom-tabs';
+import {
+  BottomTabBar,
+  createBottomTabNavigator,
+  type BottomTabBarProps,
+} from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { ActivityIndicator, Text, View } from 'react-native';
 import { colors } from '../constants/colors';
@@ -66,7 +70,15 @@ export const AuthStack = ({ onAuthenticated }: AuthStackProps) => {
 const AppTabBar = (props: BottomTabBarProps) => (
   <>
     <View
-      style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: 52, backgroundColor: colors.canvas, pointerEvents: 'none' }}
+      style={{
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        bottom: 0,
+        height: 52,
+        backgroundColor: colors.canvas,
+        pointerEvents: 'none',
+      }}
     />
     <BottomTabBar {...props} />
   </>
@@ -75,17 +87,20 @@ const AppTabBar = (props: BottomTabBarProps) => (
 const TAB_ICONS: Record<keyof AppTabsParamList, IoniconName> = {
   Classes: 'albums-outline',
   Statistics: 'bar-chart-outline',
-  Settings: 'settings-outline'
+  Settings: 'settings-outline',
 };
 
 export interface AppTabsProps {
   onSignedOut: () => void;
 }
 
-const TAB_LABEL_KEYS: Record<keyof AppTabsParamList, 'tabClasses' | 'tabStatistics' | 'tabSettings'> = {
+const TAB_LABEL_KEYS: Record<
+  keyof AppTabsParamList,
+  'tabClasses' | 'tabStatistics' | 'tabSettings'
+> = {
   Classes: 'tabClasses',
   Statistics: 'tabStatistics',
-  Settings: 'tabSettings'
+  Settings: 'tabSettings',
 };
 
 export const AppTabs = ({ onSignedOut }: AppTabsProps) => {
@@ -106,7 +121,7 @@ export const AppTabs = ({ onSignedOut }: AppTabsProps) => {
               fontFamily: 'PatrickHand_400Regular',
               fontSize: 14,
               lineHeight: 26,
-              color
+              color,
             }}
           >
             {t(TAB_LABEL_KEYS[route.name]) as string}
@@ -129,14 +144,18 @@ export const AppTabs = ({ onSignedOut }: AppTabsProps) => {
           boxShadow: `0px 0px 6px ${colors.ink}0F`,
           height: 80,
           paddingTop: 0,
-          paddingBottom: 0
+          paddingBottom: 0,
         },
         tabBarIcon: ({ color, size }) => (
           <Ionicons name={TAB_ICONS[route.name]} size={size} color={color} />
-        )
+        ),
       })}
     >
-      <Tabs.Screen name="Classes" component={ClassesStack} options={{ title: t('tabClasses') as string }} />
+      <Tabs.Screen
+        name="Classes"
+        component={ClassesStack}
+        options={{ title: t('tabClasses') as string }}
+      />
       <Tabs.Screen
         name="Statistics"
         component={StatisticsScreen}
@@ -154,7 +173,14 @@ export const RootNavigator = () => {
 
   if (checkingSession) {
     return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.canvas }}>
+      <View
+        style={{
+          flex: 1,
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: colors.canvas,
+        }}
+      >
         <ActivityIndicator color={colors.deepPink} />
       </View>
     );

@@ -4,32 +4,44 @@ import { SettingsScreen } from '../../screens/SettingsScreen';
 import * as authService from '../../services/auth/authService';
 
 jest.mock('../../models/studentModel', () => ({
-  getAllStudents: jest.fn(() => Promise.resolve([{ id: 1, merites: 2, retenues: 1, trimestreActuel: 1 }]))
+  getAllStudents: jest.fn(() =>
+    Promise.resolve([{ id: 1, merites: 2, retenues: 1, trimestreActuel: 1 }]),
+  ),
 }));
 
 jest.mock('../../domain/studentController', () => ({
-  reinitialiserTrimestre: jest.fn(() => Promise.resolve({ totalEleves: 1, totalMerites: 2, totalRetenues: 1 }))
+  reinitialiserTrimestre: jest.fn(() =>
+    Promise.resolve({ totalEleves: 1, totalMerites: 2, totalRetenues: 1 }),
+  ),
 }));
 
 jest.mock('../../services/auth/authService', () => ({
-  getCurrentUser: jest.fn(() => Promise.resolve({ user: { email: 'demo@example.com' }, error: null })),
-  signOut: jest.fn(() => Promise.resolve({ error: null }))
+  getCurrentUser: jest.fn(() =>
+    Promise.resolve({ user: { email: 'demo@example.com' }, error: null }),
+  ),
+  signOut: jest.fn(() => Promise.resolve({ error: null })),
 }));
 
 test('parametres affiche les sections enrichies', async () => {
-  const { getByTestId, getByText } = render(<SettingsScreen navigation={{ navigate: jest.fn(), canGoBack: jest.fn(() => false) }} />);
+  const { getByTestId, getByText } = render(
+    <SettingsScreen navigation={{ navigate: jest.fn(), canGoBack: jest.fn(() => false) }} />,
+  );
   await waitFor(() => expect(getByText('demo@example.com')).toBeTruthy());
-  expect(getByTestId('settings-scroll').props.contentContainerStyle).toEqual(expect.objectContaining({ flexGrow: 1, paddingBottom: 96 }));
+  expect(getByTestId('settings-scroll').props.contentContainerStyle).toEqual(
+    expect.objectContaining({ flexGrow: 1, paddingBottom: 96 }),
+  );
   expect(getByText('Carnet Rose')).toBeTruthy();
   expect(getByText('Account')).toBeTruthy();
   expect(getByText('Preferences')).toBeTruthy();
   expect(getByText('Data')).toBeTruthy();
-  expect(getByText('Danger zone')).toBeTruthy();
+  expect(getByText('Privacy')).toBeTruthy();
 });
 
 test('export affiche bientot disponible', async () => {
   jest.spyOn(Alert, 'alert').mockImplementation(() => {});
-  const { getByTestId, getByText } = render(<SettingsScreen navigation={{ navigate: jest.fn(), canGoBack: jest.fn(() => false) }} />);
+  const { getByTestId, getByText } = render(
+    <SettingsScreen navigation={{ navigate: jest.fn(), canGoBack: jest.fn(() => false) }} />,
+  );
   await waitFor(() => expect(getByText('demo@example.com')).toBeTruthy());
   fireEvent.press(getByTestId('export-data'));
   expect(Alert.alert).toHaveBeenCalledWith('Export my data', 'Coming soon — stay tuned!');
@@ -37,7 +49,12 @@ test('export affiche bientot disponible', async () => {
 
 test('se deconnecter revient au login via le callback', async () => {
   const onSignedOut = jest.fn();
-  const { getByTestId, getByText } = render(<SettingsScreen navigation={{ navigate: jest.fn(), canGoBack: jest.fn(() => false) }} onSignedOut={onSignedOut} />);
+  const { getByTestId, getByText } = render(
+    <SettingsScreen
+      navigation={{ navigate: jest.fn(), canGoBack: jest.fn(() => false) }}
+      onSignedOut={onSignedOut}
+    />,
+  );
   await waitFor(() => expect(getByText('demo@example.com')).toBeTruthy());
 
   fireEvent.press(getByTestId('sign-out'));

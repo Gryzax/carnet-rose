@@ -7,12 +7,7 @@
 // filtering, sorting and aggregation happens in JS in the model layer, which
 // keeps both backends tiny and identical in behaviour.
 
-export type CacheTable =
-  | 'classes'
-  | 'students'
-  | 'events'
-  | 'term_archives'
-  | 'outbox';
+export type CacheTable = 'classes' | 'students' | 'events' | 'term_archives' | 'outbox';
 
 export interface CacheRow {
   id: string;

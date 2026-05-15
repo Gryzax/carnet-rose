@@ -20,7 +20,8 @@ export interface AuthUser {
 export interface AuthResult {
   user: AuthUser | null;
   error: Error | null;
-  message?: string;
+  /** i18n key for a user-facing status/error message; the UI translates it. */
+  messageKey?: string;
 }
 
 export interface SessionResult {

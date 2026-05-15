@@ -10,7 +10,8 @@ import { useT } from '../utils/i18n';
 import { USE_NATIVE_DRIVER } from '../utils/animation';
 import type { StudentRow } from '../types/domain';
 
-export const getStudentStateColor = (student: StudentLike): string => getStudentAvatarColor(student);
+export const getStudentStateColor = (student: StudentLike): string =>
+  getStudentAvatarColor(student);
 
 export interface StudentCardProps {
   student: StudentRow;
@@ -24,7 +25,11 @@ const StudentCardBase = ({ student, onPress, onMenu }: StudentCardProps) => {
   const atRisk = student.crosses >= CROSSES_FOR_DETENTION - 1;
 
   useEffect(() => {
-    Animated.timing(fade, { toValue: 1, duration: 250, useNativeDriver: USE_NATIVE_DRIVER }).start();
+    Animated.timing(fade, {
+      toValue: 1,
+      duration: 250,
+      useNativeDriver: USE_NATIVE_DRIVER,
+    }).start();
   }, [fade]);
 
   return (
@@ -33,8 +38,7 @@ const StudentCardBase = ({ student, onPress, onMenu }: StudentCardProps) => {
         testID="student-card"
         accessibilityRole="button"
         accessibilityLabel={
-          `${student.lastName} ${student.firstName}` +
-          (atRisk ? `, ${t('atRiskBadge')}` : '')
+          `${student.lastName} ${student.firstName}` + (atRisk ? `, ${t('atRiskBadge')}` : '')
         }
         onPress={onPress}
         style={({ pressed }) => [styles.card, pressed && styles.pressed]}
@@ -63,18 +67,26 @@ const StudentCardBase = ({ student, onPress, onMenu }: StudentCardProps) => {
           <View style={styles.morePlaceholder} />
         </View>
         <View style={styles.row}>
-          <Pill style={styles.metric}>{t('ticksLabel')}</Pill>
+          <Pill numberOfLines={1} style={styles.metric}>
+            {t('ticksLabel')}
+          </Pill>
           <Text style={styles.count}>
             {student.ticks}/{TICKS_FOR_MERIT}
           </Text>
           <ProgressBar value={student.ticks} max={TICKS_FOR_MERIT} color={colors.successGreen} />
         </View>
         <View style={styles.row}>
-          <Pill style={styles.metric}>{t('crossesLabel')}</Pill>
+          <Pill numberOfLines={1} style={styles.metric}>
+            {t('crossesLabel')}
+          </Pill>
           <Text style={styles.count}>
             {student.crosses}/{CROSSES_FOR_DETENTION}
           </Text>
-          <ProgressBar value={student.crosses} max={CROSSES_FOR_DETENTION} color={colors.dangerRed} />
+          <ProgressBar
+            value={student.crosses}
+            max={CROSSES_FOR_DETENTION}
+            color={colors.dangerRed}
+          />
         </View>
         <View style={styles.badges}>
           <View style={styles.badgeRow}>
@@ -83,7 +95,9 @@ const StudentCardBase = ({ student, onPress, onMenu }: StudentCardProps) => {
           </View>
           <View style={styles.badgeRow}>
             <Sparkle />
-            <Text style={styles.badge}>{t('detentionsPlainPill', { count: student.detentions })}</Text>
+            <Text style={styles.badge}>
+              {t('detentionsPlainPill', { count: student.detentions })}
+            </Text>
           </View>
           <View style={styles.badgeRow}>
             <Sparkle />
@@ -107,8 +121,25 @@ const StudentCardBase = ({ student, onPress, onMenu }: StudentCardProps) => {
 export const StudentCard = memo(StudentCardBase);
 
 const styles = StyleSheet.create({
-  card: { backgroundColor: colors.card, borderColor: colors.border, borderWidth: 1.5, borderRadius: 20, padding: 16, marginBottom: 12 },
-  washi: { position: 'absolute', top: -9, left: 24, width: 76, height: 22, borderRadius: 3, backgroundColor: colors.orange, opacity: 0.82, transform: [{ rotate: '-5deg' }] },
+  card: {
+    backgroundColor: colors.card,
+    borderColor: colors.border,
+    borderWidth: 1.5,
+    borderRadius: 20,
+    padding: 16,
+    marginBottom: 12,
+  },
+  washi: {
+    position: 'absolute',
+    top: -9,
+    left: 24,
+    width: 76,
+    height: 22,
+    borderRadius: 3,
+    backgroundColor: colors.orange,
+    opacity: 0.82,
+    transform: [{ rotate: '-5deg' }],
+  },
   pressed: { transform: [{ scale: 0.97 }] },
   header: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 12 },
   nameBlock: { flex: 1 },
@@ -120,14 +151,26 @@ const styles = StyleSheet.create({
     borderRadius: 11,
     backgroundColor: colors.dangerRed,
     alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: 'center',
   },
   morePlaceholder: { width: 44, height: 44 },
-  more: { position: 'absolute', top: 16, right: 16, width: 44, height: 44, borderRadius: 22, borderWidth: 1.5, borderColor: colors.border, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.card },
+  more: {
+    position: 'absolute',
+    top: 16,
+    right: 16,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    borderWidth: 1.5,
+    borderColor: colors.border,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.card,
+  },
   row: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 8 },
-  metric: { width: 70, textAlign: 'center' },
+  metric: { width: 92, textAlign: 'center' },
   count: { fontFamily: 'PatrickHand_400Regular', color: colors.ink, fontSize: 18, width: 38 },
   badges: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginTop: 12 },
   badgeRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  badge: { fontFamily: 'PatrickHand_400Regular', color: colors.ink, fontSize: 17 }
+  badge: { fontFamily: 'PatrickHand_400Regular', color: colors.ink, fontSize: 17 },
 });

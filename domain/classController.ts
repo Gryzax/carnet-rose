@@ -16,7 +16,7 @@ export const loadClasses = async (sort: ClassSort = 'alpha'): Promise<ClassWithS
   const classes = await getClasses();
   if (sort === 'recent') {
     return [...classes].sort((a, b) =>
-      String(b.lastUsedAt || '').localeCompare(String(a.lastUsedAt || ''))
+      String(b.lastUsedAt || '').localeCompare(String(a.lastUsedAt || '')),
     );
   }
   return classes;
@@ -24,27 +24,24 @@ export const loadClasses = async (sort: ClassSort = 'alpha'): Promise<ClassWithS
 
 export const addClass = async (name: string): Promise<ClassRow> => {
   const normalizedName = String(name || '').trim();
-  if (!normalizedName) throw new Error('Le nom de la classe est obligatoire.');
+  if (!normalizedName) throw new Error('Class name is required.');
   const classRow: ClassRow = {
     id: uuid(),
     name: normalizedName,
     createdAt: nowIso(),
-    lastUsedAt: nowIso()
+    lastUsedAt: nowIso(),
   };
   await saveClass(classRow);
   return classRow;
 };
 
-export const updateClass = async (
-  classRow: ClassRow | string,
-  name: string
-): Promise<ClassRow> => {
+export const updateClass = async (classRow: ClassRow | string, name: string): Promise<ClassRow> => {
   const id = idOf(classRow);
-  if (!id) throw new Error('La classe est introuvable.');
+  if (!id) throw new Error('Class not found.');
   const normalizedName = String(name || '').trim();
-  if (!normalizedName) throw new Error('Le nom de la classe est obligatoire.');
+  if (!normalizedName) throw new Error('Class name is required.');
   const current = await getClassById(id);
-  if (!current) throw new Error('La classe est introuvable.');
+  if (!current) throw new Error('Class not found.');
   const next: ClassRow = { ...current, name: normalizedName };
   await saveClass(next);
   return next;
@@ -52,7 +49,7 @@ export const updateClass = async (
 
 export const deleteClass = async (classRow: ClassRow | string): Promise<void> => {
   const id = idOf(classRow);
-  if (!id) throw new Error('La classe est introuvable.');
+  if (!id) throw new Error('Class not found.');
   await removeClass(id);
 };
 

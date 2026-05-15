@@ -5,7 +5,18 @@ import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { colors } from '../constants/colors';
 import { resetTrimester, type ResetTrimesterResult } from '../domain/studentController';
 import { getAllStudents } from '../models/studentModel';
-import { Card, InfoIcon, JournalInput, Pill, PillButton, Screen, Sparkle, Title, WashiTape } from '../components/Themed';
+import {
+  Card,
+  InfoIcon,
+  JournalInput,
+  Pill,
+  PillButton,
+  Screen,
+  Sparkle,
+  Title,
+  WashiTape,
+} from '../components/Themed';
+import { ReasonsEditor } from '../components/ReasonsEditor';
 import { deleteAccount, getCurrentUser, signOut } from '../services/auth/authService';
 import { clearLocalData } from '../database/db';
 import { invalidate } from '../lib/queryClient';
@@ -61,7 +72,7 @@ export const SettingsScreen = ({ onSignedOut }: SettingsScreenProps) => {
       totalMerits: students.reduce((s, e) => s + e.merits, 0),
       totalDetentions: students.reduce((s, e) => s + e.detentions, 0),
       totalStudents: students.length,
-      trimester: students[0]?.currentTrimester || 1
+      trimester: students[0]?.currentTrimester || 1,
     });
   };
 
@@ -116,13 +127,22 @@ export const SettingsScreen = ({ onSignedOut }: SettingsScreenProps) => {
       >
         <WashiTape />
         <Title>{t('settingsTitle')}</Title>
-        <Section title={t('sectionAccount')}>
-          <Text testID="account-user" style={styles.strong}>
-            {user?.email || userName || t('connectedUser')}
-          </Text>
-          <PillButton testID="sign-out" onPress={disconnect} variant="sage">
-            {t('signOut')}
+        <Section title={t('sectionData')}>
+          <PillButton onPress={prepare} variant="orange">
+            {t('endTrimester')}
           </PillButton>
+          {success && (
+            <View style={styles.success}>
+              <Sparkle />
+              <Text style={styles.text}>
+                {t('trimesterArchived', {
+                  students: success.totalStudents,
+                  merits: success.totalMerits,
+                  detentions: success.totalDetentions,
+                })}
+              </Text>
+            </View>
+          )}
         </Section>
         <Section title={t('sectionPreferences')}>
           <Text style={styles.muted}>{t('languageHint')}</Text>
@@ -135,7 +155,11 @@ export const SettingsScreen = ({ onSignedOut }: SettingsScreenProps) => {
             style={({ pressed }) => [styles.languageRow, pressed && styles.pressed]}
           >
             <Text style={styles.languageLabel}>{LANGUAGE_LABELS[lang]}</Text>
-            <Ionicons name={langOpen ? 'chevron-up' : 'chevron-down'} size={20} color={colors.ink} />
+            <Ionicons
+              name={langOpen ? 'chevron-up' : 'chevron-down'}
+              size={20}
+              color={colors.ink}
+            />
           </Pressable>
           {langOpen && (
             <View style={styles.languageMenu}>
@@ -155,7 +179,7 @@ export const SettingsScreen = ({ onSignedOut }: SettingsScreenProps) => {
                     style={({ pressed }) => [
                       styles.languageRow,
                       active && styles.languageRowActive,
-                      pressed && styles.pressed
+                      pressed && styles.pressed,
                     ]}
                   >
                     <Text style={[styles.languageLabel, active && styles.languageLabelActive]}>
@@ -168,7 +192,10 @@ export const SettingsScreen = ({ onSignedOut }: SettingsScreenProps) => {
             </View>
           )}
         </Section>
-        <Section title={t('sectionData')}>
+        <Section title={t('sectionReasons')}>
+          <ReasonsEditor />
+        </Section>
+        <Section title={t('sectionDangerZone')}>
           <PillButton
             testID="export-data"
             onPress={() => Alert.alert(t('exportDataTitle') as string, t('comingSoon') as string)}
@@ -176,25 +203,16 @@ export const SettingsScreen = ({ onSignedOut }: SettingsScreenProps) => {
           >
             {t('exportData')}
           </PillButton>
-          <PillButton onPress={prepare} variant="orange">
-            {t('endTrimester')}
-          </PillButton>
-          {success && (
-            <View style={styles.success}>
-              <Sparkle />
-              <Text style={styles.text}>
-                {t('trimesterArchived', {
-                  students: success.totalStudents,
-                  merits: success.totalMerits,
-                  detentions: success.totalDetentions
-                })}
-              </Text>
-            </View>
-          )}
-        </Section>
-        <Section title={t('sectionDangerZone')}>
           <PillButton testID="delete-account" onPress={openDelete} variant="danger">
             {t('deleteAccount')}
+          </PillButton>
+        </Section>
+        <Section title={t('sectionAccount')}>
+          <Text testID="account-user" style={styles.strong}>
+            {user?.email || userName || t('connectedUser')}
+          </Text>
+          <PillButton testID="sign-out" onPress={disconnect} variant="sage">
+            {t('signOut')}
           </PillButton>
         </Section>
         <View style={styles.about}>
@@ -214,7 +232,7 @@ export const SettingsScreen = ({ onSignedOut }: SettingsScreenProps) => {
               {t('allClassesSummary', {
                 merits: summary?.totalMerits ?? 0,
                 detentions: summary?.totalDetentions ?? 0,
-                students: summary?.totalStudents ?? 0
+                students: summary?.totalStudents ?? 0,
               })}
             </Text>
             <Text style={styles.text}>{t('typeConfirmToContinue', { word: confirmWord })}</Text>
@@ -269,18 +287,55 @@ const styles = StyleSheet.create({
   sectionBody: { marginTop: 12, gap: 8 },
   infoRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   about: { marginTop: 24, alignItems: 'center', gap: 4 },
-  aboutText: { color: colors.muted, fontFamily: 'PatrickHand_400Regular', fontSize: 17, textAlign: 'center' },
+  aboutText: {
+    color: colors.muted,
+    fontFamily: 'PatrickHand_400Regular',
+    fontSize: 17,
+    textAlign: 'center',
+  },
   strong: { color: colors.ink, fontFamily: 'PatrickHand_400Regular', fontSize: 23 },
-  muted: { color: colors.muted, fontFamily: 'PatrickHand_400Regular', fontSize: 19, lineHeight: 24 },
-  text: { color: colors.ink, fontFamily: 'PatrickHand_400Regular', fontSize: 19, lineHeight: 24, flex: 1 },
-  success: { marginTop: 14, backgroundColor: colors.sage, borderColor: colors.border, borderWidth: 1.5, borderRadius: 16, padding: 14, flexDirection: 'row', alignItems: 'center', gap: 8 },
+  muted: {
+    color: colors.muted,
+    fontFamily: 'PatrickHand_400Regular',
+    fontSize: 19,
+    lineHeight: 24,
+  },
+  text: {
+    color: colors.ink,
+    fontFamily: 'PatrickHand_400Regular',
+    fontSize: 19,
+    lineHeight: 24,
+    flex: 1,
+  },
+  success: {
+    marginTop: 14,
+    backgroundColor: colors.sage,
+    borderColor: colors.border,
+    borderWidth: 1.5,
+    borderRadius: 16,
+    padding: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
   backdrop: { flex: 1, justifyContent: 'center', padding: 24, backgroundColor: colors.scrim },
   dialog: { gap: 12 },
   modalTitle: { fontSize: 28, fontFamily: 'PatrickHand_400Regular', color: colors.ink },
-  languageRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', minHeight: 48, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 10, backgroundColor: colors.canvas, borderColor: colors.border, borderWidth: 1.5 },
+  languageRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    minHeight: 48,
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    backgroundColor: colors.canvas,
+    borderColor: colors.border,
+    borderWidth: 1.5,
+  },
   languageMenu: { gap: 8 },
   languageRowActive: { backgroundColor: colors.pink },
   languageLabel: { color: colors.ink, fontFamily: 'PatrickHand_400Regular', fontSize: 21 },
   languageLabelActive: { color: colors.onPrimary },
-  pressed: { transform: [{ scale: 0.98 }] }
+  pressed: { transform: [{ scale: 0.98 }] },
 });

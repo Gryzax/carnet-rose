@@ -1,4 +1,9 @@
-import { deleteClassCascade, getClassById, putClass, replaceAllClasses } from '../models/classModel';
+import {
+  deleteClassCascade,
+  getClassById,
+  putClass,
+  replaceAllClasses,
+} from '../models/classModel';
 import { getStudentsByClass } from '../models/studentModel';
 import { fetchClasses, pushClass, softDeleteClassRemote } from '../services/remote/classRemote';
 import { softDeleteStudentRemote } from '../services/remote/studentRemote';
@@ -25,7 +30,7 @@ export const removeClass = async (id: string): Promise<void> => {
   await pushOrQueue('class', 'delete', { id }, (ctx) => softDeleteClassRemote(ctx, id));
   for (const student of students) {
     await pushOrQueue('student', 'delete', { id: student.id }, (ctx) =>
-      softDeleteStudentRemote(ctx, student.id)
+      softDeleteStudentRemote(ctx, student.id),
     );
   }
 };

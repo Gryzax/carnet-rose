@@ -54,7 +54,7 @@ const buildEvent = (
   student: StudentRow,
   type: EventRow['type'],
   reason: string,
-  next: StudentRow
+  next: StudentRow,
 ): EventRow => ({
   id: uuid(),
   studentId: student.id,
@@ -68,7 +68,7 @@ const buildEvent = (
   newCrosses: next.crosses,
   previousForgets: student.forgets,
   newForgets: next.forgets,
-  cancelled: 0
+  cancelled: 0,
 });
 
 export const addTick = async (student: StudentRow, reason = ''): Promise<TickResult> => {
@@ -109,17 +109,17 @@ export const addForgot = async (student: StudentRow): Promise<ForgotResult> => {
 
 export const undoLastAction = async (studentId: string): Promise<UndoResult> => {
   const event = await getLastActiveEvent(studentId);
-  if (!event) return { cancelled: false, reason: 'Aucune action à annuler' };
+  if (!event) return { cancelled: false, reason: 'No action to undo' };
   if (secondsBetween(event.createdAt) > UNDO_LIMIT_SECONDS) {
-    return { cancelled: false, reason: 'Délai dépassé' };
+    return { cancelled: false, reason: 'Undo window expired' };
   }
   const student = await getStudentById(studentId);
-  if (!student) return { cancelled: false, reason: 'Élève introuvable' };
+  if (!student) return { cancelled: false, reason: 'Student not found' };
   const restored: StudentRow = {
     ...student,
     ticks: event.previousTicks,
     crosses: event.previousCrosses,
-    forgets: event.previousForgets
+    forgets: event.previousForgets,
   };
   await saveStudent(restored);
   await saveEvent({ ...event, cancelled: 1 });
@@ -127,13 +127,11 @@ export const undoLastAction = async (studentId: string): Promise<UndoResult> => 
 };
 
 export const deleteEvent = async (eventId: string): Promise<void> => {
-  if (!eventId) throw new Error('Événement introuvable.');
+  if (!eventId) throw new Error('Event not found.');
   await removeEvent(eventId);
 };
 
-export const resetTrimester = async (
-  trimesterNumber?: number
-): Promise<ResetTrimesterResult> => {
+export const resetTrimester = async (trimesterNumber?: number): Promise<ResetTrimesterResult> => {
   const students = await getAllStudents();
   const archivedAt = nowIso();
   for (const student of students) {
@@ -145,7 +143,7 @@ export const resetTrimester = async (
       detentions: student.detentions,
       totalTicks: student.ticks,
       totalCrosses: student.crosses,
-      archivedAt
+      archivedAt,
     };
     await saveArchive(archive);
   }
@@ -159,36 +157,36 @@ export const resetTrimester = async (
       merits: 0,
       detentions: 0,
       forgets: 0,
-      currentTrimester: student.currentTrimester + 1
+      currentTrimester: student.currentTrimester + 1,
     });
   }
   return {
     archivedAt,
     totalStudents: students.length,
     totalMerits: students.reduce((sum, s) => sum + s.merits, 0),
-    totalDetentions: students.reduce((sum, s) => sum + s.detentions, 0)
+    totalDetentions: students.reduce((sum, s) => sum + s.detentions, 0),
   };
 };
 
 export const deleteStudent = async (student: StudentRow | string): Promise<void> => {
   const id = typeof student === 'object' ? student?.id : student;
-  if (!id) throw new Error('Élève introuvable.');
+  if (!id) throw new Error('Student not found.');
   await removeStudent(id);
 };
 
 export const updateStudent = async (
   student: StudentRow,
-  { firstName, lastName }: EditStudentInput
+  { firstName, lastName }: EditStudentInput,
 ): Promise<StudentRow> => {
   const normalizedFirstName = String(firstName || '').trim();
   const normalizedLastName = String(lastName || '').trim();
-  if (!student?.id) throw new Error('Élève introuvable.');
-  if (!normalizedFirstName) throw new Error("Le prénom de l'élève est obligatoire.");
-  if (!normalizedLastName) throw new Error("Le nom de l'élève est obligatoire.");
+  if (!student?.id) throw new Error('Student not found.');
+  if (!normalizedFirstName) throw new Error('Student first name is required.');
+  if (!normalizedLastName) throw new Error('Student last name is required.');
   const next: StudentRow = {
     ...student,
     firstName: normalizedFirstName,
-    lastName: normalizedLastName
+    lastName: normalizedLastName,
   };
   await saveStudent(next);
   await touchClass(student.classId);
@@ -198,13 +196,13 @@ export const updateStudent = async (
 export const addStudent = async ({
   classId,
   firstName,
-  lastName
+  lastName,
 }: AddStudentInput): Promise<StudentRow> => {
   const normalizedFirstName = String(firstName || '').trim();
   const normalizedLastName = String(lastName || '').trim();
-  if (!classId) throw new Error('Classe introuvable.');
-  if (!normalizedFirstName) throw new Error("Le prénom de l'élève est obligatoire.");
-  if (!normalizedLastName) throw new Error("Le nom de l'élève est obligatoire.");
+  if (!classId) throw new Error('Class not found.');
+  if (!normalizedFirstName) throw new Error('Student first name is required.');
+  if (!normalizedLastName) throw new Error('Student last name is required.');
   const student: StudentRow = {
     id: uuid(),
     classId,
@@ -215,7 +213,7 @@ export const addStudent = async ({
     merits: 0,
     detentions: 0,
     forgets: 0,
-    currentTrimester: 1
+    currentTrimester: 1,
   };
   await saveStudent(student);
   await touchClass(classId);

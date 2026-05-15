@@ -46,7 +46,7 @@ export default function App() {
           "style-src 'self' 'unsafe-inline'",
           scriptSrc,
           "object-src 'none'",
-          "base-uri 'self'"
+          "base-uri 'self'",
           // Note: `frame-ancestors` is intentionally omitted — it is ignored
           // when delivered via <meta> and must be set as an HTTP header by the
           // host (alongside X-Frame-Options) to actually prevent framing.
@@ -60,7 +60,14 @@ export default function App() {
   }, []);
   if (!ready || !fontsLoaded) {
     return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.canvas }}>
+      <View
+        style={{
+          flex: 1,
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: colors.canvas,
+        }}
+      >
         <ActivityIndicator color={colors.orange} />
       </View>
     );

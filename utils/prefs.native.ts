@@ -12,7 +12,10 @@ const getDb = async (): Promise<SQLite.SQLiteDatabase> => {
 
 export const getPref = async (key: string): Promise<string | null> => {
   const conn = await getDb();
-  const row = await conn.getFirstAsync<{ v: string | null }>('SELECT v FROM prefs WHERE k = ?', key);
+  const row = await conn.getFirstAsync<{ v: string | null }>(
+    'SELECT v FROM prefs WHERE k = ?',
+    key,
+  );
   return row ? row.v : null;
 };
 

@@ -32,7 +32,7 @@ export const mapStudentToSupabase = (student: StudentRow, userId: string) => ({
   current_term: student.currentTrimester || 1,
   term: student.currentTrimester || 1,
   updated_at: nowIso(),
-  deleted_at: null
+  deleted_at: null,
 });
 
 export const mapStudentFromSupabase = (row: SupabaseStudent): StudentRow => ({
@@ -45,13 +45,13 @@ export const mapStudentFromSupabase = (row: SupabaseStudent): StudentRow => ({
   merits: row.merits || 0,
   detentions: row.detentions || 0,
   forgets: row.forgets || 0,
-  currentTrimester: row.current_term || 1
+  currentTrimester: row.current_term || 1,
 });
 
 export const fetchStudents = async (ctx: ReadyRemoteContext): Promise<StudentRow[]> => {
   const rows = await remoteRequest<SupabaseStudent[]>(
     `/rest/v1/students?user_id=eq.${encodeURIComponent(ctx.user.id)}&deleted_at=is.null&select=local_id,class_local_id,first_name,last_name,ticks,crosses,merits,detentions,forgets,current_term,deleted_at`,
-    { accessToken: ctx.session.accessToken }
+    { accessToken: ctx.session.accessToken },
   );
   return (rows || []).map(mapStudentFromSupabase);
 };
@@ -61,13 +61,13 @@ export const pushStudent = async (ctx: ReadyRemoteContext, student: StudentRow):
     method: 'POST',
     accessToken: ctx.session.accessToken,
     headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
-    body: JSON.stringify(mapStudentToSupabase(student, ctx.user.id))
+    body: JSON.stringify(mapStudentToSupabase(student, ctx.user.id)),
   });
 };
 
 export const softDeleteStudentRemote = async (
   ctx: ReadyRemoteContext,
-  studentId: string
+  studentId: string,
 ): Promise<void> => {
   await remoteRequest(
     `/rest/v1/students?user_id=eq.${encodeURIComponent(ctx.user.id)}&local_id=eq.${encodeURIComponent(studentId)}`,
@@ -75,7 +75,7 @@ export const softDeleteStudentRemote = async (
       method: 'PATCH',
       accessToken: ctx.session.accessToken,
       headers: { Prefer: 'return=minimal' },
-      body: JSON.stringify({ deleted_at: nowIso(), updated_at: nowIso() })
-    }
+      body: JSON.stringify({ deleted_at: nowIso(), updated_at: nowIso() }),
+    },
   );
 };

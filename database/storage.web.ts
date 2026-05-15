@@ -20,7 +20,7 @@ const emptyState = (): CacheState => ({
   students: [],
   events: [],
   term_archives: [],
-  outbox: []
+  outbox: [],
 });
 
 const loadState = async (): Promise<CacheState> => {
@@ -81,7 +81,7 @@ const cacheStore: CacheStore = {
 
   async clear(): Promise<void> {
     await saveState(emptyState());
-  }
+  },
 };
 
 export const getStore = async (): Promise<CacheStore> => {

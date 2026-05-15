@@ -30,7 +30,7 @@ const floatingStyle: ViewStyle = {
   left: 16,
   zIndex: 10,
   elevation: 10,
-  marginBottom: 0
+  marginBottom: 0,
 };
 
 export const BackButton = ({
@@ -38,7 +38,7 @@ export const BackButton = ({
   fallbackRoute = 'Classes',
   style,
   label,
-  floating = false
+  floating = false,
 }: BackButtonProps) => {
   const { t } = useT();
   const resolvedLabel = label ?? (t('back') as string);

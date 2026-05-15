@@ -17,8 +17,8 @@ jest.mock('@react-navigation/native-stack', () => ({
       const { View } = require('react-native');
       return <View>{children}</View>;
     },
-    Screen: ({ children, component: Component }) => (children ? children({}) : <Component />)
-  })
+    Screen: ({ children, component: Component }) => (children ? children({}) : <Component />),
+  }),
 }));
 
 jest.mock('@react-navigation/bottom-tabs', () => ({
@@ -35,54 +35,54 @@ jest.mock('@react-navigation/bottom-tabs', () => ({
           {children ? children({}) : <Component />}
         </View>
       );
-    }
-  })
+    },
+  }),
 }));
 
 jest.mock('../../screens/LandingScreen', () => ({
   LandingScreen: () => {
     const { Text } = require('react-native');
     return <Text>Landing screen</Text>;
-  }
+  },
 }));
 
 jest.mock('../../screens/ClassesScreen', () => ({
   ClassesScreen: () => {
     const { Text } = require('react-native');
     return <Text>Classes screen</Text>;
-  }
+  },
 }));
 
 jest.mock('../../screens/ClassDashboardScreen', () => ({
   ClassDashboardScreen: () => {
     const { Text } = require('react-native');
     return <Text>Class dashboard</Text>;
-  }
+  },
 }));
 
 jest.mock('../../screens/StudentDetailScreen', () => ({
   StudentDetailScreen: () => {
     const { Text } = require('react-native');
     return <Text>Student detail</Text>;
-  }
+  },
 }));
 
 jest.mock('../../screens/StatisticsScreen', () => ({
   StatisticsScreen: () => {
     const { Text } = require('react-native');
     return <Text>Statistics screen</Text>;
-  }
+  },
 }));
 
 jest.mock('../../screens/SettingsScreen', () => ({
   SettingsScreen: ({ onSignedOut }) => {
     const { Text } = require('react-native');
     return <Text onPress={onSignedOut}>Settings screen</Text>;
-  }
+  },
 }));
 
 jest.mock('../../services/supabase/supabaseClient', () => ({
-  isSupabaseConfigured: jest.fn(() => false)
+  isSupabaseConfigured: jest.fn(() => false),
 }));
 
 jest.mock('../../services/auth/authService', () => ({
@@ -94,7 +94,7 @@ jest.mock('../../services/auth/authService', () => ({
   }),
   signOut: jest.fn(() => Promise.resolve({ error: null })),
   signInWithApple: jest.fn(() => Promise.resolve({ user: null, message: 'Apple pending' })),
-  signInWithGoogle: jest.fn(() => Promise.resolve({ user: null, message: 'Google pending' }))
+  signInWithGoogle: jest.fn(() => Promise.resolve({ user: null, message: 'Google pending' })),
 }));
 
 beforeEach(() => {
@@ -116,7 +116,10 @@ test('aucun acces aux tabs sans session', async () => {
 });
 
 test('acces aux tabs avec utilisateur mocke', async () => {
-  authService.getCurrentUser.mockResolvedValueOnce({ user: { email: 'demo@example.com' }, error: null });
+  authService.getCurrentUser.mockResolvedValueOnce({
+    user: { email: 'demo@example.com' },
+    error: null,
+  });
 
   const { getByText, queryByText } = renderNav();
 
@@ -147,7 +150,10 @@ test('retour navigateur simule ne declenche pas signOut si une session existe', 
     if (event === 'popstate') popstateHandler = handler;
   });
   window.removeEventListener = jest.fn();
-  authService.getCurrentUser.mockResolvedValue({ user: { email: 'demo@example.com' }, error: null });
+  authService.getCurrentUser.mockResolvedValue({
+    user: { email: 'demo@example.com' },
+    error: null,
+  });
   const { getByText } = renderNav();
   await waitFor(() => expect(getByText('Classes')).toBeTruthy());
 
@@ -160,7 +166,10 @@ test('retour navigateur simule ne declenche pas signOut si une session existe', 
 });
 
 test('signOut renvoie vers LoginScreen', async () => {
-  authService.getCurrentUser.mockResolvedValueOnce({ user: { email: 'demo@example.com' }, error: null });
+  authService.getCurrentUser.mockResolvedValueOnce({
+    user: { email: 'demo@example.com' },
+    error: null,
+  });
   const { getByText } = renderNav();
   await waitFor(() => expect(getByText('Settings screen')).toBeTruthy());
 

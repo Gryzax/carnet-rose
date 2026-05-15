@@ -13,8 +13,16 @@ export type LandingScreenProps = NativeStackScreenProps<AuthStackParamList, 'Lan
 
 interface Feature {
   icon: IoniconName;
-  titleKey: 'landingFeature1Title' | 'landingFeature2Title' | 'landingFeature3Title' | 'landingFeature4Title';
-  bodyKey: 'landingFeature1Body' | 'landingFeature2Body' | 'landingFeature3Body' | 'landingFeature4Body';
+  titleKey:
+    | 'landingFeature1Title'
+    | 'landingFeature2Title'
+    | 'landingFeature3Title'
+    | 'landingFeature4Title';
+  bodyKey:
+    | 'landingFeature1Body'
+    | 'landingFeature2Body'
+    | 'landingFeature3Body'
+    | 'landingFeature4Body';
 }
 
 // Light mode only — see DESIGN.md. Cozy peach canvas, white notebook cards,
@@ -22,9 +30,13 @@ interface Feature {
 // RootNavigator swaps the whole AuthStack out once a user is present.
 const FEATURES: Feature[] = [
   { icon: 'albums-outline', titleKey: 'landingFeature1Title', bodyKey: 'landingFeature1Body' },
-  { icon: 'checkmark-circle-outline', titleKey: 'landingFeature2Title', bodyKey: 'landingFeature2Body' },
+  {
+    icon: 'checkmark-circle-outline',
+    titleKey: 'landingFeature2Title',
+    bodyKey: 'landingFeature2Body',
+  },
   { icon: 'time-outline', titleKey: 'landingFeature3Title', bodyKey: 'landingFeature3Body' },
-  { icon: 'bar-chart-outline', titleKey: 'landingFeature4Title', bodyKey: 'landingFeature4Body' }
+  { icon: 'bar-chart-outline', titleKey: 'landingFeature4Title', bodyKey: 'landingFeature4Body' },
 ];
 
 export const LandingScreen = ({ navigation }: LandingScreenProps) => {
@@ -67,7 +79,7 @@ export const LandingScreen = ({ navigation }: LandingScreenProps) => {
                   style={({ pressed }) => [
                     styles.langMenuRow,
                     active && styles.langMenuRowActive,
-                    pressed && styles.pressed
+                    pressed && styles.pressed,
                   ]}
                 >
                   <Text style={[styles.langMenuText, active && styles.langMenuTextActive]}>
@@ -129,29 +141,132 @@ const baseText = { fontFamily: 'PatrickHand_400Regular', color: colors.ink, lett
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.canvas },
-  washi: { position: 'absolute', top: 64, right: -22, width: 148, height: 30, borderRadius: 3, backgroundColor: colors.orange, opacity: 0.28, transform: [{ rotate: '-8deg' }], pointerEvents: 'none' },
-  langSwitcher: { position: 'absolute', top: 12, right: 12, zIndex: 10, alignItems: 'flex-end', gap: 6 },
-  langButton: { flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 36, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 10, backgroundColor: colors.card, borderColor: colors.border, borderWidth: 1.5 },
+  washi: {
+    position: 'absolute',
+    top: 64,
+    right: -22,
+    width: 148,
+    height: 30,
+    borderRadius: 3,
+    backgroundColor: colors.orange,
+    opacity: 0.28,
+    transform: [{ rotate: '-8deg' }],
+    pointerEvents: 'none',
+  },
+  langSwitcher: {
+    position: 'absolute',
+    top: 12,
+    right: 12,
+    zIndex: 10,
+    alignItems: 'flex-end',
+    gap: 6,
+  },
+  langButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    minHeight: 36,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 10,
+    backgroundColor: colors.card,
+    borderColor: colors.border,
+    borderWidth: 1.5,
+  },
   langButtonText: { ...baseText, fontSize: 16 },
-  langMenu: { gap: 4, backgroundColor: colors.card, borderColor: colors.border, borderWidth: 1.5, borderRadius: 12, padding: 4, minWidth: 132 },
-  langMenuRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', minHeight: 36, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 6 },
+  langMenu: {
+    gap: 4,
+    backgroundColor: colors.card,
+    borderColor: colors.border,
+    borderWidth: 1.5,
+    borderRadius: 12,
+    padding: 4,
+    minWidth: 132,
+  },
+  langMenuRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    minHeight: 36,
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+  },
   langMenuRowActive: { backgroundColor: colors.pink },
   langMenuText: { ...baseText, fontSize: 17 },
   langMenuTextActive: { color: colors.onPrimary },
   scroll: { flex: 1, backgroundColor: colors.canvas },
-  content: { flexGrow: 1, alignItems: 'center', justifyContent: 'center', padding: 16, paddingVertical: 24, gap: 12, maxWidth: 520, width: '100%', alignSelf: 'center' },
-  logo: { width: 58, height: 58, borderRadius: 29, backgroundColor: colors.card, alignItems: 'center', justifyContent: 'center', borderColor: colors.border, borderWidth: 1.5 },
+  content: {
+    flexGrow: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 16,
+    paddingVertical: 24,
+    gap: 12,
+    maxWidth: 520,
+    width: '100%',
+    alignSelf: 'center',
+  },
+  logo: {
+    width: 58,
+    height: 58,
+    borderRadius: 29,
+    backgroundColor: colors.card,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderColor: colors.border,
+    borderWidth: 1.5,
+  },
   title: { ...baseText, fontSize: 42, lineHeight: 48, textAlign: 'center' },
   headline: { ...baseText, fontSize: 26, lineHeight: 30, textAlign: 'center' },
   intro: { ...baseText, color: colors.muted, fontSize: 19, lineHeight: 24, textAlign: 'center' },
   features: { width: '100%', gap: 10, marginTop: 8 },
-  featureCard: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: colors.card, borderColor: colors.border, borderWidth: 1.5, borderRadius: 16, padding: 14 },
-  featureIcon: { width: 44, height: 44, borderRadius: 22, backgroundColor: colors.lightPink, alignItems: 'center', justifyContent: 'center', borderColor: colors.border, borderWidth: 1.5 },
+  featureCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    backgroundColor: colors.card,
+    borderColor: colors.border,
+    borderWidth: 1.5,
+    borderRadius: 16,
+    padding: 14,
+  },
+  featureIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: colors.lightPink,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderColor: colors.border,
+    borderWidth: 1.5,
+  },
   featureText: { flex: 1, gap: 2 },
   featureTitle: { ...baseText, fontSize: 21, lineHeight: 25 },
   featureBody: { ...baseText, color: colors.muted, fontSize: 17, lineHeight: 22 },
-  pricing: { ...baseText, color: colors.muted, fontSize: 17, lineHeight: 22, textAlign: 'center', marginTop: 4 },
-  cta: { minHeight: 52, width: '100%', borderRadius: 8, borderColor: colors.border, borderWidth: 1.5, backgroundColor: colors.pink, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', gap: 8, paddingHorizontal: 16, paddingVertical: 12, marginTop: 8 },
+  pricing: {
+    ...baseText,
+    color: colors.muted,
+    fontSize: 17,
+    lineHeight: 22,
+    textAlign: 'center',
+    marginTop: 4,
+  },
+  cta: {
+    minHeight: 52,
+    width: '100%',
+    borderRadius: 8,
+    borderColor: colors.border,
+    borderWidth: 1.5,
+    backgroundColor: colors.pink,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+    gap: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    marginTop: 8,
+  },
   ctaText: { ...baseText, color: colors.onPrimary, fontSize: 22, textAlign: 'center' },
-  pressed: { transform: [{ scale: 0.97 }] }
+  pressed: { transform: [{ scale: 0.97 }] },
 });

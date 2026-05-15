@@ -19,6 +19,7 @@ import { UndoSnackbar } from '../components/UndoSnackbar';
 import { useHistory } from '../hooks/useHistory';
 import { useStudent } from '../hooks/useStudents';
 import { useHistoryMutations } from '../hooks/useHistoryMutations';
+import { useReasons } from '../utils/reasons';
 import type { ClassesStackParamList } from '../navigation/types';
 
 type Props = NativeStackScreenProps<ClassesStackParamList, 'StudentDetail'>;
@@ -36,17 +37,18 @@ export const StudentDetailScreen = ({ route, navigation }: Props) => {
   const { student } = useStudent(route.params.studentId);
   const { history, archives } = useHistory(student);
   const { tick, cross, forgot, undo, removeEvent } = useHistoryMutations();
+  const { tickReasons, crossReasons } = useReasons();
 
   useEffect(
     () => () => {
       if (snackTimer.current) clearTimeout(snackTimer.current);
     },
-    []
+    [],
   );
 
   const reasons = useMemo(
-    () => (action === 'tick' ? t('tickReasons') : t('crossReasons')) as string[],
-    [action, t]
+    () => (action === 'tick' ? tickReasons : crossReasons),
+    [action, tickReasons, crossReasons],
   );
 
   const runAction = async (reason: string) => {
@@ -56,9 +58,11 @@ export const StudentDetailScreen = ({ route, navigation }: Props) => {
         ? await tick.mutateAsync({ student, reason })
         : await cross.mutateAsync({ student, reason });
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    Animated.spring(pulse, { toValue: 1.03, friction: 4, useNativeDriver: USE_NATIVE_DRIVER }).start(() =>
-      pulse.setValue(1)
-    );
+    Animated.spring(pulse, {
+      toValue: 1.03,
+      friction: 4,
+      useNativeDriver: USE_NATIVE_DRIVER,
+    }).start(() => pulse.setValue(1));
     const compensated = action === 'tick' ? student.crosses > 0 : student.ticks > 0;
     const message =
       action === 'tick'
@@ -78,14 +82,14 @@ export const StudentDetailScreen = ({ route, navigation }: Props) => {
       const copy = t('meritCopy', { name: student.firstName }) as string;
       Alert.alert(t('meritObtainedTitle') as string, copy, [
         { text: t('copyMessage') as string, onPress: () => Clipboard.setStringAsync(copy) },
-        { text: t('close') as string }
+        { text: t('close') as string },
       ]);
     }
     if ('detentionTriggered' in result && result.detentionTriggered) {
       const copy = t('detentionCopy', { name: student.firstName }) as string;
       Alert.alert(t('detentionTriggeredTitle') as string, copy, [
         { text: t('copyMessage') as string, onPress: () => Clipboard.setStringAsync(copy) },
-        { text: t('close') as string }
+        { text: t('close') as string },
       ]);
     }
   };
@@ -96,9 +100,11 @@ export const StudentDetailScreen = ({ route, navigation }: Props) => {
     if (!student) return;
     await forgot.mutateAsync({ student });
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    Animated.spring(pulse, { toValue: 1.03, friction: 4, useNativeDriver: USE_NATIVE_DRIVER }).start(() =>
-      pulse.setValue(1)
-    );
+    Animated.spring(pulse, {
+      toValue: 1.03,
+      friction: 4,
+      useNativeDriver: USE_NATIVE_DRIVER,
+    }).start(() => pulse.setValue(1));
     setSnackMessage(t('snackForgotAdded', { name: student.firstName }) as string);
     setSnack(true);
     if (snackTimer.current) clearTimeout(snackTimer.current);
@@ -125,7 +131,9 @@ export const StudentDetailScreen = ({ route, navigation }: Props) => {
             <Text accessibilityRole="header" style={styles.name}>
               {student.firstName} {student.lastName}
             </Text>
-            <Text style={styles.meta}>{t('trimesterTracking', { trimester: student.currentTrimester })}</Text>
+            <Text style={styles.meta}>
+              {t('trimesterTracking', { trimester: student.currentTrimester })}
+            </Text>
           </View>
         </View>
         <View style={styles.pills}>
@@ -278,7 +286,13 @@ export const StudentDetailScreen = ({ route, navigation }: Props) => {
 };
 
 const styles = StyleSheet.create({
-  loading: { fontFamily: 'PatrickHand_400Regular', color: colors.ink, fontSize: 22, marginTop: 52, marginHorizontal: 16 },
+  loading: {
+    fontFamily: 'PatrickHand_400Regular',
+    color: colors.ink,
+    fontSize: 22,
+    marginTop: 52,
+    marginHorizontal: 16,
+  },
   hero: { marginBottom: 16 },
   heroRow: { flexDirection: 'row', alignItems: 'center', gap: 14 },
   heroText: { flex: 1 },
@@ -286,7 +300,14 @@ const styles = StyleSheet.create({
   meta: { fontFamily: 'PatrickHand_400Regular', color: colors.muted, fontSize: 19 },
   pills: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 16 },
   actions: { flexDirection: 'row', gap: 12, marginBottom: 16 },
-  bigAction: { flex: 1, borderColor: colors.border, borderWidth: 1.5, borderRadius: 8, padding: 18, alignItems: 'center' },
+  bigAction: {
+    flex: 1,
+    borderColor: colors.border,
+    borderWidth: 1.5,
+    borderRadius: 8,
+    padding: 18,
+    alignItems: 'center',
+  },
   tick: { backgroundColor: colors.sage },
   cross: { backgroundColor: colors.pink },
   forgotAction: {
@@ -300,12 +321,12 @@ const styles = StyleSheet.create({
     backgroundColor: colors.orangeSoft,
     borderColor: colors.border,
     borderWidth: 1.5,
-    borderRadius: 999
+    borderRadius: 999,
   },
   forgotActionText: {
     fontFamily: 'PatrickHand_400Regular',
     color: colors.ink,
-    fontSize: 18
+    fontSize: 18,
   },
   pressed: { transform: [{ scale: 0.97 }] },
   actionText: { fontFamily: 'PatrickHand_400Regular', color: colors.ink, fontSize: 26 },
@@ -317,11 +338,21 @@ const styles = StyleSheet.create({
   historyContent: { flexGrow: 1, paddingTop: 76, paddingBottom: 96, paddingHorizontal: 16 },
   historyRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   historyText: { fontFamily: 'PatrickHand_400Regular', color: colors.ink, fontSize: 19, flex: 1 },
-  footer: { fontFamily: 'PatrickHand_400Regular', color: colors.muted, fontSize: 19, marginTop: 12 },
+  footer: {
+    fontFamily: 'PatrickHand_400Regular',
+    color: colors.muted,
+    fontSize: 19,
+    marginTop: 12,
+  },
   backdrop: { flex: 1, backgroundColor: colors.scrim, justifyContent: 'center', padding: 20 },
   dialog: { gap: 12 },
   modalTitle: { fontFamily: 'PatrickHand_400Regular', fontSize: 28, color: colors.ink },
-  modalText: { fontFamily: 'PatrickHand_400Regular', fontSize: 19, color: colors.muted, lineHeight: 24 },
+  modalText: {
+    fontFamily: 'PatrickHand_400Regular',
+    fontSize: 19,
+    color: colors.muted,
+    lineHeight: 24,
+  },
   dialogActions: { flexDirection: 'row', gap: 10 },
-  dialogButton: { flex: 1 }
+  dialogButton: { flex: 1 },
 });

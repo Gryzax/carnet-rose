@@ -3,14 +3,20 @@ import { createMemStore } from '../test-utils/memStore';
 let mockStore;
 jest.mock('../database/db', () => ({ getStore: jest.fn(() => Promise.resolve(mockStore)) }));
 
-import { deleteClassCascade, getClassById, getClasses, putClass, replaceAllClasses } from '../models/classModel';
+import {
+  deleteClassCascade,
+  getClassById,
+  getClasses,
+  putClass,
+  replaceAllClasses,
+} from '../models/classModel';
 import {
   deleteStudentCascade,
   getAllStudents,
   getStudentById,
   getStudentsByClass,
   putStudent,
-  replaceAllStudents
+  replaceAllStudents,
 } from '../models/studentModel';
 import {
   deleteEvent,
@@ -19,26 +25,89 @@ import {
   getCurrentHistory,
   getLastActiveEvent,
   putArchive,
-  putEvent
+  putEvent,
 } from '../models/historyModel';
 
 const seed = () => ({
   classes: [
     { id: 'c1', name: '6e Rose', createdAt: 'a', lastUsedAt: 'a' },
-    { id: 'c2', name: '5e Bleu', createdAt: 'b', lastUsedAt: 'b' }
+    { id: 'c2', name: '5e Bleu', createdAt: 'b', lastUsedAt: 'b' },
   ],
   students: [
-    { id: 's1', classId: 'c1', firstName: 'Emma', lastName: 'Martin', ticks: 1, crosses: 0, merits: 2, detentions: 1, currentTrimester: 1 },
-    { id: 's2', classId: 'c1', firstName: 'Lucas', lastName: 'Bernard', ticks: 0, crosses: 3, merits: 0, detentions: 0, currentTrimester: 1 },
-    { id: 's3', classId: 'c2', firstName: 'Chloe', lastName: 'Petit', ticks: 0, crosses: 0, merits: 1, detentions: 0, currentTrimester: 1 }
+    {
+      id: 's1',
+      classId: 'c1',
+      firstName: 'Emma',
+      lastName: 'Martin',
+      ticks: 1,
+      crosses: 0,
+      merits: 2,
+      detentions: 1,
+      currentTrimester: 1,
+    },
+    {
+      id: 's2',
+      classId: 'c1',
+      firstName: 'Lucas',
+      lastName: 'Bernard',
+      ticks: 0,
+      crosses: 3,
+      merits: 0,
+      detentions: 0,
+      currentTrimester: 1,
+    },
+    {
+      id: 's3',
+      classId: 'c2',
+      firstName: 'Chloe',
+      lastName: 'Petit',
+      ticks: 0,
+      crosses: 0,
+      merits: 1,
+      detentions: 0,
+      currentTrimester: 1,
+    },
   ],
   events: [
-    { id: 'e1', studentId: 's1', type: 'tick', reason: 'Effort', trimester: 1, createdAt: '2026-01-01', previousTicks: 0, previousCrosses: 0, newTicks: 1, newCrosses: 0, cancelled: 0 },
-    { id: 'e2', studentId: 's1', type: 'cross', reason: '', trimester: 1, createdAt: '2026-01-02', previousTicks: 1, previousCrosses: 0, newTicks: 1, newCrosses: 1, cancelled: 1 }
+    {
+      id: 'e1',
+      studentId: 's1',
+      type: 'tick',
+      reason: 'Effort',
+      trimester: 1,
+      createdAt: '2026-01-01',
+      previousTicks: 0,
+      previousCrosses: 0,
+      newTicks: 1,
+      newCrosses: 0,
+      cancelled: 0,
+    },
+    {
+      id: 'e2',
+      studentId: 's1',
+      type: 'cross',
+      reason: '',
+      trimester: 1,
+      createdAt: '2026-01-02',
+      previousTicks: 1,
+      previousCrosses: 0,
+      newTicks: 1,
+      newCrosses: 1,
+      cancelled: 1,
+    },
   ],
   term_archives: [
-    { id: 'a1', studentId: 's1', trimester: 1, merits: 2, detentions: 1, totalTicks: 4, totalCrosses: 1, archivedAt: '2026-01-05' }
-  ]
+    {
+      id: 'a1',
+      studentId: 's1',
+      trimester: 1,
+      merits: 2,
+      detentions: 1,
+      totalTicks: 4,
+      totalCrosses: 1,
+      archivedAt: '2026-01-05',
+    },
+  ],
 });
 
 beforeEach(() => {
@@ -107,7 +176,19 @@ test('getLastActiveEvent ignore les événements annulés', async () => {
 });
 
 test('putEvent et deleteEvent modifient le cache', async () => {
-  await putEvent({ id: 'e3', studentId: 's2', type: 'tick', reason: '', trimester: 1, createdAt: '2026-02-01', previousTicks: 0, previousCrosses: 0, newTicks: 1, newCrosses: 0, cancelled: 0 });
+  await putEvent({
+    id: 'e3',
+    studentId: 's2',
+    type: 'tick',
+    reason: '',
+    trimester: 1,
+    createdAt: '2026-02-01',
+    previousTicks: 0,
+    previousCrosses: 0,
+    newTicks: 1,
+    newCrosses: 0,
+    cancelled: 0,
+  });
   expect(mockStore.tables.events).toHaveLength(3);
   await deleteEvent('e1');
   expect(mockStore.tables.events.map((e) => e.id)).toEqual(['e2', 'e3']);
@@ -115,6 +196,15 @@ test('putEvent et deleteEvent modifient le cache', async () => {
 
 test('getArchives / getAllArchives / putArchive', async () => {
   expect(await getArchives('s1')).toHaveLength(1);
-  await putArchive({ id: 'a2', studentId: 's2', trimester: 1, merits: 0, detentions: 0, totalTicks: 0, totalCrosses: 3, archivedAt: '2026-01-06' });
+  await putArchive({
+    id: 'a2',
+    studentId: 's2',
+    trimester: 1,
+    merits: 0,
+    detentions: 0,
+    totalTicks: 0,
+    totalCrosses: 3,
+    archivedAt: '2026-01-06',
+  });
   expect(await getAllArchives()).toHaveLength(2);
 });

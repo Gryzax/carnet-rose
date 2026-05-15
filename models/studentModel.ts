@@ -10,7 +10,7 @@ const byName = (a: StudentRow, b: StudentRow): number =>
 // `forgets` was added after launch — default it for rows cached before then.
 const normalize = (student: StudentRow): StudentRow => ({
   ...student,
-  forgets: student.forgets ?? 0
+  forgets: student.forgets ?? 0,
 });
 
 export const getStudentsByClass = async (classId: string): Promise<StudentRow[]> => {
@@ -32,12 +32,12 @@ export const getAllStudents = async (): Promise<StudentWithClass[]> => {
   const store = await getStore();
   const [students, classes] = await Promise.all([
     store.all<StudentRow>('students'),
-    store.all<ClassRow>('classes')
+    store.all<ClassRow>('classes'),
   ]);
   const classNameOf = new Map(classes.map((classRow) => [classRow.id, classRow.name]));
   return students.map((student) => ({
     ...normalize(student),
-    className: classNameOf.get(student.classId) || ''
+    className: classNameOf.get(student.classId) || '',
   }));
 };
 

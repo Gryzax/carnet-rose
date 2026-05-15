@@ -1,21 +1,21 @@
 jest.mock('../../models/studentModel', () => ({
   getAllStudents: jest.fn(),
-  getStudentById: jest.fn()
+  getStudentById: jest.fn(),
 }));
 jest.mock('../../models/historyModel', () => ({
-  getLastActiveEvent: jest.fn()
+  getLastActiveEvent: jest.fn(),
 }));
 jest.mock('../../repositories/studentRepository', () => ({
   saveStudent: jest.fn(() => Promise.resolve()),
-  removeStudent: jest.fn(() => Promise.resolve())
+  removeStudent: jest.fn(() => Promise.resolve()),
 }));
 jest.mock('../../repositories/classRepository', () => ({
-  touchClass: jest.fn(() => Promise.resolve())
+  touchClass: jest.fn(() => Promise.resolve()),
 }));
 jest.mock('../../repositories/historyRepository', () => ({
   saveEvent: jest.fn(() => Promise.resolve()),
   removeEvent: jest.fn(() => Promise.resolve()),
-  saveArchive: jest.fn(() => Promise.resolve())
+  saveArchive: jest.fn(() => Promise.resolve()),
 }));
 
 import {
@@ -23,7 +23,7 @@ import {
   addForgot,
   addTick,
   resetTrimester,
-  undoLastAction
+  undoLastAction,
 } from '../../domain/studentController';
 import { getAllStudents, getStudentById } from '../../models/studentModel';
 import { getLastActiveEvent } from '../../models/historyModel';
@@ -41,7 +41,7 @@ const student = {
   merits: 0,
   detentions: 0,
   forgets: 0,
-  currentTrimester: 1
+  currentTrimester: 1,
 };
 
 beforeEach(() => jest.clearAllMocks());
@@ -53,7 +53,12 @@ test('addTick: normal case writes through repositories', async () => {
   expect(saveStudent).toHaveBeenCalledWith(expect.objectContaining({ ticks: 1 }));
   expect(touchClass).toHaveBeenCalledWith('c5');
   expect(saveEvent).toHaveBeenCalledWith(
-    expect.objectContaining({ type: 'tick', previousTicks: 0, newTicks: 1, reason: 'Participation' })
+    expect.objectContaining({
+      type: 'tick',
+      previousTicks: 0,
+      newTicks: 1,
+      reason: 'Participation',
+    }),
   );
 });
 
@@ -77,7 +82,7 @@ test('addCross: normal case writes through repositories', async () => {
   expect(saveStudent).toHaveBeenCalledWith(expect.objectContaining({ crosses: 1 }));
   expect(touchClass).toHaveBeenCalledWith('c5');
   expect(saveEvent).toHaveBeenCalledWith(
-    expect.objectContaining({ type: 'cross', previousCrosses: 0, newCrosses: 1 })
+    expect.objectContaining({ type: 'cross', previousCrosses: 0, newCrosses: 1 }),
   );
 });
 
@@ -103,7 +108,7 @@ test('addForgot increments the standalone counter and writes a forgot event', as
   expect(saveStudent).toHaveBeenCalledWith(expect.objectContaining({ forgets: 2 }));
   expect(touchClass).toHaveBeenCalledWith('c5');
   expect(saveEvent).toHaveBeenCalledWith(
-    expect.objectContaining({ type: 'forgot', previousForgets: 1, newForgets: 2, reason: null })
+    expect.objectContaining({ type: 'forgot', previousForgets: 1, newForgets: 2, reason: null }),
   );
 });
 
@@ -113,13 +118,13 @@ test('undo within 30 seconds restores the previous counters', async () => {
     createdAt: new Date().toISOString(),
     previousTicks: 1,
     previousCrosses: 0,
-    previousForgets: 3
+    previousForgets: 3,
   });
   getStudentById.mockResolvedValue({ ...student, ticks: 2, forgets: 4 });
   const res = await undoLastAction('s1');
   expect(res.cancelled).toBe(true);
   expect(saveStudent).toHaveBeenCalledWith(
-    expect.objectContaining({ ticks: 1, crosses: 0, forgets: 3 })
+    expect.objectContaining({ ticks: 1, crosses: 0, forgets: 3 }),
   );
   expect(saveEvent).toHaveBeenCalledWith(expect.objectContaining({ id: 'e9', cancelled: 1 }));
 });
@@ -129,7 +134,7 @@ test('undo refused after 30 seconds', async () => {
     id: 'e9',
     createdAt: new Date(Date.now() - 31000).toISOString(),
     previousTicks: 1,
-    previousCrosses: 0
+    previousCrosses: 0,
   });
   const res = await undoLastAction('s1');
   expect(res.cancelled).toBe(false);
@@ -138,13 +143,19 @@ test('undo refused after 30 seconds', async () => {
 test('resetTrimester archives every student and resets counters', async () => {
   getAllStudents.mockResolvedValue([
     { ...student, id: 's1', merits: 2, detentions: 1 },
-    { ...student, id: 's2', merits: 1, detentions: 0 }
+    { ...student, id: 's2', merits: 1, detentions: 0 },
   ]);
   const res = await resetTrimester(1);
   expect(saveArchive).toHaveBeenCalledTimes(2);
   expect(saveStudent).toHaveBeenCalledTimes(2);
   expect(saveStudent).toHaveBeenCalledWith(
-    expect.objectContaining({ ticks: 0, crosses: 0, merits: 0, detentions: 0, currentTrimester: 2 })
+    expect.objectContaining({
+      ticks: 0,
+      crosses: 0,
+      merits: 0,
+      detentions: 0,
+      currentTrimester: 2,
+    }),
   );
   expect(res.totalStudents).toBe(2);
   expect(res.totalMerits).toBe(3);

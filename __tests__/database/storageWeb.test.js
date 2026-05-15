@@ -17,9 +17,9 @@ jest.mock('localforage', () => {
         removeItem: jest.fn((key) => {
           data.delete(key);
           return Promise.resolve();
-        })
+        }),
       };
-    })
+    }),
   };
 });
 
@@ -59,7 +59,7 @@ test('stockage web: replaceAll remplace tout le contenu de la table', async () =
   await store.put('students', { id: 's1', classId: 'c1' });
   await store.replaceAll('students', [
     { id: 's2', classId: 'c1' },
-    { id: 's3', classId: 'c1' }
+    { id: 's3', classId: 'c1' },
   ]);
 
   const ids = (await store.all('students')).map((row) => row.id);
@@ -71,7 +71,7 @@ test('stockage web: putMany insère et met à jour en lot', async () => {
   await store.put('outbox', { id: 'o1', entity: 'class' });
   await store.putMany('outbox', [
     { id: 'o1', entity: 'class', attempts: 1 },
-    { id: 'o2', entity: 'student' }
+    { id: 'o2', entity: 'student' },
   ]);
 
   const all = await store.all('outbox');

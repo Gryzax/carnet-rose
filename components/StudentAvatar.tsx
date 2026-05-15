@@ -32,15 +32,22 @@ export const StudentAvatar = ({ student, size = 44 }: StudentAvatarProps) => (
         width: size,
         height: size,
         borderRadius: size / 2,
-        backgroundColor: getStudentAvatarColor(student)
-      }
+        backgroundColor: getStudentAvatarColor(student),
+      },
     ]}
   >
-    <Text style={[styles.text, { fontSize: size >= 56 ? 23 : 17 }]}>{getStudentInitials(student)}</Text>
+    <Text style={[styles.text, { fontSize: size >= 56 ? 23 : 17 }]}>
+      {getStudentInitials(student)}
+    </Text>
   </View>
 );
 
 const styles = StyleSheet.create({
-  avatar: { alignItems: 'center', justifyContent: 'center', borderWidth: 1.5, borderColor: colors.border },
-  text: { color: colors.onPrimary, fontFamily: 'PatrickHand_400Regular' }
+  avatar: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1.5,
+    borderColor: colors.border,
+  },
+  text: { color: colors.onPrimary, fontFamily: 'PatrickHand_400Regular' },
 });

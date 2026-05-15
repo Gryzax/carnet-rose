@@ -4,7 +4,7 @@ import {
   deleteStudent,
   updateStudent,
   type AddStudentInput,
-  type EditStudentInput
+  type EditStudentInput,
 } from '../domain/studentController';
 import type { StudentRow } from '../types/domain';
 
@@ -15,11 +15,11 @@ export const useStudentMutations = () => {
 
   const edit = useMutation({
     mutationFn: ({ student, changes }: { student: StudentRow; changes: EditStudentInput }) =>
-      updateStudent(student, changes)
+      updateStudent(student, changes),
   });
 
   const remove = useMutation({
-    mutationFn: (student: StudentRow | string) => deleteStudent(student)
+    mutationFn: (student: StudentRow | string) => deleteStudent(student),
   });
 
   return { create, edit, remove };

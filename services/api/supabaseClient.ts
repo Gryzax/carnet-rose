@@ -3,5 +3,5 @@ export {
   getSupabaseAuthUrl,
   getSupabaseUrl,
   isSupabaseConfigured,
-  supabaseRequest
+  supabaseRequest,
 } from '../supabase/supabaseClient';

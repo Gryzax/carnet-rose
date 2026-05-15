@@ -3,6 +3,7 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { useEffect, type ReactNode } from 'react';
 import { Platform } from 'react-native';
 import { LanguageProvider, useT } from '../utils/i18n';
+import { ReasonsProvider } from '../utils/reasons';
 import { queryClient } from '../lib/queryClient';
 import { AuthProvider } from './AuthContext';
 
@@ -35,21 +36,23 @@ const WebMeta = () => {
 export const AppProviders = ({ children }: { children: ReactNode }) => (
   <QueryClientProvider client={queryClient}>
     <LanguageProvider>
-      <AuthProvider>
-        <NavigationContainer
-          documentTitle={{
-            // Each screen sets a localised `title`; surface it as
-            // "<screen> · Carnet Rose" in the browser tab / history.
-            formatter: (options, route) => {
-              const title = options?.title ?? route?.name;
-              return title ? `${title} · ${APP_NAME}` : APP_NAME;
-            }
-          }}
-        >
-          <WebMeta />
-          {children}
-        </NavigationContainer>
-      </AuthProvider>
+      <ReasonsProvider>
+        <AuthProvider>
+          <NavigationContainer
+            documentTitle={{
+              // Each screen sets a localised `title`; surface it as
+              // "<screen> · Carnet Rose" in the browser tab / history.
+              formatter: (options, route) => {
+                const title = options?.title ?? route?.name;
+                return title ? `${title} · ${APP_NAME}` : APP_NAME;
+              },
+            }}
+          >
+            <WebMeta />
+            {children}
+          </NavigationContainer>
+        </AuthProvider>
+      </ReasonsProvider>
     </LanguageProvider>
   </QueryClientProvider>
 );

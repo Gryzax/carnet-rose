@@ -4,14 +4,14 @@ import * as authService from '../../services/auth/authService';
 import { isSupabaseConfigured } from '../../services/supabase/supabaseClient';
 
 jest.mock('../../services/supabase/supabaseClient', () => ({
-  isSupabaseConfigured: jest.fn(() => false)
+  isSupabaseConfigured: jest.fn(() => false),
 }));
 
 jest.mock('../../services/auth/authService', () => ({
   getCurrentUser: jest.fn(() => Promise.resolve({ user: null, error: null })),
   consumePendingAuthError: jest.fn(() => null),
   signInWithApple: jest.fn(() => Promise.resolve({ user: null, message: 'Apple pending' })),
-  signInWithGoogle: jest.fn(() => Promise.resolve({ user: null, message: 'Google pending' }))
+  signInWithGoogle: jest.fn(() => Promise.resolve({ user: null, message: 'Google pending' })),
 }));
 
 beforeEach(() => {
@@ -21,11 +21,15 @@ beforeEach(() => {
 
 test('Supabase absent bloque proprement le login', () => {
   const onAuthenticated = jest.fn();
-  const { getByText, getByTestId, queryByText } = render(<LoginScreen onAuthenticated={onAuthenticated} />);
+  const { getByText, getByTestId, queryByText } = render(
+    <LoginScreen onAuthenticated={onAuthenticated} />,
+  );
 
   expect(getByText('Carnet Rose')).toBeTruthy();
   expect(getByText('Sign-in unavailable')).toBeTruthy();
-  expect(getByText('Sign-in isn’t set up yet. Please reach out to your administrator.')).toBeTruthy();
+  expect(
+    getByText('Sign-in isn’t set up yet. Please reach out to your administrator.'),
+  ).toBeTruthy();
   expect(queryByText('Continuer en mode local')).toBeNull();
 
   fireEvent.press(getByTestId('login-google'));
@@ -54,12 +58,17 @@ test('Google appelle signInWithGoogle quand Supabase est configure', async () =>
 
 test('LoginScreen redirige si une session utilisateur existe deja', async () => {
   isSupabaseConfigured.mockReturnValueOnce(true);
-  authService.getCurrentUser.mockResolvedValueOnce({ user: { email: 'demo@example.com' }, error: null });
+  authService.getCurrentUser.mockResolvedValueOnce({
+    user: { email: 'demo@example.com' },
+    error: null,
+  });
   const onAuthenticated = jest.fn();
 
   render(<LoginScreen onAuthenticated={onAuthenticated} />);
 
-  await waitFor(() => expect(onAuthenticated).toHaveBeenCalledWith({ user: { email: 'demo@example.com' } }));
+  await waitFor(() =>
+    expect(onAuthenticated).toHaveBeenCalledWith({ user: { email: 'demo@example.com' } }),
+  );
   expect(authService.signInWithGoogle).not.toHaveBeenCalled();
 });
 

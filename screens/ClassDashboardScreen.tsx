@@ -1,12 +1,21 @@
-import { FlatList, Modal, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useEffect, useMemo, useState } from 'react';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { colors } from '../constants/colors';
+import { colors, spacing } from '../constants/colors';
 import { BackButton } from '../components/BackButton';
 import { EmptyState } from '../components/EmptyState';
 import { SheetModal } from '../components/SheetModal';
 import { StudentCard } from '../components/StudentCard';
-import { Card, JournalInput, PillButton, Screen, SegmentedControl, Sparkle, Title, WashiTape } from '../components/Themed';
+import {
+  Card,
+  JournalInput,
+  PillButton,
+  Screen,
+  SegmentedControl,
+  Sparkle,
+  Title,
+  WashiTape,
+} from '../components/Themed';
 import { useStudents, type StudentSort } from '../hooks/useStudents';
 import { useStudentMutations } from '../hooks/useStudentMutations';
 import { useClassMutations } from '../hooks/useClassMutations';
@@ -41,9 +50,10 @@ export const ClassDashboardScreen = ({ route, navigation }: Props) => {
   const filteredStudents = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return students;
-    return students.filter((s) =>
-      `${s.firstName} ${s.lastName}`.toLowerCase().includes(q) ||
-      `${s.lastName} ${s.firstName}`.toLowerCase().includes(q)
+    return students.filter(
+      (s) =>
+        `${s.firstName} ${s.lastName}`.toLowerCase().includes(q) ||
+        `${s.lastName} ${s.firstName}`.toLowerCase().includes(q),
     );
   }, [students, query]);
 
@@ -86,7 +96,7 @@ export const ClassDashboardScreen = ({ route, navigation }: Props) => {
     try {
       await edit.mutateAsync({
         student: studentToEdit,
-        changes: { firstName: editFirstName, lastName: editLastName }
+        changes: { firstName: editFirstName, lastName: editLastName },
       });
       setStudentToEdit(null);
       setEditFirstName('');
@@ -113,7 +123,7 @@ export const ClassDashboardScreen = ({ route, navigation }: Props) => {
       await create.mutateAsync({
         classId: classRow.id,
         firstName: studentFirstName,
-        lastName: studentLastName
+        lastName: studentLastName,
       });
       setAddModalVisible(false);
       setStudentFirstName('');
@@ -132,7 +142,9 @@ export const ClassDashboardScreen = ({ route, navigation }: Props) => {
         <Title style={styles.title}>{classRow.name}</Title>
         <View style={styles.metaLine}>
           <Sparkle />
-          <Text style={styles.meta}>{t('studentsAndRisk', { count: students.length, risk: atRisk })}</Text>
+          <Text style={styles.meta}>
+            {t('studentsAndRisk', { count: students.length, risk: atRisk })}
+          </Text>
         </View>
       </View>
       <SegmentedControl
@@ -141,7 +153,7 @@ export const ClassDashboardScreen = ({ route, navigation }: Props) => {
         options={[
           { value: 'name', label: t('sortName') as string },
           { value: 'crosses', label: t('sortCroix') as string },
-          { value: 'ticks', label: t('sortTicks') as string }
+          { value: 'ticks', label: t('sortTicks') as string },
         ]}
         style={styles.segmented}
       />
@@ -172,10 +184,7 @@ export const ClassDashboardScreen = ({ route, navigation }: Props) => {
         ListHeaderComponent={listHeader}
         ListEmptyComponent={
           query.trim() ? (
-            <EmptyState
-              icon="search-outline"
-              title={t('noStudentsMatch') as string}
-            />
+            <EmptyState icon="search-outline" title={t('noStudentsMatch') as string} />
           ) : (
             <EmptyState
               icon="people-outline"
@@ -197,40 +206,46 @@ export const ClassDashboardScreen = ({ route, navigation }: Props) => {
       <PillButton onPress={() => setAddModalVisible(true)} variant="pink" style={styles.add}>
         {t('addStudent')}
       </PillButton>
-      <SheetModal visible={addModalVisible} onRequestClose={closeAddModal}>
-        <Card style={styles.sheet} washi>
-          <Text style={styles.modalTitle}>{t('addStudent')}</Text>
-          <JournalInput
-            placeholder={t('firstName') as string}
-            value={studentFirstName}
-            onChangeText={setStudentFirstName}
-          />
-          <JournalInput
-            placeholder={t('lastName') as string}
-            value={studentLastName}
-            onChangeText={setStudentLastName}
-          />
-          {!!addError && <Text style={styles.error}>{addError}</Text>}
-          <View style={styles.actions}>
-            <PillButton
-              testID="cancel-add-student"
-              disabled={saving}
-              onPress={closeAddModal}
-              variant="light"
-              style={styles.actionButton}
-            >
-              {t('cancel')}
-            </PillButton>
-            <PillButton
-              disabled={saving}
-              onPress={submitStudent}
-              variant="pink"
-              style={styles.actionButton}
-            >
-              {saving ? t('adding') : t('add')}
-            </PillButton>
-          </View>
-        </Card>
+      <SheetModal
+        visible={addModalVisible}
+        onRequestClose={closeAddModal}
+        onBackdropPress={closeAddModal}
+      >
+        <Pressable>
+          <Card style={styles.sheet} washi>
+            <Text style={styles.modalTitle}>{t('addStudent')}</Text>
+            <JournalInput
+              placeholder={t('firstName') as string}
+              value={studentFirstName}
+              onChangeText={setStudentFirstName}
+            />
+            <JournalInput
+              placeholder={t('lastName') as string}
+              value={studentLastName}
+              onChangeText={setStudentLastName}
+            />
+            {!!addError && <Text style={styles.error}>{addError}</Text>}
+            <View style={styles.actions}>
+              <PillButton
+                testID="cancel-add-student"
+                disabled={saving}
+                onPress={closeAddModal}
+                variant="light"
+                style={styles.actionButton}
+              >
+                {t('cancel')}
+              </PillButton>
+              <PillButton
+                disabled={saving}
+                onPress={submitStudent}
+                variant="pink"
+                style={styles.actionButton}
+              >
+                {saving ? t('adding') : t('add')}
+              </PillButton>
+            </View>
+          </Card>
+        </Pressable>
       </SheetModal>
       <Modal
         visible={!!menuStudent}
@@ -260,51 +275,53 @@ export const ClassDashboardScreen = ({ route, navigation }: Props) => {
             >
               {t('delete')}
             </PillButton>
-            <PillButton
-              testID="menu-cancel"
-              onPress={() => setMenuStudent(null)}
-              variant="light"
-            >
+            <PillButton testID="menu-cancel" onPress={() => setMenuStudent(null)} variant="light">
               {t('cancel')}
             </PillButton>
           </Card>
         </View>
       </Modal>
-      <SheetModal visible={!!studentToEdit} onRequestClose={closeEditModal}>
-        <Card style={styles.sheet} washi>
-          <Text style={styles.modalTitle}>{t('editStudentTitle')}</Text>
-          <JournalInput
-            placeholder={t('firstName') as string}
-            value={editFirstName}
-            onChangeText={setEditFirstName}
-          />
-          <JournalInput
-            placeholder={t('lastName') as string}
-            value={editLastName}
-            onChangeText={setEditLastName}
-          />
-          {!!editError && <Text style={styles.error}>{editError}</Text>}
-          <View style={styles.actions}>
-            <PillButton
-              testID="cancel-edit-student"
-              disabled={editSaving}
-              onPress={closeEditModal}
-              variant="light"
-              style={styles.actionButton}
-            >
-              {t('cancel')}
-            </PillButton>
-            <PillButton
-              testID="confirm-edit-student"
-              disabled={editSaving}
-              onPress={submitEditStudent}
-              variant="pink"
-              style={styles.actionButton}
-            >
-              {editSaving ? t('saving') : t('save')}
-            </PillButton>
-          </View>
-        </Card>
+      <SheetModal
+        visible={!!studentToEdit}
+        onRequestClose={closeEditModal}
+        onBackdropPress={closeEditModal}
+      >
+        <Pressable>
+          <Card style={styles.sheet} washi>
+            <Text style={styles.modalTitle}>{t('editStudentTitle')}</Text>
+            <JournalInput
+              placeholder={t('firstName') as string}
+              value={editFirstName}
+              onChangeText={setEditFirstName}
+            />
+            <JournalInput
+              placeholder={t('lastName') as string}
+              value={editLastName}
+              onChangeText={setEditLastName}
+            />
+            {!!editError && <Text style={styles.error}>{editError}</Text>}
+            <View style={styles.actions}>
+              <PillButton
+                testID="cancel-edit-student"
+                disabled={editSaving}
+                onPress={closeEditModal}
+                variant="light"
+                style={styles.actionButton}
+              >
+                {t('cancel')}
+              </PillButton>
+              <PillButton
+                testID="confirm-edit-student"
+                disabled={editSaving}
+                onPress={submitEditStudent}
+                variant="pink"
+                style={styles.actionButton}
+              >
+                {editSaving ? t('saving') : t('save')}
+              </PillButton>
+            </View>
+          </Card>
+        </Pressable>
       </SheetModal>
       <Modal
         visible={!!studentToDelete}
@@ -357,12 +374,22 @@ const styles = StyleSheet.create({
   search: { marginBottom: 12 },
   add: { marginTop: 8, marginBottom: 84, marginHorizontal: 16 },
   backdrop: { flex: 1, backgroundColor: colors.scrim, justifyContent: 'center', padding: 20 },
-  sheet: { gap: 12 },
+  sheet: { gap: 16, padding: spacing.lg },
   dialog: { gap: 12 },
-  modalTitle: { fontFamily: 'PatrickHand_400Regular', fontSize: 28, color: colors.ink },
+  modalTitle: {
+    fontFamily: 'PatrickHand_400Regular',
+    fontSize: 28,
+    color: colors.ink,
+    marginBottom: spacing.xs,
+  },
   modalStrong: { fontFamily: 'PatrickHand_400Regular', fontSize: 22, color: colors.ink },
-  modalText: { fontFamily: 'PatrickHand_400Regular', fontSize: 19, color: colors.muted, lineHeight: 24 },
+  modalText: {
+    fontFamily: 'PatrickHand_400Regular',
+    fontSize: 19,
+    color: colors.muted,
+    lineHeight: 24,
+  },
   error: { fontFamily: 'PatrickHand_400Regular', fontSize: 18, color: colors.dangerRed },
   actions: { flexDirection: 'row', gap: 10 },
-  actionButton: { flex: 1 }
+  actionButton: { flex: 1 },
 });

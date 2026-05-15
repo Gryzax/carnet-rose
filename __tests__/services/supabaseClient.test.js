@@ -22,13 +22,17 @@ describe('supabaseClient', () => {
       NODE_ENV: 'test',
       EXPO_PUBLIC_SUPABASE_URL: 'https://frmiyddfipejirtbzoxr.supabase.co',
       EXPO_PUBLIC_SUPABASE_KEY: 'mock_publishable_key',
-      EXPO_PUBLIC_APP_URL: 'https://gryzax.github.io/carnet-rose/'
+      EXPO_PUBLIC_APP_URL: 'https://gryzax.github.io/carnet-rose/',
     });
 
     expect(isSupabaseConfigured()).toBe(true);
     expect(getSupabaseUrl()).toBe('https://frmiyddfipejirtbzoxr.supabase.co');
-    expect(getSupabaseAuthUrl('google', 'https://gryzax.github.io/carnet-rose/')).toContain('https://frmiyddfipejirtbzoxr.supabase.co/auth/v1/authorize');
-    expect(getSupabaseAuthUrl('google', 'https://gryzax.github.io/carnet-rose/')).not.toContain('/rest/v1');
+    expect(getSupabaseAuthUrl('google', 'https://gryzax.github.io/carnet-rose/')).toContain(
+      'https://frmiyddfipejirtbzoxr.supabase.co/auth/v1/authorize',
+    );
+    expect(getSupabaseAuthUrl('google', 'https://gryzax.github.io/carnet-rose/')).not.toContain(
+      '/rest/v1',
+    );
   });
 
   test('ne crashe pas sans env', () => {
@@ -37,7 +41,8 @@ describe('supabaseClient', () => {
     delete envWithoutSupabase.EXPO_PUBLIC_SUPABASE_KEY;
     delete envWithoutSupabase.EXPO_PUBLIC_APP_URL;
 
-    const { getSupabaseAuthUrl, isSupabaseConfigured } = loadSupabaseClientWithEnv(envWithoutSupabase);
+    const { getSupabaseAuthUrl, isSupabaseConfigured } =
+      loadSupabaseClientWithEnv(envWithoutSupabase);
 
     expect(isSupabaseConfigured()).toBe(false);
     expect(getSupabaseAuthUrl('google', 'https://gryzax.github.io/carnet-rose/')).toBeNull();

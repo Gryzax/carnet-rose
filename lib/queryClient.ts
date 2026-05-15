@@ -12,9 +12,9 @@ export const queryClient = new QueryClient({
       retry: false,
       refetchOnMount: false,
       refetchOnWindowFocus: false,
-      refetchOnReconnect: false
-    }
-  }
+      refetchOnReconnect: false,
+    },
+  },
 });
 
 // The three persisted entities. Query keys are prefixed with one of these so a
@@ -25,13 +25,11 @@ export type EntityKey = 'classes' | 'students' | 'events';
 export const queryKeys = {
   classes: (sort: string) => ['classes', sort] as const,
   allStudents: () => ['students', 'all'] as const,
-  studentsByClass: (classId: string, sort: string) =>
-    ['students', 'class', classId, sort] as const,
+  studentsByClass: (classId: string, sort: string) => ['students', 'class', classId, sort] as const,
   student: (id: string) => ['students', 'detail', id] as const,
   history: (studentId: string, trimester: number) =>
     ['events', 'history', studentId, trimester] as const,
-  statistics: (period: string, classId: string | null) =>
-    ['statistics', period, classId] as const
+  statistics: (period: string, classId: string | null) => ['statistics', period, classId] as const,
 };
 
 /**

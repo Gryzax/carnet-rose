@@ -5,10 +5,15 @@ import {
   useEffect,
   useMemo,
   useState,
-  type ReactNode
+  type ReactNode,
 } from 'react';
 import { getPref, setPref } from './prefs';
-import { SUPPORTED_LANGUAGES, translations, type Language, type TranslationKey } from '../constants/i18n';
+import {
+  SUPPORTED_LANGUAGES,
+  translations,
+  type Language,
+  type TranslationKey,
+} from '../constants/i18n';
 
 const DEFAULT_LANGUAGE: Language = 'en';
 const LANGUAGE_PREF_KEY = 'language';
@@ -51,11 +56,15 @@ export const detectLanguage = (): Language => {
 const interpolate = (template: string, params?: TParams): string => {
   if (!params) return template;
   return String(template).replace(/\{(\w+)\}/g, (match, key: string) =>
-    key in params ? String(params[key]) : match
+    key in params ? String(params[key]) : match,
   );
 };
 
-const translate = (lang: Language, key: TranslationKey | string, params?: TParams): string | string[] => {
+const translate = (
+  lang: Language,
+  key: TranslationKey | string,
+  params?: TParams,
+): string | string[] => {
   const table = translations[lang] ?? translations[DEFAULT_LANGUAGE];
   const value =
     (table as Record<string, string | string[]>)[key] ??
@@ -96,7 +105,10 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
 
   const t = useCallback<TFunction>((key, params) => translate(lang, key, params), [lang]);
 
-  const value = useMemo<I18nContextValue>(() => ({ lang, setLang, t, ready }), [lang, setLang, t, ready]);
+  const value = useMemo<I18nContextValue>(
+    () => ({ lang, setLang, t, ready }),
+    [lang, setLang, t, ready],
+  );
 
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
 };
@@ -109,7 +121,7 @@ export const useT = (): I18nContextValue => {
       lang: DEFAULT_LANGUAGE,
       setLang: () => {},
       t: (key, params) => translate(DEFAULT_LANGUAGE, key, params),
-      ready: true
+      ready: true,
     };
   }
   return context;

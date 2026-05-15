@@ -11,7 +11,7 @@ export const getClasses = async (): Promise<ClassWithStats[]> => {
   const store = await getStore();
   const [classes, students] = await Promise.all([
     store.all<ClassRow>('classes'),
-    store.all<StudentRow>('students')
+    store.all<StudentRow>('students'),
   ]);
   return classes
     .map((classRow) => {
@@ -20,7 +20,7 @@ export const getClasses = async (): Promise<ClassWithStats[]> => {
         ...classRow,
         studentCount: own.length,
         totalMerits: own.reduce((sum, student) => sum + (student.merits || 0), 0),
-        totalDetentions: own.reduce((sum, student) => sum + (student.detentions || 0), 0)
+        totalDetentions: own.reduce((sum, student) => sum + (student.detentions || 0), 0),
       };
     })
     .sort(byName);
@@ -46,7 +46,7 @@ export const replaceAllClasses = async (classes: ClassRow[]): Promise<void> => {
 export const deleteClassCascade = async (id: string): Promise<void> => {
   const store = await getStore();
   const students = (await store.all<StudentRow>('students')).filter(
-    (student) => student.classId === id
+    (student) => student.classId === id,
   );
   const studentIds = new Set(students.map((student) => student.id));
   const events = await store.all<{ id: string; studentId: string }>('events');

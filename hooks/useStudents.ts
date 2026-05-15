@@ -18,7 +18,7 @@ export const useStudents = (classId: string | null | undefined, sort: StudentSor
         if (sort === 'ticks') return b.ticks - a.ticks;
         return a.lastName.localeCompare(b.lastName);
       });
-    }
+    },
   });
 
   useEffect(() => {
@@ -31,7 +31,7 @@ export const useStudents = (classId: string | null | undefined, sort: StudentSor
 export const useAllStudents = () => {
   const { data, isLoading, refetch } = useQuery({
     queryKey: queryKeys.allStudents(),
-    queryFn: () => getAllStudents()
+    queryFn: () => getAllStudents(),
   });
 
   useEffect(() => {
@@ -47,7 +47,7 @@ export const useStudent = (id: string | null | undefined) => {
   const { data, isLoading, refetch } = useQuery({
     queryKey: queryKeys.student(id ?? ''),
     enabled: id != null,
-    queryFn: () => getStudentById(id as string)
+    queryFn: () => getStudentById(id as string),
   });
 
   useEffect(() => {

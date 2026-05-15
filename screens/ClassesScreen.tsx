@@ -10,7 +10,7 @@ import {
   useWindowDimensions,
   View,
   type ListRenderItem,
-  type ListRenderItemInfo
+  type ListRenderItemInfo,
 } from 'react-native';
 import { useMemo, useRef, useState } from 'react';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -34,7 +34,7 @@ import {
   SegmentedControl,
   Sparkle,
   Title,
-  WashiTape
+  WashiTape,
 } from '../components/Themed';
 import type { ClassesStackParamList } from '../navigation/types';
 import type { ClassSort } from '../domain/classController';
@@ -69,9 +69,7 @@ export const ClassesScreen = ({ navigation }: Props) => {
   const nameMatches = useMemo<StudentWithClass[]>(() => {
     const text = query.trim().toLowerCase();
     if (text.length < 2) return [];
-    return allStudents.filter((s) =>
-      `${s.firstName} ${s.lastName}`.toLowerCase().includes(text)
-    );
+    return allStudents.filter((s) => `${s.firstName} ${s.lastName}`.toLowerCase().includes(text));
   }, [query, allStudents]);
   // Only the classes that actually contain a name match get a filter chip.
   const filterClasses = useMemo(() => {
@@ -85,13 +83,12 @@ export const ClassesScreen = ({ navigation }: Props) => {
   const activeFilter =
     classFilter && filterClasses.some((c) => c.id === classFilter) ? classFilter : null;
   const results = useMemo<StudentWithClass[]>(
-    () =>
-      activeFilter ? nameMatches.filter((s) => s.classId === activeFilter) : nameMatches,
-    [nameMatches, activeFilter]
+    () => (activeFilter ? nameMatches.filter((s) => s.classId === activeFilter) : nameMatches),
+    [nameMatches, activeFilter],
   );
   const data = useMemo<(ClassWithStats | StudentWithClass)[]>(
     () => (searching ? results : classes),
-    [searching, results, classes]
+    [searching, results, classes],
   );
 
   const openAddModal = () => {
@@ -304,7 +301,7 @@ export const ClassesScreen = ({ navigation }: Props) => {
           onChange={setSort}
           options={[
             { value: 'alpha', label: t('sortAlpha') as string },
-            { value: 'recent', label: t('sortRecent') as string }
+            { value: 'recent', label: t('sortRecent') as string },
           ]}
           style={styles.segmented}
         />
@@ -473,7 +470,7 @@ export const ClassesScreen = ({ navigation }: Props) => {
 const FilterChip = ({
   label,
   active,
-  onPress
+  onPress,
 }: {
   label: string;
   active: boolean;
@@ -512,7 +509,7 @@ const EditClassModal = ({
   onClose,
   onSubmit,
   submitLabel,
-  savingLabel
+  savingLabel,
 }: EditClassModalProps) => {
   const { t } = useT();
   const inputRef = useRef<TextInput>(null);
@@ -521,29 +518,42 @@ const EditClassModal = ({
     <SheetModal
       visible={visible}
       onRequestClose={onClose}
+      onBackdropPress={onClose}
       onShow={() => setTimeout(() => inputRef.current?.focus?.(), 80)}
     >
-      <Card style={styles.sheet} washi>
-        <Text style={styles.modalTitle}>{title}</Text>
-        <JournalInput
-          ref={inputRef}
-          placeholder={t('classNamePlaceholder') as string}
-          value={value}
-          onChangeText={onChange}
-          testID="add-class-name-input"
-          returnKeyType="done"
-          onSubmitEditing={onSubmit}
-        />
-        {!!error && <Text style={styles.error}>{error}</Text>}
-        <View style={styles.actions}>
-          <PillButton disabled={saving} onPress={onClose} variant="light" style={styles.actionButton}>
-            {t('cancel')}
-          </PillButton>
-          <PillButton disabled={saving} onPress={onSubmit} variant="pink" style={styles.actionButton}>
-            {saving ? (savingLabel ?? t('adding')) : (submitLabel ?? t('add'))}
-          </PillButton>
-        </View>
-      </Card>
+      <Pressable>
+        <Card style={styles.sheet} washi>
+          <Text style={styles.modalTitle}>{title}</Text>
+          <JournalInput
+            ref={inputRef}
+            placeholder={t('classNamePlaceholder') as string}
+            value={value}
+            onChangeText={onChange}
+            testID="add-class-name-input"
+            returnKeyType="done"
+            onSubmitEditing={onSubmit}
+          />
+          {!!error && <Text style={styles.error}>{error}</Text>}
+          <View style={styles.actions}>
+            <PillButton
+              disabled={saving}
+              onPress={onClose}
+              variant="light"
+              style={styles.actionButton}
+            >
+              {t('cancel')}
+            </PillButton>
+            <PillButton
+              disabled={saving}
+              onPress={onSubmit}
+              variant="pink"
+              style={styles.actionButton}
+            >
+              {saving ? (savingLabel ?? t('adding')) : (submitLabel ?? t('add'))}
+            </PillButton>
+          </View>
+        </Card>
+      </Pressable>
     </SheetModal>
   );
 };
@@ -565,7 +575,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     minHeight: 38,
     alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: 'center',
   },
   chipActive: { backgroundColor: colors.pink },
   chipText: { fontFamily: 'PatrickHand_400Regular', fontSize: 17, color: colors.ink },
@@ -575,8 +585,19 @@ const styles = StyleSheet.create({
   classCard: { margin: 6, minHeight: 128 },
   menuSpacer: { width: 44, height: 44 },
   menuButton: { position: 'absolute', top: 14, right: 14 },
-  classHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
-  classTitle: { flex: 1, fontFamily: 'PatrickHand_400Regular', fontSize: 28, color: colors.ink, lineHeight: 32 },
+  classHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  classTitle: {
+    flex: 1,
+    fontFamily: 'PatrickHand_400Regular',
+    fontSize: 28,
+    color: colors.ink,
+    lineHeight: 32,
+  },
   line: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 8 },
   meta: { fontFamily: 'PatrickHand_400Regular', color: colors.muted, fontSize: 18 },
   stats: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 10 },
@@ -584,19 +605,41 @@ const styles = StyleSheet.create({
   resultCard: { margin: 6, gap: 4 },
   resultHeader: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 6 },
   resultNameBlock: { flex: 1, gap: 2 },
-  resultName: { fontFamily: 'PatrickHand_400Regular', fontSize: 24, color: colors.ink, lineHeight: 28 },
+  resultName: {
+    fontFamily: 'PatrickHand_400Regular',
+    fontSize: 24,
+    color: colors.ink,
+    lineHeight: 28,
+  },
   resultRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 6 },
   resultMetric: { width: 70, textAlign: 'center' },
   resultCount: { fontFamily: 'PatrickHand_400Regular', color: colors.ink, fontSize: 18, width: 40 },
-  fab: { position: 'absolute', right: 20, bottom: 116, backgroundColor: colors.pink, borderColor: colors.border, borderWidth: 1.5, width: 62, height: 62, borderRadius: 31, alignItems: 'center', justifyContent: 'center' },
+  fab: {
+    position: 'absolute',
+    right: 20,
+    bottom: 116,
+    backgroundColor: colors.pink,
+    borderColor: colors.border,
+    borderWidth: 1.5,
+    width: 62,
+    height: 62,
+    borderRadius: 31,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   pressed: { transform: [{ scale: 0.97 }] },
   backdrop: { flex: 1, backgroundColor: colors.scrim, justifyContent: 'center', padding: 20 },
-  sheet: { marginBottom: 0 },
+  sheet: { marginBottom: 0, gap: 16 },
   dialog: { gap: 12 },
   modalTitle: { fontFamily: 'PatrickHand_400Regular', fontSize: 28, color: colors.ink },
   modalStrong: { fontFamily: 'PatrickHand_400Regular', fontSize: 22, color: colors.ink },
-  modalText: { fontFamily: 'PatrickHand_400Regular', fontSize: 19, color: colors.muted, lineHeight: 24 },
+  modalText: {
+    fontFamily: 'PatrickHand_400Regular',
+    fontSize: 19,
+    color: colors.muted,
+    lineHeight: 24,
+  },
   error: { fontFamily: 'PatrickHand_400Regular', fontSize: 18, color: colors.dangerRed },
   actions: { flexDirection: 'row', gap: 10 },
-  actionButton: { flex: 1 }
+  actionButton: { flex: 1 },
 });

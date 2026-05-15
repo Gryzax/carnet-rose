@@ -44,7 +44,7 @@ export const colors = {
   darkBg: '#F9E8E0',
   darkCard: '#FFFFFF',
 
-  scrim: 'rgba(26,26,26,0.48)'
+  scrim: 'rgba(26,26,26,0.48)',
 };
 
 export const spacing = {
@@ -52,19 +52,19 @@ export const spacing = {
   sm: 8,
   md: 16,
   lg: 24,
-  xl: 32
+  xl: 32,
 };
 
 export const radii = {
   sm: 8,
   md: 16,
   lg: 20,
-  full: 999
+  full: 999,
 };
 
 export const typography = {
   regular: 'PatrickHand_400Regular',
-  fallback: 'PatrickHand_400Regular'
+  fallback: 'PatrickHand_400Regular',
 };
 
 export type ColorName = keyof typeof colors;

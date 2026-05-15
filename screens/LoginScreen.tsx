@@ -7,7 +7,7 @@ import {
   StyleSheet,
   Text,
   useWindowDimensions,
-  View
+  View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { colors } from '../constants/colors';
@@ -15,7 +15,7 @@ import {
   consumePendingAuthError,
   getCurrentUser,
   signInWithApple,
-  signInWithGoogle
+  signInWithGoogle,
 } from '../services/auth/authService';
 import { isSupabaseConfigured } from '../services/supabase/supabaseClient';
 import { useT } from '../utils/i18n';
@@ -48,7 +48,7 @@ const LoginButton = ({ children, icon, onPress, disabled, testID, primary }: Log
       styles.button,
       primary ? styles.buttonPrimary : styles.buttonSecondary,
       disabled && styles.disabled,
-      pressed && !disabled && styles.pressed
+      pressed && !disabled && styles.pressed,
     ]}
   >
     <Ionicons name={icon} size={20} color={primary ? colors.onPrimary : colors.ink} />
@@ -75,7 +75,11 @@ export const LoginScreen = ({ onAuthenticated }: LoginScreenProps) => {
       if (authError) setMessage(authError);
       if (!user) return;
       if (Platform.OS === 'web' && typeof window !== 'undefined') {
-        window.history.replaceState({}, document.title, window.location.pathname + window.location.search);
+        window.history.replaceState(
+          {},
+          document.title,
+          window.location.pathname + window.location.search,
+        );
       }
       onAuthenticated?.({ user });
     });
@@ -94,12 +98,16 @@ export const LoginScreen = ({ onAuthenticated }: LoginScreenProps) => {
     setLoading('');
     if (result.user) {
       if (Platform.OS === 'web' && typeof window !== 'undefined') {
-        window.history.replaceState({}, document.title, window.location.pathname + window.location.search);
+        window.history.replaceState(
+          {},
+          document.title,
+          window.location.pathname + window.location.search,
+        );
       }
       onAuthenticated?.({ user: result.user });
       return;
     }
-    setMessage(result.message || result.error?.message || (t('connectionFailed') as string));
+    setMessage(t(result.messageKey || 'connectionFailed') as string);
   };
 
   return (
@@ -153,22 +161,70 @@ const baseText = { fontFamily: 'PatrickHand_400Regular', color: colors.ink, lett
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.canvas },
-  washi: { position: 'absolute', top: 64, right: -22, width: 148, height: 30, borderRadius: 3, backgroundColor: colors.orange, opacity: 0.28, transform: [{ rotate: '-8deg' }], pointerEvents: 'none' },
+  washi: {
+    position: 'absolute',
+    top: 64,
+    right: -22,
+    width: 148,
+    height: 30,
+    borderRadius: 3,
+    backgroundColor: colors.orange,
+    opacity: 0.28,
+    transform: [{ rotate: '-8deg' }],
+    pointerEvents: 'none',
+  },
   wrap: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 16 },
-  card: { width: '100%', maxWidth: 460, backgroundColor: colors.card, borderColor: colors.border, borderWidth: 1.5, borderRadius: 20, padding: 20, gap: 12 },
+  card: {
+    width: '100%',
+    maxWidth: 460,
+    backgroundColor: colors.card,
+    borderColor: colors.border,
+    borderWidth: 1.5,
+    borderRadius: 20,
+    padding: 20,
+    gap: 12,
+  },
   cardCompact: { padding: 14 },
-  logo: { alignSelf: 'center', width: 48, height: 48, borderRadius: 24, backgroundColor: colors.card, alignItems: 'center', justifyContent: 'center', borderColor: colors.border, borderWidth: 1.5 },
+  logo: {
+    alignSelf: 'center',
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: colors.card,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderColor: colors.border,
+    borderWidth: 1.5,
+  },
   brand: { ...baseText, fontSize: 30, lineHeight: 34, textAlign: 'center', color: colors.pink },
   prompt: { ...baseText, fontSize: 24, lineHeight: 28, textAlign: 'center' },
-  notice: { backgroundColor: colors.lightPink, borderColor: colors.border, borderWidth: 1.5, borderRadius: 8, padding: 12, gap: 4 },
+  notice: {
+    backgroundColor: colors.lightPink,
+    borderColor: colors.border,
+    borderWidth: 1.5,
+    borderRadius: 8,
+    padding: 12,
+    gap: 4,
+  },
   noticeTitle: { ...baseText, fontSize: 21 },
   noticeText: { ...baseText, color: colors.muted, fontSize: 18, lineHeight: 23 },
-  button: { minHeight: 50, borderRadius: 8, borderColor: colors.border, borderWidth: 1.5, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', gap: 8, paddingHorizontal: 16, paddingVertical: 12 },
+  button: {
+    minHeight: 50,
+    borderRadius: 8,
+    borderColor: colors.border,
+    borderWidth: 1.5,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+    gap: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
   buttonPrimary: { backgroundColor: colors.pink },
   buttonSecondary: { backgroundColor: colors.sage },
   buttonText: { ...baseText, fontSize: 20, textAlign: 'center' },
   buttonTextPrimary: { color: colors.onPrimary },
   disabled: { opacity: 0.55 },
   pressed: { transform: [{ scale: 0.97 }] },
-  message: { ...baseText, fontSize: 18, lineHeight: 23, textAlign: 'center' }
+  message: { ...baseText, fontSize: 18, lineHeight: 23, textAlign: 'center' },
 });

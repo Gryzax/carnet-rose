@@ -21,7 +21,7 @@ const CLIMATE_TONE: Record<ClimateStatus, ClimateTone> = {
   attention: 'warning',
   tense: 'danger',
   'low-positive': 'warning',
-  empty: 'neutral'
+  empty: 'neutral',
 };
 
 interface ArchiveAccumulator {
@@ -46,15 +46,15 @@ const startOfToday = (): Date => {
 };
 
 // A forgotten notebook is now its own 'forgot' event type. Older data recorded
-// it as a cross with a "carnet" reason, so keep matching that too.
+// it as a cross with a "cahier"/"carnet" reason, so keep matching that too.
 const isForgottenNotebook = (event: EventRow): boolean =>
   event.type === 'forgot' ||
-  (event.type === 'cross' && /carnet/i.test(String(event.reason || '')));
+  (event.type === 'cross' && /cahier|carnet/i.test(String(event.reason || '')));
 
 const computeClimate = ({
   ticks,
   crosses,
-  studentCount
+  studentCount,
 }: {
   ticks: number;
   crosses: number;
@@ -79,19 +79,20 @@ const studentLabel = (student: { lastName?: string | null; firstName?: string | 
  */
 export const getClassroomStatistics = async ({
   period = 'week',
-  classId = null
+  classId = null,
 }: StatisticsOptions = {}) => {
   const [classes, students, events, archives] = await Promise.all([
     getClasses(),
     getAllStudents(),
     getAllEvents(),
-    getAllArchives()
+    getAllArchives(),
   ]);
 
   const classOf = new Map(students.map((student) => [student.id, student.classId]));
   const scopedStudents: StudentWithClass[] =
     classId == null ? students : students.filter((s) => s.classId === classId);
-  const inScope = (studentId: string): boolean => classId == null || classOf.get(studentId) === classId;
+  const inScope = (studentId: string): boolean =>
+    classId == null || classOf.get(studentId) === classId;
 
   const days = PERIOD_DAYS[period] || PERIOD_DAYS.week;
   const periodStart = new Date(Date.now() - days * DAY_MS);
@@ -108,10 +109,10 @@ export const getClassroomStatistics = async ({
   const periodTicks = countType(periodEvents, 'tick');
   const periodCrosses = countType(periodEvents, 'cross');
   const periodMerits = periodEvents.filter(
-    (event) => event.type === 'tick' && event.previousTicks === TICKS_FOR_MERIT - 1
+    (event) => event.type === 'tick' && event.previousTicks === TICKS_FOR_MERIT - 1,
   ).length;
   const periodDetentions = periodEvents.filter(
-    (event) => event.type === 'cross' && event.previousCrosses === CROSSES_FOR_DETENTION - 1
+    (event) => event.type === 'cross' && event.previousCrosses === CROSSES_FOR_DETENTION - 1,
   ).length;
 
   // Today snapshot.
@@ -125,14 +126,12 @@ export const getClassroomStatistics = async ({
     .map((student) => ({
       ...student,
       metaKey: 'metaCrossesOngoing',
-      metaParams: { count: student.crosses }
+      metaParams: { count: student.crosses },
     }))
     .sort((a, b) => b.crosses - a.crosses);
 
   // Students linked to a forgotten-notebook cross during the period.
-  const forgottenIds = new Set(
-    periodEvents.filter(isForgottenNotebook).map((e) => e.studentId)
-  );
+  const forgottenIds = new Set(periodEvents.filter(isForgottenNotebook).map((e) => e.studentId));
   const forgottenNotebooks = scopedStudents
     .filter((student) => forgottenIds.has(student.id))
     .map((student) => ({ ...student, metaKey: 'metaForgottenNotebook' }));
@@ -160,7 +159,7 @@ export const getClassroomStatistics = async ({
         daysSinceLastEvent: daysSince,
         ...(daysSince == null
           ? { metaKey: 'metaNoEvent' }
-          : { metaKey: 'metaDaysSince', metaParams: { days: daysSince } })
+          : { metaKey: 'metaDaysSince', metaParams: { days: daysSince } }),
       };
     })
     .sort((a, b) => (lastEventAt.get(a.id) || 0) - (lastEventAt.get(b.id) || 0));
@@ -171,7 +170,7 @@ export const getClassroomStatistics = async ({
       ...student,
       score: student.merits * 4 + student.ticks,
       metaKey: 'metaEncourage',
-      metaParams: { merits: student.merits, ticks: student.ticks }
+      metaParams: { merits: student.merits, ticks: student.ticks },
     }))
     .filter((student) => student.score > 0)
     .sort((a, b) => b.score - a.score)
@@ -181,7 +180,7 @@ export const getClassroomStatistics = async ({
       ...student,
       score: student.detentions * 4 + student.crosses,
       metaKey: 'metaReframe',
-      metaParams: { detentions: student.detentions, crosses: student.crosses }
+      metaParams: { detentions: student.detentions, crosses: student.crosses },
     }))
     .filter((student) => student.score > 0)
     .sort((a, b) => b.score - a.score)
@@ -190,7 +189,7 @@ export const getClassroomStatistics = async ({
   const climateStatus = computeClimate({
     ticks: periodTicks,
     crosses: periodCrosses,
-    studentCount: scopedStudents.length
+    studentCount: scopedStudents.length,
   });
   const climate = { status: climateStatus, tone: CLIMATE_TONE[climateStatus] };
 
@@ -205,14 +204,15 @@ export const getClassroomStatistics = async ({
       merits: 0,
       detentions: 0,
       ticks: 0,
-      crosses: 0
+      crosses: 0,
     };
     current.students += 1;
     current.merits += archive.merits || 0;
     current.detentions += archive.detentions || 0;
     current.ticks += archive.totalTicks || 0;
     current.crosses += archive.totalCrosses || 0;
-    if (new Date(archive.archivedAt) > new Date(current.archivedAt)) current.archivedAt = archive.archivedAt;
+    if (new Date(archive.archivedAt) > new Date(current.archivedAt))
+      current.archivedAt = archive.archivedAt;
     archiveByTrimester.set(archive.trimester, current);
   }
   const archiveList = [...archiveByTrimester.values()].sort((a, b) => b.trimester - a.trimester);
@@ -232,7 +232,7 @@ export const getClassroomStatistics = async ({
       toWatch: toWatch.length,
       ticks: todayTicks,
       crosses: todayCrosses,
-      forgottenNotebooks: todayForgotten
+      forgottenNotebooks: todayForgotten,
     },
     quickActions: { toWatch, forgottenNotebooks, noRecentEvent },
     top: { encourage, reframe },
@@ -240,9 +240,9 @@ export const getClassroomStatistics = async ({
       ticks: periodTicks,
       crosses: periodCrosses,
       merits: periodMerits,
-      detentions: periodDetentions
+      detentions: periodDetentions,
     },
-    archives: archiveList
+    archives: archiveList,
   };
 };
 

@@ -1,4 +1,10 @@
-import { bumpAttempts, listOutbox, outboxSize, removeEntry, type OutboxEntry } from '../database/outbox';
+import {
+  bumpAttempts,
+  listOutbox,
+  outboxSize,
+  removeEntry,
+  type OutboxEntry,
+} from '../database/outbox';
 import { getRemoteContext, type ReadyRemoteContext } from '../services/remote/context';
 import { isOnline } from '../net/connectivity';
 import { pushClass, softDeleteClassRemote } from '../services/remote/classRemote';

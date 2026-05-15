@@ -8,12 +8,12 @@ import type { ArchiveRow, EventRow } from '../types/domain';
 const normalizeEvent = (event: EventRow): EventRow => ({
   ...event,
   previousForgets: event.previousForgets ?? 0,
-  newForgets: event.newForgets ?? 0
+  newForgets: event.newForgets ?? 0,
 });
 
 export const getCurrentHistory = async (
   studentId: string,
-  trimester: number
+  trimester: number,
 ): Promise<EventRow[]> => {
   const store = await getStore();
   const events = await store.all<EventRow>('events');
@@ -33,7 +33,7 @@ export const getLastActiveEvent = async (studentId: string): Promise<EventRow | 
       .sort(
         (a, b) =>
           String(b.createdAt).localeCompare(String(a.createdAt)) ||
-          String(b.id).localeCompare(String(a.id))
+          String(b.id).localeCompare(String(a.id)),
       )[0] || null
   );
 };
