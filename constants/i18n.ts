@@ -193,6 +193,8 @@ export const translations = {
     typeTick: 'Tick',
     typeCross: 'Cross',
     typeForgot: 'Forgotten notebook',
+    historyMeritEarned: 'Merit earned 🎉',
+    historyDetentionEarned: 'Detention triggered',
 
     // Reasons
     tickReasons: ['Participation', 'Lesson learned', 'Great work', 'Effort'],
@@ -466,6 +468,8 @@ export const translations = {
     typeTick: 'Tick',
     typeCross: 'Croix',
     typeForgot: 'Cahier oublié',
+    historyMeritEarned: 'Mérite obtenu 🎉',
+    historyDetentionEarned: 'Retenue déclenchée',
 
     tickReasons: ['Participation', 'Leçon sue', 'Bon travail', 'Effort'],
     crossReasons: ['Devoirs non faits', 'Leçon non sue', 'Travail insuffisant', 'Comportement'],
@@ -736,6 +740,8 @@ export const translations = {
     typeTick: 'Marca',
     typeCross: 'Cruz',
     typeForgot: 'Cuaderno olvidado',
+    historyMeritEarned: 'Mérito conseguido 🎉',
+    historyDetentionEarned: 'Sanción activada',
 
     tickReasons: ['Participación', 'Lección aprendida', 'Buen trabajo', 'Esfuerzo'],
     crossReasons: [
