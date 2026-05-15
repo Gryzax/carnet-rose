@@ -1,4 +1,5 @@
-import { CROSSES_FOR_DETENTION, TICKS_FOR_MERIT, UNDO_LIMIT_SECONDS } from '../constants/config';
+import { UNDO_LIMIT_SECONDS } from '../constants/config';
+import { getThresholds } from '../utils/thresholds';
 import { getLastActiveEvent } from '../models/historyModel';
 import { getAllStudents, getStudentById } from '../models/studentModel';
 import { removeStudent, saveStudent } from '../repositories/studentRepository';
@@ -73,7 +74,7 @@ const buildEvent = (
 
 export const addTick = async (student: StudentRow, reason = ''): Promise<TickResult> => {
   const next: StudentRow = { ...student, ticks: student.ticks + 1 };
-  const meritObtained = next.ticks >= TICKS_FOR_MERIT;
+  const meritObtained = next.ticks >= getThresholds().ticksForMerit;
   if (meritObtained) {
     next.ticks = 0;
     next.merits += 1;
@@ -86,7 +87,7 @@ export const addTick = async (student: StudentRow, reason = ''): Promise<TickRes
 
 export const addCross = async (student: StudentRow, reason = ''): Promise<CrossResult> => {
   const next: StudentRow = { ...student, crosses: student.crosses + 1 };
-  const detentionTriggered = next.crosses >= CROSSES_FOR_DETENTION;
+  const detentionTriggered = next.crosses >= getThresholds().crossesForDetention;
   if (detentionTriggered) {
     next.crosses = 0;
     next.detentions += 1;

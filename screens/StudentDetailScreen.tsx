@@ -5,7 +5,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, typography } from '../constants/colors';
-import { CROSSES_FOR_DETENTION, TICKS_FOR_MERIT } from '../constants/config';
+import { useThresholds } from '../utils/thresholds';
 import { useT } from '../utils/i18n';
 import { USE_NATIVE_DRIVER } from '../utils/animation';
 import { EmptyState } from '../components/EmptyState';
@@ -29,6 +29,7 @@ type PendingAction = 'tick' | 'cross' | null;
 
 export const StudentDetailScreen = ({ route, navigation }: Props) => {
   const { t } = useT();
+  const { ticksForMerit, crossesForDetention } = useThresholds();
   const [action, setAction] = useState<PendingAction>(null);
   const [snack, setSnack] = useState(false);
   const [snackMessage, setSnackMessage] = useState('');
@@ -188,7 +189,7 @@ export const StudentDetailScreen = ({ route, navigation }: Props) => {
           label={`${t('crossesLabel')} ${student.crosses}/4`}
         />
         <Text style={styles.legend}>
-          {t('counterLegend', { ticks: TICKS_FOR_MERIT, crosses: CROSSES_FOR_DETENTION })}
+          {t('counterLegend', { ticks: ticksForMerit, crosses: crossesForDetention })}
         </Text>
       </View>
       <Pill accessibilityRole="header" style={styles.sectionLabel}>

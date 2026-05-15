@@ -2,7 +2,7 @@ import { memo, useEffect, useRef } from 'react';
 import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, typography } from '../constants/colors';
-import { CROSSES_FOR_DETENTION, TICKS_FOR_MERIT } from '../constants/config';
+import { useThresholds } from '../utils/thresholds';
 import { ProgressBar } from './ProgressBar';
 import { StudentAvatar, getStudentAvatarColor, type StudentLike } from './StudentAvatar';
 import { CardTape, CatMascot, Pill, Sparkle } from './Themed';
@@ -21,8 +21,9 @@ export interface StudentCardProps {
 
 const StudentCardBase = ({ student, onPress, onMenu }: StudentCardProps) => {
   const { t } = useT();
+  const { ticksForMerit, crossesForDetention } = useThresholds();
   const fade = useRef(new Animated.Value(0)).current;
-  const atRisk = student.crosses >= CROSSES_FOR_DETENTION - 1;
+  const atRisk = student.crosses >= crossesForDetention - 1;
 
   useEffect(() => {
     Animated.timing(fade, {
@@ -72,22 +73,18 @@ const StudentCardBase = ({ student, onPress, onMenu }: StudentCardProps) => {
             {t('ticksLabel')}
           </Pill>
           <Text style={styles.count}>
-            {student.ticks}/{TICKS_FOR_MERIT}
+            {student.ticks}/{ticksForMerit}
           </Text>
-          <ProgressBar value={student.ticks} max={TICKS_FOR_MERIT} color={colors.successGreen} />
+          <ProgressBar value={student.ticks} max={ticksForMerit} color={colors.successGreen} />
         </View>
         <View style={styles.row}>
           <Pill numberOfLines={1} style={styles.metric}>
             {t('crossesLabel')}
           </Pill>
           <Text style={styles.count}>
-            {student.crosses}/{CROSSES_FOR_DETENTION}
+            {student.crosses}/{crossesForDetention}
           </Text>
-          <ProgressBar
-            value={student.crosses}
-            max={CROSSES_FOR_DETENTION}
-            color={colors.dangerRed}
-          />
+          <ProgressBar value={student.crosses} max={crossesForDetention} color={colors.dangerRed} />
         </View>
         <View style={styles.badges}>
           <View style={styles.badgeRow}>

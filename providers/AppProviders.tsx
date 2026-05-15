@@ -4,8 +4,11 @@ import { useEffect, type ReactNode } from 'react';
 import { Platform } from 'react-native';
 import { LanguageProvider, useT } from '../utils/i18n';
 import { ReasonsProvider } from '../utils/reasons';
+import { loadThresholds } from '../utils/thresholds';
 import { queryClient } from '../lib/queryClient';
 import { AuthProvider } from './AuthContext';
+
+loadThresholds();
 
 const APP_NAME = 'Carnet Rose';
 
