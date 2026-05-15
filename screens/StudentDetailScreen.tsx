@@ -28,7 +28,7 @@ type Props = NativeStackScreenProps<ClassesStackParamList, 'StudentDetail'>;
 type PendingAction = 'tick' | 'cross' | null;
 
 export const StudentDetailScreen = ({ route, navigation }: Props) => {
-  const { t } = useT();
+  const { t, lang } = useT();
   const { ticksForMerit, crossesForDetention } = useThresholds();
   const [action, setAction] = useState<PendingAction>(null);
   const [snack, setSnack] = useState(false);
@@ -49,6 +49,20 @@ export const StudentDetailScreen = ({ route, navigation }: Props) => {
     },
     [],
   );
+
+  const formatEventDate = useMemo(() => {
+    try {
+      const formatter = new Intl.DateTimeFormat(lang, {
+        day: '2-digit',
+        month: 'short',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+      return (iso: string) => formatter.format(new Date(iso));
+    } catch {
+      return (iso: string) => new Date(iso).toLocaleString();
+    }
+  }, [lang]);
 
   const reasons = useMemo(
     () => (action === 'tick' ? tickReasons : crossReasons),
@@ -213,31 +227,48 @@ export const StudentDetailScreen = ({ route, navigation }: Props) => {
             message={t('emptyHistoryMessage') as string}
           />
         }
-        renderItem={({ item }) => (
-          <Card style={styles.historyItem} mascot={false}>
-            <View style={styles.historyRow}>
-              <Sparkle />
-              <Text style={styles.historyText}>
-                {item.type === 'tick'
-                  ? t('typeTick')
-                  : item.type === 'forgot'
-                    ? t('typeForgot')
-                    : t('typeCross')}
-                {item.reason ? ` - ${item.reason}` : ''}{' '}
-                {item.cancelled ? t('historyCancelled') : ''}
-              </Text>
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={t('eventOptions') as string}
-                hitSlop={8}
-                onPress={() => setMenuForEvent(item.id)}
-                style={({ pressed }) => [styles.optionsButton, pressed && styles.pressed]}
-              >
-                <Ionicons name="ellipsis-horizontal" size={20} color={colors.muted} />
-              </Pressable>
-            </View>
-          </Card>
-        )}
+        renderItem={({ item }) => {
+          const meritEarned =
+            item.type === 'tick' && !item.cancelled && item.newTicks < item.previousTicks;
+          const detentionEarned =
+            item.type === 'cross' && !item.cancelled && item.newCrosses < item.previousCrosses;
+          const baseLabel =
+            item.type === 'tick'
+              ? t('typeTick')
+              : item.type === 'forgot'
+                ? t('typeForgot')
+                : t('typeCross');
+          const milestoneLabel = meritEarned
+            ? (t('historyMeritEarned') as string)
+            : detentionEarned
+              ? (t('historyDetentionEarned') as string)
+              : null;
+          return (
+            <Card style={styles.historyItem} mascot={false}>
+              <View style={styles.historyRow}>
+                <Sparkle />
+                <View style={styles.historyTextWrap}>
+                  <Text style={styles.historyText}>
+                    {baseLabel}
+                    {item.reason ? ` - ${item.reason}` : ''}{' '}
+                    {item.cancelled ? t('historyCancelled') : ''}
+                  </Text>
+                  {milestoneLabel && <Text style={styles.historyMilestone}>{milestoneLabel}</Text>}
+                  <Text style={styles.historyDate}>{formatEventDate(item.createdAt)}</Text>
+                </View>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={t('eventOptions') as string}
+                  hitSlop={8}
+                  onPress={() => setMenuForEvent(item.id)}
+                  style={({ pressed }) => [styles.optionsButton, pressed && styles.pressed]}
+                >
+                  <Ionicons name="ellipsis-horizontal" size={20} color={colors.muted} />
+                </Pressable>
+              </View>
+            </Card>
+          );
+        }}
         ListFooterComponent={
           <Text style={styles.footer}>{t('termArchivesCount', { count: archives.length })}</Text>
         }
@@ -347,7 +378,15 @@ const styles = StyleSheet.create({
   historyItem: { padding: 12, marginBottom: 8 },
   historyContent: { flexGrow: 1, paddingTop: 76, paddingBottom: 96, paddingHorizontal: 16 },
   historyRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  historyText: { fontFamily: typography.regular, color: colors.ink, fontSize: 19, flex: 1 },
+  historyTextWrap: { flex: 1 },
+  historyText: { fontFamily: typography.regular, color: colors.ink, fontSize: 19 },
+  historyDate: { fontFamily: typography.regular, color: colors.muted, fontSize: 14, marginTop: 2 },
+  historyMilestone: {
+    fontFamily: typography.regular,
+    color: colors.deepPink,
+    fontSize: 16,
+    marginTop: 2,
+  },
   optionsButton: {
     width: 32,
     height: 32,
