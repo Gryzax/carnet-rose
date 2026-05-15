@@ -5,7 +5,7 @@ import {
   addTick,
   deleteEvent,
   undoLastAction,
-} from '../domain/studentController';
+} from '../domain/studentService';
 import type { StudentRow } from '../types/domain';
 
 // Counter and history write operations as TanStack mutations. The history and

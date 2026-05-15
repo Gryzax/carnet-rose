@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { loadClasses, type ClassSort } from '../domain/classController';
+import { loadClasses, type ClassSort } from '../domain/classService';
 import { refreshClasses } from '../repositories/classRepository';
 import { refreshStudents } from '../repositories/studentRepository';
 import { queryKeys } from '../lib/queryClient';

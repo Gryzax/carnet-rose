@@ -20,14 +20,14 @@ jest.mock('../../hooks/useStudents', () => ({
   useAllStudents: jest.fn(() => ({ students: [], loading: false, refresh: jest.fn() })),
 }));
 
-jest.mock('../../domain/classController', () => ({
+jest.mock('../../domain/classService', () => ({
   addClass: jest.fn(() => Promise.resolve({ id: 'c3', name: '4e Rose' })),
   markClassUsed: jest.fn(() => Promise.resolve()),
   deleteClass: jest.fn(() => Promise.resolve()),
   updateClass: jest.fn((classRow, name) => Promise.resolve({ ...classRow, name })),
 }));
 
-import { addClass, markClassUsed, deleteClass, updateClass } from '../../domain/classController';
+import { addClass, markClassUsed, deleteClass, updateClass } from '../../domain/classService';
 
 beforeEach(() => {
   jest.clearAllMocks();

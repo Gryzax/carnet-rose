@@ -9,7 +9,7 @@ jest.mock('../../models/studentModel', () => ({
   ),
 }));
 
-jest.mock('../../domain/studentController', () => ({
+jest.mock('../../domain/studentService', () => ({
   reinitialiserTrimestre: jest.fn(() =>
     Promise.resolve({ totalEleves: 1, totalMerites: 2, totalRetenues: 1 }),
   ),

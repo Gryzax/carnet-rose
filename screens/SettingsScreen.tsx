@@ -1,9 +1,9 @@
-import { Alert, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useEffect, useState, type ReactNode } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
-import { colors } from '../constants/colors';
-import { resetTrimester, type ResetTrimesterResult } from '../domain/studentController';
+import { colors, typography } from '../constants/colors';
+import { resetTrimester, type ResetTrimesterResult } from '../domain/studentService';
 import { getAllStudents } from '../models/studentModel';
 import {
   Card,
@@ -17,6 +17,7 @@ import {
   WashiTape,
 } from '../components/Themed';
 import { ReasonsEditor } from '../components/ReasonsEditor';
+import { DialogModal, DialogTitle } from '../components/ConfirmDialog';
 import { deleteAccount, getCurrentUser, signOut } from '../services/auth/authService';
 import { clearLocalData } from '../database/db';
 import { invalidate } from '../lib/queryClient';
@@ -224,60 +225,52 @@ export const SettingsScreen = ({ onSignedOut }: SettingsScreenProps) => {
           <Text style={styles.aboutText}>Fourkane Ahmer-Elain · v1.0.0</Text>
         </View>
       </ScrollView>
-      <Modal transparent visible={Boolean(summary)} onRequestClose={() => setSummary(null)}>
-        <View style={styles.backdrop}>
-          <Card style={styles.dialog} washi>
-            <Text style={styles.modalTitle}>{t('confirmEndTrimesterTitle')}</Text>
-            <Text style={styles.muted}>
-              {t('allClassesSummary', {
-                merits: summary?.totalMerits ?? 0,
-                detentions: summary?.totalDetentions ?? 0,
-                students: summary?.totalStudents ?? 0,
-              })}
-            </Text>
-            <Text style={styles.text}>{t('typeConfirmToContinue', { word: confirmWord })}</Text>
-            <JournalInput
-              testID="trimester-confirm-input"
-              value={confirmText}
-              onChangeText={setConfirmText}
-              autoCapitalize="characters"
-            />
-            <PillButton onPress={confirm} variant="orange" disabled={confirmText !== confirmWord}>
-              {t('iConfirm')}
-            </PillButton>
-            <PillButton onPress={() => setSummary(null)} variant="light">
-              {t('cancel')}
-            </PillButton>
-          </Card>
-        </View>
-      </Modal>
-      <Modal transparent visible={deleteOpen} onRequestClose={() => setDeleteOpen(false)}>
-        <View style={styles.backdrop}>
-          <Card style={styles.dialog} washi>
-            <Text style={styles.modalTitle}>{t('deleteAccountTitle')}</Text>
-            <Text style={styles.muted}>{t('deleteAccountWarning')}</Text>
-            <Text style={styles.text}>{t('typeConfirmToContinue', { word: deleteWord })}</Text>
-            <JournalInput
-              testID="delete-account-input"
-              value={deleteText}
-              onChangeText={setDeleteText}
-              autoCapitalize="characters"
-            />
-            {deleteError && <Text style={styles.muted}>{deleteError}</Text>}
-            <PillButton
-              testID="delete-account-confirm"
-              onPress={confirmDelete}
-              variant="danger"
-              disabled={deleteText !== deleteWord}
-            >
-              {t('deleteAccountConfirm')}
-            </PillButton>
-            <PillButton onPress={() => setDeleteOpen(false)} variant="light">
-              {t('cancel')}
-            </PillButton>
-          </Card>
-        </View>
-      </Modal>
+      <DialogModal visible={Boolean(summary)} onRequestClose={() => setSummary(null)}>
+        <DialogTitle>{t('confirmEndTrimesterTitle')}</DialogTitle>
+        <Text style={styles.muted}>
+          {t('allClassesSummary', {
+            merits: summary?.totalMerits ?? 0,
+            detentions: summary?.totalDetentions ?? 0,
+            students: summary?.totalStudents ?? 0,
+          })}
+        </Text>
+        <Text style={styles.text}>{t('typeConfirmToContinue', { word: confirmWord })}</Text>
+        <JournalInput
+          testID="trimester-confirm-input"
+          value={confirmText}
+          onChangeText={setConfirmText}
+          autoCapitalize="characters"
+        />
+        <PillButton onPress={confirm} variant="orange" disabled={confirmText !== confirmWord}>
+          {t('iConfirm')}
+        </PillButton>
+        <PillButton onPress={() => setSummary(null)} variant="light">
+          {t('cancel')}
+        </PillButton>
+      </DialogModal>
+      <DialogModal visible={deleteOpen} onRequestClose={() => setDeleteOpen(false)}>
+        <DialogTitle>{t('deleteAccountTitle')}</DialogTitle>
+        <Text style={styles.muted}>{t('deleteAccountWarning')}</Text>
+        <Text style={styles.text}>{t('typeConfirmToContinue', { word: deleteWord })}</Text>
+        <JournalInput
+          testID="delete-account-input"
+          value={deleteText}
+          onChangeText={setDeleteText}
+          autoCapitalize="characters"
+        />
+        {deleteError && <Text style={styles.muted}>{deleteError}</Text>}
+        <PillButton
+          testID="delete-account-confirm"
+          onPress={confirmDelete}
+          variant="danger"
+          disabled={deleteText !== deleteWord}
+        >
+          {t('deleteAccountConfirm')}
+        </PillButton>
+        <PillButton onPress={() => setDeleteOpen(false)} variant="light">
+          {t('cancel')}
+        </PillButton>
+      </DialogModal>
     </Screen>
   );
 };
@@ -289,20 +282,20 @@ const styles = StyleSheet.create({
   about: { marginTop: 24, alignItems: 'center', gap: 4 },
   aboutText: {
     color: colors.muted,
-    fontFamily: 'PatrickHand_400Regular',
+    fontFamily: typography.regular,
     fontSize: 17,
     textAlign: 'center',
   },
-  strong: { color: colors.ink, fontFamily: 'PatrickHand_400Regular', fontSize: 23 },
+  strong: { color: colors.ink, fontFamily: typography.regular, fontSize: 23 },
   muted: {
     color: colors.muted,
-    fontFamily: 'PatrickHand_400Regular',
+    fontFamily: typography.regular,
     fontSize: 19,
     lineHeight: 24,
   },
   text: {
     color: colors.ink,
-    fontFamily: 'PatrickHand_400Regular',
+    fontFamily: typography.regular,
     fontSize: 19,
     lineHeight: 24,
     flex: 1,
@@ -318,9 +311,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
   },
-  backdrop: { flex: 1, justifyContent: 'center', padding: 24, backgroundColor: colors.scrim },
-  dialog: { gap: 12 },
-  modalTitle: { fontSize: 28, fontFamily: 'PatrickHand_400Regular', color: colors.ink },
   languageRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -335,7 +325,7 @@ const styles = StyleSheet.create({
   },
   languageMenu: { gap: 8 },
   languageRowActive: { backgroundColor: colors.pink },
-  languageLabel: { color: colors.ink, fontFamily: 'PatrickHand_400Regular', fontSize: 21 },
+  languageLabel: { color: colors.ink, fontFamily: typography.regular, fontSize: 21 },
   languageLabelActive: { color: colors.onPrimary },
-  pressed: { transform: [{ scale: 0.98 }] },
+  pressed: { transform: [{ scale: 0.97 }] },
 });

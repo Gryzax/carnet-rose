@@ -1,11 +1,12 @@
-import { FlatList, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useEffect, useMemo, useState } from 'react';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { colors, spacing } from '../constants/colors';
+import { colors, spacing, typography } from '../constants/colors';
 import { BackButton } from '../components/BackButton';
 import { EmptyState } from '../components/EmptyState';
 import { SheetModal } from '../components/SheetModal';
 import { StudentCard } from '../components/StudentCard';
+import { ConfirmDialog, DialogModal, DialogTitle } from '../components/ConfirmDialog';
 import {
   Card,
   JournalInput,
@@ -247,40 +248,31 @@ export const ClassDashboardScreen = ({ route, navigation }: Props) => {
           </Card>
         </Pressable>
       </SheetModal>
-      <Modal
-        visible={!!menuStudent}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setMenuStudent(null)}
-      >
-        <View style={styles.backdrop}>
-          <Card style={styles.dialog} washi>
-            <Text style={styles.modalTitle}>
-              {menuStudent?.firstName} {menuStudent?.lastName}
-            </Text>
-            <PillButton
-              testID="menu-edit-student"
-              onPress={() => menuStudent && openEditModal(menuStudent)}
-              variant="light"
-            >
-              {t('edit')}
-            </PillButton>
-            <PillButton
-              testID="menu-delete-student"
-              onPress={() => {
-                setStudentToDelete(menuStudent);
-                setMenuStudent(null);
-              }}
-              variant="pink"
-            >
-              {t('delete')}
-            </PillButton>
-            <PillButton testID="menu-cancel" onPress={() => setMenuStudent(null)} variant="light">
-              {t('cancel')}
-            </PillButton>
-          </Card>
-        </View>
-      </Modal>
+      <DialogModal visible={!!menuStudent} onRequestClose={() => setMenuStudent(null)}>
+        <DialogTitle>
+          {menuStudent?.firstName} {menuStudent?.lastName}
+        </DialogTitle>
+        <PillButton
+          testID="menu-edit-student"
+          onPress={() => menuStudent && openEditModal(menuStudent)}
+          variant="light"
+        >
+          {t('edit')}
+        </PillButton>
+        <PillButton
+          testID="menu-delete-student"
+          onPress={() => {
+            setStudentToDelete(menuStudent);
+            setMenuStudent(null);
+          }}
+          variant="pink"
+        >
+          {t('delete')}
+        </PillButton>
+        <PillButton testID="menu-cancel" onPress={() => setMenuStudent(null)} variant="light">
+          {t('cancel')}
+        </PillButton>
+      </DialogModal>
       <SheetModal
         visible={!!studentToEdit}
         onRequestClose={closeEditModal}
@@ -323,42 +315,21 @@ export const ClassDashboardScreen = ({ route, navigation }: Props) => {
           </Card>
         </Pressable>
       </SheetModal>
-      <Modal
+      <ConfirmDialog
         visible={!!studentToDelete}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setStudentToDelete(null)}
-      >
-        <View style={styles.backdrop}>
-          <Card style={styles.dialog} washi>
-            <Text style={styles.modalTitle}>{t('deleteStudentTitle')}</Text>
-            <Text style={styles.modalStrong}>
-              {studentToDelete?.firstName} {studentToDelete?.lastName}
-            </Text>
-            <Text style={styles.modalText}>{t('deleteStudentMessage')}</Text>
-            <View style={styles.actions}>
-              <PillButton
-                testID="cancel-delete-student"
-                disabled={deleting}
-                onPress={() => setStudentToDelete(null)}
-                variant="light"
-                style={styles.actionButton}
-              >
-                {t('cancel')}
-              </PillButton>
-              <PillButton
-                testID="confirm-delete-student"
-                disabled={deleting}
-                onPress={confirmDeleteStudent}
-                variant="pink"
-                style={styles.actionButton}
-              >
-                {deleting ? t('deleting') : t('delete')}
-              </PillButton>
-            </View>
-          </Card>
-        </View>
-      </Modal>
+        title={t('deleteStudentTitle') as string}
+        emphasis={
+          studentToDelete ? `${studentToDelete.firstName} ${studentToDelete.lastName}` : undefined
+        }
+        message={t('deleteStudentMessage') as string}
+        cancelLabel={t('cancel') as string}
+        confirmLabel={(deleting ? t('deleting') : t('delete')) as string}
+        onCancel={() => setStudentToDelete(null)}
+        onConfirm={confirmDeleteStudent}
+        busy={deleting}
+        cancelTestID="cancel-delete-student"
+        confirmTestID="confirm-delete-student"
+      />
       <BackButton floating navigation={navigation} fallbackRoute="ClassesHome" />
     </Screen>
   );
@@ -369,27 +340,18 @@ const styles = StyleSheet.create({
   header: { marginBottom: 14 },
   title: { marginBottom: 4 },
   metaLine: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  meta: { fontFamily: 'PatrickHand_400Regular', color: colors.muted, fontSize: 19 },
+  meta: { fontFamily: typography.regular, color: colors.muted, fontSize: 19 },
   segmented: { marginBottom: 12 },
   search: { marginBottom: 12 },
   add: { marginTop: 8, marginBottom: 84, marginHorizontal: 16 },
-  backdrop: { flex: 1, backgroundColor: colors.scrim, justifyContent: 'center', padding: 20 },
   sheet: { gap: 16, padding: spacing.lg },
-  dialog: { gap: 12 },
   modalTitle: {
-    fontFamily: 'PatrickHand_400Regular',
+    fontFamily: typography.regular,
     fontSize: 28,
     color: colors.ink,
     marginBottom: spacing.xs,
   },
-  modalStrong: { fontFamily: 'PatrickHand_400Regular', fontSize: 22, color: colors.ink },
-  modalText: {
-    fontFamily: 'PatrickHand_400Regular',
-    fontSize: 19,
-    color: colors.muted,
-    lineHeight: 24,
-  },
-  error: { fontFamily: 'PatrickHand_400Regular', fontSize: 18, color: colors.dangerRed },
+  error: { fontFamily: typography.regular, fontSize: 18, color: colors.dangerRed },
   actions: { flexDirection: 'row', gap: 10 },
   actionButton: { flex: 1 },
 });

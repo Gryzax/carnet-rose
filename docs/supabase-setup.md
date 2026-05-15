@@ -1,93 +1,51 @@
 # Supabase setup
 
-This project is prepared for Supabase Auth and future sync. Do not commit real Supabase keys. Keep local values in `.env`, which is ignored by Git.
+Provider setup for Supabase Auth and sync. Never commit real keys — keep local
+values in `.env` (Git-ignored).
 
 ## Environment variables
 
-Copy `.env.example` to `.env` locally and fill:
+Copy `.env.example` to `.env` and fill:
 
 ```env
 EXPO_PUBLIC_SUPABASE_URL=https://frmiyddfipejirtbzoxr.supabase.co
-EXPO_PUBLIC_SUPABASE_KEY=
+EXPO_PUBLIC_SUPABASE_KEY=    # the sb_publishable_... anon key — never a service_role key
 EXPO_PUBLIC_APP_URL=https://gryzax.github.io/carnet-rose/
 ```
 
-Use the Supabase `sb_publishable_...` anon/publishable key. Never use or commit a `service_role` key.
+For the GitHub Pages PWA, add the same three variables in GitHub → Settings →
+Secrets and variables → Actions → Variables.
 
-For the GitHub Pages PWA, add the same values in GitHub:
+## Auth URLs
 
-Settings -> Secrets and variables -> Actions -> Variables / Secrets
+In Supabase → Authentication → URL Configuration:
 
-- `EXPO_PUBLIC_SUPABASE_URL`
-- `EXPO_PUBLIC_APP_URL`
+- **Site URL:** `https://gryzax.github.io/carnet-rose/`
+- **Redirect URLs:** the Site URL, `…/auth/callback`, `http://localhost:8081`,
+  `http://localhost:19006`
 
-Store `EXPO_PUBLIC_SUPABASE_KEY` in Actions -> Secrets instead of Variables.
-
-## Supabase Auth URLs
-
-In Supabase Authentication -> URL Configuration:
-
-Site URL:
-
-```txt
-https://gryzax.github.io/carnet-rose/
-```
-
-Redirect URLs to add:
-
-```txt
-https://gryzax.github.io/carnet-rose/
-https://gryzax.github.io/carnet-rose/auth/callback
-http://localhost:8081
-http://localhost:19006
-```
-
-Redirect URLs must match exactly what the app uses. Supabase uses these URLs to authorize OAuth returns after login.
+Redirect URLs must match exactly what the app uses.
 
 ## Google Auth
 
-1. Go to Google Cloud Console.
-2. Create or select a project.
-3. Configure OAuth consent screen.
-4. Create an OAuth Client ID of type Web application.
-5. Add Authorized JavaScript origins:
-   - `https://gryzax.github.io`
-   - `http://localhost:8081`
-   - `http://localhost:19006`
-6. Add Authorized redirect URI:
-   - `https://frmiyddfipejirtbzoxr.supabase.co/auth/v1/callback`
-7. Copy the Client ID and Client Secret.
-8. In Supabase, go to Authentication -> Providers -> Google.
-9. Enable Google.
-10. Paste the Client ID and Client Secret in the Supabase Dashboard.
+1. In Google Cloud Console, create/select a project and configure the OAuth consent screen.
+2. Create an OAuth Client ID of type **Web application**:
+   - Authorized JavaScript origins: `https://gryzax.github.io`, `http://localhost:8081`, `http://localhost:19006`
+   - Authorized redirect URI: `https://frmiyddfipejirtbzoxr.supabase.co/auth/v1/callback`
+3. In Supabase → Authentication → Providers → Google, enable it and paste the Client ID and Secret.
 
-Do not commit the Google Client ID or Client Secret to this repository.
+Do not commit the Client ID or Secret.
 
 ## Apple Auth
 
-Apple Sign-In usually requires an Apple Developer account.
+Requires an Apple Developer account. In Apple Developer, create an App ID /
+Service ID with Sign in with Apple enabled and the Supabase callback
+`https://frmiyddfipejirtbzoxr.supabase.co/auth/v1/callback`. Fill the requested
+values in Supabase → Authentication → Providers → Apple.
 
-Configure in Apple Developer:
-
-- App ID or Service ID;
-- Sign in with Apple enabled;
-- Supabase domain / redirect URL;
-- key / secret values required by the selected Apple configuration.
-
-In Supabase:
-
-Authentication -> Providers -> Apple
-
-Fill the Apple values requested by Supabase.
-
-Supabase callback:
-
-```txt
-https://frmiyddfipejirtbzoxr.supabase.co/auth/v1/callback
-```
-
-Without Apple Developer configuration, the Apple button can remain visible, but it will not work until the provider is configured.
+Until configured, the Apple button can stay visible but will not work.
 
 ## Database schema
 
-Copy `docs/supabase-schema.sql` into the Supabase SQL Editor and run it manually when you are ready to create the database tables and RLS policies. Do not run it automatically from the app.
+Run `docs/supabase-schema.sql` manually in the Supabase SQL Editor to create the
+tables and RLS policies. Do not run it automatically from the app.

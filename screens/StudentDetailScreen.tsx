@@ -1,19 +1,20 @@
 import * as Clipboard from 'expo-clipboard';
 import * as Haptics from 'expo-haptics';
-import { Alert, Animated, FlatList, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, Animated, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
-import { colors } from '../constants/colors';
+import { colors, typography } from '../constants/colors';
 import { CROSSES_FOR_DETENTION, TICKS_FOR_MERIT } from '../constants/config';
 import { useT } from '../utils/i18n';
 import { USE_NATIVE_DRIVER } from '../utils/animation';
 import { EmptyState } from '../components/EmptyState';
-import { SwipeableHistoryItem } from '../components/SwipeableHistoryItem';
+import { SheetModal } from '../components/SheetModal';
 import { BackButton } from '../components/BackButton';
 import { ProgressBar } from '../components/ProgressBar';
 import { ReasonSheet } from '../components/ReasonSheet';
-import { Card, Pill, PillButton, Screen, Sparkle, WashiTape } from '../components/Themed';
+import { Card, Pill, Screen, Sparkle, WashiTape } from '../components/Themed';
+import { ConfirmDialog } from '../components/ConfirmDialog';
 import { StudentAvatar } from '../components/StudentAvatar';
 import { UndoSnackbar } from '../components/UndoSnackbar';
 import { useHistory } from '../hooks/useHistory';
@@ -32,6 +33,8 @@ export const StudentDetailScreen = ({ route, navigation }: Props) => {
   const [snack, setSnack] = useState(false);
   const [snackMessage, setSnackMessage] = useState('');
   const [eventToDelete, setEventToDelete] = useState<string | null>(null);
+  // The history entry whose "..." options menu is currently open.
+  const [menuForEvent, setMenuForEvent] = useState<string | null>(null);
   const pulse = useRef(new Animated.Value(1)).current;
   const snackTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { student } = useStudent(route.params.studentId);
@@ -210,25 +213,29 @@ export const StudentDetailScreen = ({ route, navigation }: Props) => {
           />
         }
         renderItem={({ item }) => (
-          <SwipeableHistoryItem
-            deleteLabel={t('delete') as string}
-            onDelete={() => setEventToDelete(item.id)}
-          >
-            <Card style={styles.historyItem} mascot={false}>
-              <View style={styles.historyRow}>
-                <Sparkle />
-                <Text style={styles.historyText}>
-                  {item.type === 'tick'
-                    ? t('typeTick')
-                    : item.type === 'forgot'
-                      ? t('typeForgot')
-                      : t('typeCross')}
-                  {item.reason ? ` - ${item.reason}` : ''}{' '}
-                  {item.cancelled ? t('historyCancelled') : ''}
-                </Text>
-              </View>
-            </Card>
-          </SwipeableHistoryItem>
+          <Card style={styles.historyItem} mascot={false}>
+            <View style={styles.historyRow}>
+              <Sparkle />
+              <Text style={styles.historyText}>
+                {item.type === 'tick'
+                  ? t('typeTick')
+                  : item.type === 'forgot'
+                    ? t('typeForgot')
+                    : t('typeCross')}
+                {item.reason ? ` - ${item.reason}` : ''}{' '}
+                {item.cancelled ? t('historyCancelled') : ''}
+              </Text>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t('eventOptions') as string}
+                hitSlop={8}
+                onPress={() => setMenuForEvent(item.id)}
+                style={({ pressed }) => [styles.optionsButton, pressed && styles.pressed]}
+              >
+                <Ionicons name="ellipsis-horizontal" size={20} color={colors.muted} />
+              </Pressable>
+            </View>
+          </Card>
         )}
         ListFooterComponent={
           <Text style={styles.footer}>{t('termArchivesCount', { count: archives.length })}</Text>
@@ -248,38 +255,39 @@ export const StudentDetailScreen = ({ route, navigation }: Props) => {
           setSnack(false);
         }}
       />
-      <Modal
-        visible={eventToDelete !== null}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setEventToDelete(null)}
+      <SheetModal
+        visible={menuForEvent !== null}
+        onRequestClose={() => setMenuForEvent(null)}
+        onBackdropPress={() => setMenuForEvent(null)}
+        backdropLabel={t('cancel') as string}
       >
-        <View style={styles.backdrop}>
-          <Card style={styles.dialog} washi>
-            <Text style={styles.modalTitle}>{t('deleteHistoryTitle')}</Text>
-            <Text style={styles.modalText}>{t('deleteHistoryMessage')}</Text>
-            <View style={styles.dialogActions}>
-              <PillButton
-                onPress={() => setEventToDelete(null)}
-                variant="light"
-                style={styles.dialogButton}
-              >
-                {t('cancel')}
-              </PillButton>
-              <PillButton
-                onPress={() => {
-                  if (eventToDelete !== null) removeEvent.mutate(eventToDelete);
-                  setEventToDelete(null);
-                }}
-                variant="pink"
-                style={styles.dialogButton}
-              >
-                {t('delete')}
-              </PillButton>
-            </View>
-          </Card>
+        <View style={styles.menu}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('delete') as string}
+            onPress={() => {
+              setEventToDelete(menuForEvent);
+              setMenuForEvent(null);
+            }}
+            style={({ pressed }) => [styles.menuItem, pressed && styles.pressed]}
+          >
+            <Ionicons name="trash-outline" size={20} color={colors.dangerRed} />
+            <Text style={styles.menuItemText}>{t('delete')}</Text>
+          </Pressable>
         </View>
-      </Modal>
+      </SheetModal>
+      <ConfirmDialog
+        visible={eventToDelete !== null}
+        title={t('deleteHistoryTitle') as string}
+        message={t('deleteHistoryMessage') as string}
+        cancelLabel={t('cancel') as string}
+        confirmLabel={t('delete') as string}
+        onCancel={() => setEventToDelete(null)}
+        onConfirm={() => {
+          if (eventToDelete !== null) removeEvent.mutate(eventToDelete);
+          setEventToDelete(null);
+        }}
+      />
       <BackButton floating navigation={navigation} fallbackRoute="ClassesHome" />
     </Screen>
   );
@@ -287,7 +295,7 @@ export const StudentDetailScreen = ({ route, navigation }: Props) => {
 
 const styles = StyleSheet.create({
   loading: {
-    fontFamily: 'PatrickHand_400Regular',
+    fontFamily: typography.regular,
     color: colors.ink,
     fontSize: 22,
     marginTop: 52,
@@ -296,8 +304,8 @@ const styles = StyleSheet.create({
   hero: { marginBottom: 16 },
   heroRow: { flexDirection: 'row', alignItems: 'center', gap: 14 },
   heroText: { flex: 1 },
-  name: { fontFamily: 'PatrickHand_400Regular', fontSize: 31, color: colors.ink, lineHeight: 36 },
-  meta: { fontFamily: 'PatrickHand_400Regular', color: colors.muted, fontSize: 19 },
+  name: { fontFamily: typography.regular, fontSize: 31, color: colors.ink, lineHeight: 36 },
+  meta: { fontFamily: typography.regular, color: colors.muted, fontSize: 19 },
   pills: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 16 },
   actions: { flexDirection: 'row', gap: 12, marginBottom: 16 },
   bigAction: {
@@ -315,6 +323,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     alignSelf: 'flex-start',
     gap: 6,
+    minHeight: 44,
     paddingVertical: 8,
     paddingHorizontal: 14,
     marginBottom: 14,
@@ -324,35 +333,46 @@ const styles = StyleSheet.create({
     borderRadius: 999,
   },
   forgotActionText: {
-    fontFamily: 'PatrickHand_400Regular',
+    fontFamily: typography.regular,
     color: colors.ink,
     fontSize: 18,
   },
   pressed: { transform: [{ scale: 0.97 }] },
-  actionText: { fontFamily: 'PatrickHand_400Regular', color: colors.ink, fontSize: 26 },
+  actionText: { fontFamily: typography.regular, color: colors.ink, fontSize: 26 },
   actionTextOnPink: { color: colors.onPrimary },
   progressGroup: { gap: 8, marginBottom: 14 },
-  legend: { fontFamily: 'PatrickHand_400Regular', color: colors.muted, fontSize: 16, marginTop: 2 },
+  legend: { fontFamily: typography.regular, color: colors.muted, fontSize: 16, marginTop: 2 },
   sectionLabel: { marginBottom: 8 },
-  historyItem: { padding: 12, marginBottom: 0 },
+  historyItem: { padding: 12, marginBottom: 8 },
   historyContent: { flexGrow: 1, paddingTop: 76, paddingBottom: 96, paddingHorizontal: 16 },
   historyRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  historyText: { fontFamily: 'PatrickHand_400Regular', color: colors.ink, fontSize: 19, flex: 1 },
+  historyText: { fontFamily: typography.regular, color: colors.ink, fontSize: 19, flex: 1 },
+  optionsButton: {
+    width: 32,
+    height: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 999,
+  },
+  menu: {
+    backgroundColor: colors.card,
+    borderRadius: 20,
+    borderColor: colors.border,
+    borderWidth: 1.5,
+    paddingHorizontal: 18,
+    paddingVertical: 6,
+  },
+  menuItem: {
+    minHeight: 52,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  menuItemText: { fontFamily: typography.regular, fontSize: 20, color: colors.ink },
   footer: {
-    fontFamily: 'PatrickHand_400Regular',
+    fontFamily: typography.regular,
     color: colors.muted,
     fontSize: 19,
     marginTop: 12,
   },
-  backdrop: { flex: 1, backgroundColor: colors.scrim, justifyContent: 'center', padding: 20 },
-  dialog: { gap: 12 },
-  modalTitle: { fontFamily: 'PatrickHand_400Regular', fontSize: 28, color: colors.ink },
-  modalText: {
-    fontFamily: 'PatrickHand_400Regular',
-    fontSize: 19,
-    color: colors.muted,
-    lineHeight: 24,
-  },
-  dialogActions: { flexDirection: 'row', gap: 10 },
-  dialogButton: { flex: 1 },
 });

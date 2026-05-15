@@ -25,7 +25,11 @@ npm install
 npx expo start          # dev
 npm run start:clear     # dev, clear Metro cache
 npm test                # tests with coverage (target: 80%)
+npm run typecheck       # tsc --noEmit
+npm run format          # prettier
 ```
+
+Prod code is strict TypeScript; test files stay JS. A Husky pre-commit hook runs Prettier on staged files.
 
 Data is stored locally: `expo-sqlite` on native, IndexedDB (localforage) on web.
 
@@ -41,8 +45,7 @@ EXPO_PUBLIC_SUPABASE_KEY=    # use the sb_publishable_... key
 EXPO_PUBLIC_APP_URL=https://gryzax.github.io/carnet-rose/
 ```
 
-For the GitHub Pages PWA, add `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_APP_URL` in GitHub → Settings → Secrets and variables → Actions → Variables.
-Store `EXPO_PUBLIC_SUPABASE_KEY` in GitHub → Settings → Secrets and variables → Actions → Secrets.
+For the GitHub Pages PWA, add the same three values in GitHub → Settings → Secrets and variables → Actions → Variables.
 
 Full provider setup (Supabase Auth URLs, Google Cloud, Apple) is in `docs/supabase-setup.md`. The DB schema and RLS policies are in `docs/supabase-schema.sql` — run it manually in the Supabase SQL Editor.
 
@@ -75,18 +78,28 @@ npm run build:android:production   # production profile → .aab for Play Store
 
 ## Structure
 
+Local-first, layered. Screens read through React Query hooks; writes go through
+domain controllers → repositories, which update a local cache and push to
+Supabase (or queue in the offline outbox).
+
 ```txt
-/models        SQLite queries and data structures
-/controllers   business logic
-/views         React Native screens
-/components    reusable UI components
-/database      connection, migrations, demo seed, web/native storage
-/hooks         data-loading hooks
-/navigation    React Navigation stack + bottom tabs (auth gate)
-/services      Supabase client, auth, sync
-/constants     colors, strings, i18n catalogue, business constants
-/utils         i18n provider, date and prefs helpers
-/__tests__     unit, database and component tests
+/screens         React Native screens
+/components      reusable UI components
+/navigation      React Navigation stack + bottom tabs (auth gate)
+/providers       React Query, auth and app-wide context providers
+/hooks           React Query data + mutation hooks
+/domain          business logic (class / student / statistics controllers)
+/repositories    local cache reads/writes + remote push
+/services        Supabase client, auth, remote entity APIs
+/sync            offline outbox flush + sync manager
+/net             connectivity detection
+/database        connection, migrations, outbox, web/native storage
+/models          row shapes and SQLite queries
+/lib             React Query client
+/constants       colors, config, i18n catalogue
+/utils           i18n provider, date, prefs, reasons, uuid helpers
+/types           shared TypeScript types
+/__tests__       unit, domain, screen, sync and component tests
 ```
 
 ## Git Workflow

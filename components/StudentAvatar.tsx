@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View } from 'react-native';
-import { colors } from '../constants/colors';
+import { colors, typography } from '../constants/colors';
 import type { StudentRow } from '../types/domain';
 
 export type StudentLike = Partial<StudentRow> | null | undefined;
@@ -49,5 +49,5 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: colors.border,
   },
-  text: { color: colors.onPrimary, fontFamily: 'PatrickHand_400Regular' },
+  text: { color: colors.onPrimary, fontFamily: typography.regular },
 });

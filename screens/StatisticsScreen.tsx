@@ -10,8 +10,8 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
-import { colors } from '../constants/colors';
-import type { StatsPeriod } from '../domain/statisticsController';
+import { colors, typography } from '../constants/colors';
+import type { StatsPeriod } from '../domain/statisticsService';
 import { EmptyState } from '../components/EmptyState';
 import { StudentAvatar } from '../components/StudentAvatar';
 import { SheetModal } from '../components/SheetModal';
@@ -20,6 +20,7 @@ import {
   Pill,
   PillButton,
   Screen,
+  SegmentedControl,
   Sparkle,
   Title,
   WashiTape,
@@ -72,37 +73,6 @@ const SectionLabel = ({ children }: { children: ReactNode }) => (
   <Pill accessibilityRole="header" style={styles.sectionLabel}>
     {children}
   </Pill>
-);
-
-interface SegmentedProps {
-  options: { value: StatsPeriod; label: string }[];
-  value: StatsPeriod;
-  onChange: (value: StatsPeriod) => void;
-}
-
-const Segmented = ({ options, value, onChange }: SegmentedProps) => (
-  <View style={styles.segmented}>
-    {options.map((option) => {
-      const active = option.value === value;
-      return (
-        <Pressable
-          key={String(option.value)}
-          testID={`period-${option.value}`}
-          accessibilityRole="button"
-          accessibilityState={{ selected: active }}
-          accessibilityLabel={option.label}
-          onPress={() => onChange(option.value)}
-          style={({ pressed }) => [
-            styles.segment,
-            active && styles.segmentActive,
-            pressed && styles.pressed,
-          ]}
-        >
-          <Text style={[styles.segmentText, active && styles.textOnPink]}>{option.label}</Text>
-        </Pressable>
-      );
-    })}
-  </View>
 );
 
 interface StatTileProps {
@@ -203,7 +173,19 @@ export const StatisticsScreen = ({ navigation }: Props) => {
   const { stats, loading } = useStatistics(period, classId);
 
   const periodOptions = useMemo(
-    () => PERIOD_VALUES.map((value) => ({ value, label: t(PERIOD_LABEL_KEY[value]) as string })),
+    () =>
+      PERIOD_VALUES.map((value) => ({
+        value,
+        label: t(PERIOD_LABEL_KEY[value]) as string,
+        testID: `period-${value}`,
+      })),
+    [t],
+  );
+  const topOptions = useMemo<{ value: TopTab; label: string; testID: string }[]>(
+    () => [
+      { value: 'encourage', label: t('topEncourageTab') as string, testID: 'top-encourage' },
+      { value: 'reframe', label: t('topReframeTab') as string, testID: 'top-reframe' },
+    ],
     [t],
   );
   const allClassesLabel = t('allClasses') as string;
@@ -251,7 +233,12 @@ export const StatisticsScreen = ({ navigation }: Props) => {
         <WashiTape />
         <Title>{t('statisticsTitle')}</Title>
 
-        <Segmented options={periodOptions} value={period} onChange={setPeriod} />
+        <SegmentedControl
+          options={periodOptions}
+          value={period}
+          onChange={setPeriod}
+          style={styles.segmented}
+        />
 
         <Pressable
           testID="class-dropdown"
@@ -364,40 +351,12 @@ export const StatisticsScreen = ({ navigation }: Props) => {
             {/* Top 3 */}
             <Card>
               <SectionLabel>{t('statsTop3Section')}</SectionLabel>
-              <View style={styles.topTabs}>
-                <Pressable
-                  testID="top-encourage"
-                  accessibilityRole="button"
-                  accessibilityState={{ selected: topTab === 'encourage' }}
-                  accessibilityLabel={t('topEncourageTab') as string}
-                  onPress={() => setTopTab('encourage')}
-                  style={({ pressed }) => [
-                    styles.topTab,
-                    topTab === 'encourage' && styles.topTabActive,
-                    pressed && styles.pressed,
-                  ]}
-                >
-                  <Text style={[styles.topTabText, topTab === 'encourage' && styles.textOnPink]}>
-                    {t('topEncourageTab')}
-                  </Text>
-                </Pressable>
-                <Pressable
-                  testID="top-reframe"
-                  accessibilityRole="button"
-                  accessibilityState={{ selected: topTab === 'reframe' }}
-                  accessibilityLabel={t('topReframeTab') as string}
-                  onPress={() => setTopTab('reframe')}
-                  style={({ pressed }) => [
-                    styles.topTab,
-                    topTab === 'reframe' && styles.topTabActive,
-                    pressed && styles.pressed,
-                  ]}
-                >
-                  <Text style={[styles.topTabText, topTab === 'reframe' && styles.textOnPink]}>
-                    {t('topReframeTab')}
-                  </Text>
-                </Pressable>
-              </View>
+              <SegmentedControl
+                options={topOptions}
+                value={topTab}
+                onChange={setTopTab}
+                style={styles.topTabs}
+              />
               <StudentList
                 students={topStudents}
                 emptyLabel={topEmptyLabel}
@@ -428,7 +387,7 @@ export const StatisticsScreen = ({ navigation }: Props) => {
                   label={t('evoMerits') as string}
                   value={evolution.merits}
                   max={evolutionMax}
-                  color={colors.primaryPink}
+                  color={colors.pink}
                 />
                 <EvolutionBar
                   label={t('evoDetentions') as string}
@@ -535,7 +494,7 @@ export const StatisticsScreen = ({ navigation }: Props) => {
   );
 };
 
-const baseText = { fontFamily: 'PatrickHand_400Regular', color: colors.ink, letterSpacing: 0 };
+const baseText = { fontFamily: typography.regular, color: colors.ink, letterSpacing: 0 };
 const bordered = { borderColor: colors.border, borderWidth: 1.5 };
 
 const styles = StyleSheet.create({
@@ -543,26 +502,9 @@ const styles = StyleSheet.create({
   pressed: { transform: [{ scale: 0.97 }] },
   textOnPink: { color: colors.onPrimary },
 
-  // Period segmented control
-  segmented: {
-    flexDirection: 'row',
-    borderRadius: 999,
-    padding: 3,
-    gap: 2,
-    backgroundColor: colors.card,
-    marginBottom: 12,
-    ...bordered,
-  },
-  segment: {
-    flex: 1,
-    minHeight: 44,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 999,
-    paddingHorizontal: 8,
-  },
-  segmentActive: { backgroundColor: colors.pink },
-  segmentText: { ...baseText, fontSize: 17, textTransform: 'uppercase' },
+  // Shared SegmentedControl provides the pill chrome — this only adds the
+  // breathing room between it and the next section.
+  segmented: { marginBottom: 12 },
 
   // Class dropdown
   dropdown: {
@@ -627,26 +569,7 @@ const styles = StyleSheet.create({
   inlineEmpty: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 8 },
   inlineEmptyText: { ...baseText, color: colors.muted, fontSize: 18, flex: 1 },
 
-  // Top 3 tabs
-  topTabs: {
-    flexDirection: 'row',
-    borderRadius: 999,
-    padding: 3,
-    gap: 2,
-    backgroundColor: colors.card,
-    marginBottom: 12,
-    ...bordered,
-  },
-  topTab: {
-    flex: 1,
-    minHeight: 44,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 999,
-    paddingHorizontal: 8,
-  },
-  topTabActive: { backgroundColor: colors.pink },
-  topTabText: { ...baseText, fontSize: 17 },
+  topTabs: { marginBottom: 12 },
 
   // Evolution
   evoCaption: { ...baseText, color: colors.muted, fontSize: 16, marginBottom: 12 },

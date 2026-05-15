@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { getClassroomStatistics, type StatsPeriod } from '../domain/statisticsController';
+import { getClassroomStatistics, type StatsPeriod } from '../domain/statisticsService';
 import { queryKeys } from '../lib/queryClient';
 
 // The dashboard aggregates classes, students and events, so any write

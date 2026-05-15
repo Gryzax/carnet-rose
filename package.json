@@ -60,7 +60,7 @@
     "lint-staged": "^17.0.4",
     "prettier": "^3.8.3",
     "react-test-renderer": "^19.2.0",
-    "typescript": "^6.0.3"
+    "typescript": "~5.9.3"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx,json,md,yml,yaml,css}": "prettier --write"

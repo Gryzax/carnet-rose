@@ -1,7 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import {
   FlatList,
-  Modal,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -14,13 +13,14 @@ import {
 } from 'react-native';
 import { useMemo, useRef, useState } from 'react';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { colors } from '../constants/colors';
+import { colors, typography } from '../constants/colors';
 import { useT } from '../utils/i18n';
 import { useClasses } from '../hooks/useClasses';
 import { useClassMutations } from '../hooks/useClassMutations';
 import { useAllStudents } from '../hooks/useStudents';
 import { EmptyState } from '../components/EmptyState';
 import { SheetModal } from '../components/SheetModal';
+import { ConfirmDialog, DialogModal, DialogTitle } from '../components/ConfirmDialog';
 import { ProgressBar } from '../components/ProgressBar';
 import { StudentAvatar } from '../components/StudentAvatar';
 import { CROSSES_FOR_DETENTION, TICKS_FOR_MERIT } from '../constants/config';
@@ -37,7 +37,7 @@ import {
   WashiTape,
 } from '../components/Themed';
 import type { ClassesStackParamList } from '../navigation/types';
-import type { ClassSort } from '../domain/classController';
+import type { ClassSort } from '../domain/classService';
 import type { ClassWithStats, StudentWithClass } from '../types/domain';
 
 type Props = NativeStackScreenProps<ClassesStackParamList, 'ClassesHome'>;
@@ -395,74 +395,40 @@ export const ClassesScreen = ({ navigation }: Props) => {
         onClose={closeEditModal}
         onSubmit={submitEditClass}
       />
-      <Modal
-        visible={!!menuClass}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setMenuClass(null)}
-      >
-        <View style={styles.backdrop}>
-          <Card style={styles.dialog} washi>
-            <Text style={styles.modalTitle}>{menuClass?.name}</Text>
-            <PillButton
-              testID="menu-edit-class"
-              onPress={() => menuClass && openEditModal(menuClass)}
-              variant="light"
-            >
-              {t('edit')}
-            </PillButton>
-            <PillButton
-              testID="menu-delete-class"
-              onPress={() => menuClass && openDeleteModal(menuClass)}
-              variant="pink"
-            >
-              {t('delete')}
-            </PillButton>
-            <PillButton
-              testID="menu-cancel-class"
-              onPress={() => setMenuClass(null)}
-              variant="light"
-            >
-              {t('cancel')}
-            </PillButton>
-          </Card>
-        </View>
-      </Modal>
-      <Modal
+      <DialogModal visible={!!menuClass} onRequestClose={() => setMenuClass(null)}>
+        <DialogTitle>{menuClass?.name}</DialogTitle>
+        <PillButton
+          testID="menu-edit-class"
+          onPress={() => menuClass && openEditModal(menuClass)}
+          variant="light"
+        >
+          {t('edit')}
+        </PillButton>
+        <PillButton
+          testID="menu-delete-class"
+          onPress={() => menuClass && openDeleteModal(menuClass)}
+          variant="pink"
+        >
+          {t('delete')}
+        </PillButton>
+        <PillButton testID="menu-cancel-class" onPress={() => setMenuClass(null)} variant="light">
+          {t('cancel')}
+        </PillButton>
+      </DialogModal>
+      <ConfirmDialog
         visible={!!classToDelete}
-        transparent
-        animationType="fade"
-        onRequestClose={closeDeleteModal}
-      >
-        <View style={styles.backdrop}>
-          <Card style={styles.dialog} washi>
-            <Text style={styles.modalTitle}>{t('deleteClassTitle')}</Text>
-            <Text style={styles.modalStrong}>{classToDelete?.name}</Text>
-            <Text style={styles.modalText}>{t('deleteClassMessage')}</Text>
-            {!!deleteError && <Text style={styles.error}>{deleteError}</Text>}
-            <View style={styles.actions}>
-              <PillButton
-                testID="cancel-delete-class"
-                disabled={deleting}
-                onPress={closeDeleteModal}
-                variant="light"
-                style={styles.actionButton}
-              >
-                {t('cancel')}
-              </PillButton>
-              <PillButton
-                testID="confirm-delete-class"
-                disabled={deleting}
-                onPress={confirmDeleteClass}
-                variant="pink"
-                style={styles.actionButton}
-              >
-                {deleting ? t('deleting') : t('delete')}
-              </PillButton>
-            </View>
-          </Card>
-        </View>
-      </Modal>
+        title={t('deleteClassTitle') as string}
+        emphasis={classToDelete?.name}
+        message={t('deleteClassMessage') as string}
+        error={deleteError || undefined}
+        cancelLabel={t('cancel') as string}
+        confirmLabel={(deleting ? t('deleting') : t('delete')) as string}
+        onCancel={closeDeleteModal}
+        onConfirm={confirmDeleteClass}
+        busy={deleting}
+        cancelTestID="cancel-delete-class"
+        confirmTestID="confirm-delete-class"
+      />
     </Screen>
   );
 };
@@ -573,12 +539,12 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     borderWidth: 1.5,
     paddingHorizontal: 14,
-    minHeight: 38,
+    minHeight: 44,
     alignItems: 'center',
     justifyContent: 'center',
   },
   chipActive: { backgroundColor: colors.pink },
-  chipText: { fontFamily: 'PatrickHand_400Regular', fontSize: 17, color: colors.ink },
+  chipText: { fontFamily: typography.regular, fontSize: 17, color: colors.ink },
   chipTextActive: { color: colors.white },
   classWrap: { flex: 1 },
   classPressable: { flex: 1 },
@@ -593,31 +559,31 @@ const styles = StyleSheet.create({
   },
   classTitle: {
     flex: 1,
-    fontFamily: 'PatrickHand_400Regular',
+    fontFamily: typography.regular,
     fontSize: 28,
     color: colors.ink,
     lineHeight: 32,
   },
   line: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 8 },
-  meta: { fontFamily: 'PatrickHand_400Regular', color: colors.muted, fontSize: 18 },
+  meta: { fontFamily: typography.regular, color: colors.muted, fontSize: 18 },
   stats: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 10 },
   resultWrap: { flex: 1 },
   resultCard: { margin: 6, gap: 4 },
   resultHeader: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 6 },
   resultNameBlock: { flex: 1, gap: 2 },
   resultName: {
-    fontFamily: 'PatrickHand_400Regular',
+    fontFamily: typography.regular,
     fontSize: 24,
     color: colors.ink,
     lineHeight: 28,
   },
   resultRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 6 },
   resultMetric: { width: 70, textAlign: 'center' },
-  resultCount: { fontFamily: 'PatrickHand_400Regular', color: colors.ink, fontSize: 18, width: 40 },
+  resultCount: { fontFamily: typography.regular, color: colors.ink, fontSize: 18, width: 40 },
   fab: {
     position: 'absolute',
     right: 20,
-    bottom: 116,
+    bottom: 92,
     backgroundColor: colors.pink,
     borderColor: colors.border,
     borderWidth: 1.5,
@@ -628,18 +594,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   pressed: { transform: [{ scale: 0.97 }] },
-  backdrop: { flex: 1, backgroundColor: colors.scrim, justifyContent: 'center', padding: 20 },
   sheet: { marginBottom: 0, gap: 16 },
-  dialog: { gap: 12 },
-  modalTitle: { fontFamily: 'PatrickHand_400Regular', fontSize: 28, color: colors.ink },
-  modalStrong: { fontFamily: 'PatrickHand_400Regular', fontSize: 22, color: colors.ink },
-  modalText: {
-    fontFamily: 'PatrickHand_400Regular',
-    fontSize: 19,
-    color: colors.muted,
-    lineHeight: 24,
-  },
-  error: { fontFamily: 'PatrickHand_400Regular', fontSize: 18, color: colors.dangerRed },
+  modalTitle: { fontFamily: typography.regular, fontSize: 28, color: colors.ink },
+  error: { fontFamily: typography.regular, fontSize: 18, color: colors.dangerRed },
   actions: { flexDirection: 'row', gap: 10 },
   actionButton: { flex: 1 },
 });

@@ -3,10 +3,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { colors } from '../constants/colors';
+import { colors, typography } from '../constants/colors';
 import { useT } from '../utils/i18n';
 import { LANGUAGE_LABELS, SUPPORTED_LANGUAGES } from '../constants/i18n';
-import type { IoniconName } from '../components/Themed';
+import { WashiTape, type IoniconName } from '../components/Themed';
 import type { AuthStackParamList } from '../navigation/types';
 
 export type LandingScreenProps = NativeStackScreenProps<AuthStackParamList, 'Landing'>;
@@ -45,7 +45,7 @@ export const LandingScreen = ({ navigation }: LandingScreenProps) => {
 
   return (
     <SafeAreaView style={styles.screen}>
-      <View style={styles.washi} />
+      <WashiTape style={styles.washi} />
 
       {/* Corner language switcher — a fallback in case auto-detection got it wrong. */}
       <View style={styles.langSwitcher}>
@@ -137,22 +137,13 @@ export const LandingScreen = ({ navigation }: LandingScreenProps) => {
   );
 };
 
-const baseText = { fontFamily: 'PatrickHand_400Regular', color: colors.ink, letterSpacing: 0 };
+const baseText = { fontFamily: typography.regular, color: colors.ink, letterSpacing: 0 };
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.canvas },
-  washi: {
-    position: 'absolute',
-    top: 64,
-    right: -22,
-    width: 148,
-    height: 30,
-    borderRadius: 3,
-    backgroundColor: colors.orange,
-    opacity: 0.28,
-    transform: [{ rotate: '-8deg' }],
-    pointerEvents: 'none',
-  },
+  // Overrides the shared WashiTape default (top:14 right:-18) so the strip
+  // clears the floating language switcher at the top-right.
+  washi: { top: 64, right: -22, width: 148, height: 30 },
   langSwitcher: {
     position: 'absolute',
     top: 12,
@@ -165,7 +156,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    minHeight: 36,
+    minHeight: 44,
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 10,
@@ -187,7 +178,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    minHeight: 36,
+    minHeight: 44,
     borderRadius: 8,
     paddingHorizontal: 10,
     paddingVertical: 6,

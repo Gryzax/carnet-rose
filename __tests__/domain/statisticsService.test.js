@@ -5,7 +5,7 @@ jest.mock('../../models/historyModel', () => ({
   getAllArchives: jest.fn(),
 }));
 
-import { getClassroomStatistics } from '../../domain/statisticsController';
+import { getClassroomStatistics } from '../../domain/statisticsService';
 import { getClasses } from '../../models/classModel';
 import { getAllStudents } from '../../models/studentModel';
 import { getAllArchives, getAllEvents } from '../../models/historyModel';

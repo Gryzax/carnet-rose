@@ -10,7 +10,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { colors } from '../constants/colors';
+import { colors, typography } from '../constants/colors';
 import {
   consumePendingAuthError,
   getCurrentUser,
@@ -19,7 +19,7 @@ import {
 } from '../services/auth/authService';
 import { isSupabaseConfigured } from '../services/supabase/supabaseClient';
 import { useT } from '../utils/i18n';
-import type { IoniconName } from '../components/Themed';
+import { WashiTape, type IoniconName } from '../components/Themed';
 import type { AuthUser } from '../types/services';
 
 export interface LoginScreenProps {
@@ -112,7 +112,7 @@ export const LoginScreen = ({ onAuthenticated }: LoginScreenProps) => {
 
   return (
     <SafeAreaView style={styles.screen}>
-      <View style={styles.washi} />
+      <WashiTape style={styles.washi} />
       <View style={styles.wrap}>
         <View style={[styles.card, compact && styles.cardCompact]}>
           <View style={styles.logo}>
@@ -157,22 +157,13 @@ export const LoginScreen = ({ onAuthenticated }: LoginScreenProps) => {
   );
 };
 
-const baseText = { fontFamily: 'PatrickHand_400Regular', color: colors.ink, letterSpacing: 0 };
+const baseText = { fontFamily: typography.regular, color: colors.ink, letterSpacing: 0 };
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.canvas },
-  washi: {
-    position: 'absolute',
-    top: 64,
-    right: -22,
-    width: 148,
-    height: 30,
-    borderRadius: 3,
-    backgroundColor: colors.orange,
-    opacity: 0.28,
-    transform: [{ rotate: '-8deg' }],
-    pointerEvents: 'none',
-  },
+  // Overrides the shared WashiTape default (top:14) so it clears the top
+  // edge of the auth card.
+  washi: { top: 64, right: -22, width: 148, height: 30 },
   wrap: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 16 },
   card: {
     width: '100%',

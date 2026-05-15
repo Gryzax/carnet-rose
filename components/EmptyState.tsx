@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, Text, View } from 'react-native';
-import { colors } from '../constants/colors';
+import { colors, typography } from '../constants/colors';
 import { Card, PillButton, type IoniconName } from './Themed';
 
 export interface EmptyStateProps {
@@ -48,13 +48,13 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   title: {
-    fontFamily: 'PatrickHand_400Regular',
+    fontFamily: typography.regular,
     color: colors.ink,
     fontSize: 26,
     textAlign: 'center',
   },
   message: {
-    fontFamily: 'PatrickHand_400Regular',
+    fontFamily: typography.regular,
     color: colors.muted,
     fontSize: 19,
     textAlign: 'center',

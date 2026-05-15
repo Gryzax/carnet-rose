@@ -1,8 +1,8 @@
 import { fireEvent, render, waitFor } from '../../test-utils/render';
 import { StatisticsScreen } from '../../screens/StatisticsScreen';
-import { getClassroomStatistics } from '../../domain/statisticsController';
+import { getClassroomStatistics } from '../../domain/statisticsService';
 
-jest.mock('../../domain/statisticsController', () => ({
+jest.mock('../../domain/statisticsService', () => ({
   getClassroomStatistics: jest.fn(),
 }));
 

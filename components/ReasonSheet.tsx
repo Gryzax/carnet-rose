@@ -1,7 +1,7 @@
 import { Animated, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useEffect, useRef } from 'react';
-import { colors } from '../constants/colors';
-import { Sparkle } from './Themed';
+import { colors, typography } from '../constants/colors';
+import { CardTape, Sparkle } from './Themed';
 import { useT } from '../utils/i18n';
 import { USE_NATIVE_DRIVER } from '../utils/animation';
 
@@ -36,7 +36,7 @@ export const ReasonSheet = ({ visible, reasons, onSelect, onClose }: ReasonSheet
         testID="reason-sheet"
         style={[styles.sheet, { transform: [{ translateY: y }] }]}
       >
-        <View style={styles.washi} />
+        <CardTape />
         <Text accessibilityRole="header" style={styles.title}>
           {t('chooseReason')}
         </Text>
@@ -78,18 +78,7 @@ const styles = StyleSheet.create({
     padding: 18,
   },
   reasonList: { maxHeight: 420 },
-  washi: {
-    position: 'absolute',
-    top: -10,
-    alignSelf: 'center',
-    width: 88,
-    height: 24,
-    borderRadius: 3,
-    backgroundColor: colors.orange,
-    opacity: 0.84,
-    transform: [{ rotate: '4deg' }],
-  },
-  title: { fontFamily: 'PatrickHand_400Regular', color: colors.ink, fontSize: 28, marginBottom: 8 },
+  title: { fontFamily: typography.regular, color: colors.ink, fontSize: 28, marginBottom: 8 },
   item: {
     minHeight: 48,
     paddingVertical: 10,
@@ -99,6 +88,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
   },
-  itemText: { fontFamily: 'PatrickHand_400Regular', fontSize: 20, color: colors.ink, flex: 1 },
-  pressed: { transform: [{ scale: 0.98 }] },
+  itemText: { fontFamily: typography.regular, fontSize: 20, color: colors.ink, flex: 1 },
+  pressed: { transform: [{ scale: 0.97 }] },
 });

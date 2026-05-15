@@ -34,19 +34,19 @@ test('couleurs selon etat', () => {
   expect(getStudentStateColor({ ticks: 3, crosses: 0 })).toBe(colors.successGreen);
   expect(getStudentStateColor({ ticks: 0, crosses: 3 })).toBe(colors.dangerRed);
   expect(getStudentStateColor({ ticks: 0, crosses: 2 })).toBe(colors.warningOrange);
-  expect(getStudentStateColor({ ticks: 0, crosses: 0 })).toBe(colors.primaryPink);
+  expect(getStudentStateColor({ ticks: 0, crosses: 0 })).toBe(colors.pink);
 });
 
 test('progress bars', () => {
   // Without a `label` the bar is decorative and hidden from the a11y tree.
-  const { getByTestId } = render(<ProgressBar value={2} max={4} color={colors.primaryPink} />);
+  const { getByTestId } = render(<ProgressBar value={2} max={4} color={colors.pink} />);
   expect(getByTestId('progress-track', { includeHiddenElements: true })).toBeTruthy();
   expect(getByTestId('progress-fill', { includeHiddenElements: true })).toBeTruthy();
 });
 
 test('progress bar with label is exposed to screen readers', () => {
   const { getByRole } = render(
-    <ProgressBar value={2} max={4} color={colors.primaryPink} label="Ticks 2/4" />,
+    <ProgressBar value={2} max={4} color={colors.pink} label="Ticks 2/4" />,
   );
   const bar = getByRole('progressbar');
   expect(bar.props.accessibilityValue).toEqual({ min: 0, max: 4, now: 2 });

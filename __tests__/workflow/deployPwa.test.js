@@ -8,7 +8,7 @@ test('workflow PWA expose les variables Supabase au build', () => {
   );
 
   expect(workflow).toContain('EXPO_PUBLIC_SUPABASE_URL: ${{ vars.EXPO_PUBLIC_SUPABASE_URL }}');
-  expect(workflow).toContain('EXPO_PUBLIC_SUPABASE_KEY: ${{ secrets.EXPO_PUBLIC_SUPABASE_KEY }}');
+  expect(workflow).toContain('EXPO_PUBLIC_SUPABASE_KEY: ${{ vars.EXPO_PUBLIC_SUPABASE_KEY }}');
   expect(workflow).toContain('EXPO_PUBLIC_APP_URL: ${{ vars.EXPO_PUBLIC_APP_URL }}');
   expect(workflow).toContain('npx expo export --platform web');
 });

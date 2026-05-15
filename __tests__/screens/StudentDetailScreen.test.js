@@ -50,7 +50,7 @@ jest.mock('../../components/UndoSnackbar', () => ({
   },
 }));
 
-jest.mock('../../domain/studentController', () => ({
+jest.mock('../../domain/studentService', () => ({
   addTick: jest.fn((student) =>
     Promise.resolve({ student: { ...student, ticks: 1 }, meritObtained: false }),
   ),
@@ -61,7 +61,7 @@ jest.mock('../../domain/studentController', () => ({
   deleteEvent: jest.fn(() => Promise.resolve()),
 }));
 
-import { addTick } from '../../domain/studentController';
+import { addTick } from '../../domain/studentService';
 
 beforeEach(() => jest.clearAllMocks());
 

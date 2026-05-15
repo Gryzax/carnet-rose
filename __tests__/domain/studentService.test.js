@@ -24,7 +24,7 @@ import {
   addTick,
   resetTrimester,
   undoLastAction,
-} from '../../domain/studentController';
+} from '../../domain/studentService';
 import { getAllStudents, getStudentById } from '../../models/studentModel';
 import { getLastActiveEvent } from '../../models/historyModel';
 import { saveStudent } from '../../repositories/studentRepository';

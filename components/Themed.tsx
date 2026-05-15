@@ -53,6 +53,13 @@ export const WashiTape = ({ style }: { style?: StyleProp<ViewStyle> }) => (
   <View style={[styles.washi, styles.washiTop, style]} />
 );
 
+// A short tape strip overlapping the top edge of a card-shaped surface, centered
+// by default. <Card washi> already renders this; standalone sheets and bespoke
+// surfaces can render it themselves to keep the strip consistent.
+export const CardTape = ({ style }: { style?: StyleProp<ViewStyle> }) => (
+  <View style={[styles.cardWashi, style]} />
+);
+
 export const Title = ({
   children,
   style,
@@ -148,13 +155,9 @@ export const PillButton = ({
       style,
     ]}
   >
-    <Text
-      style={[
-        styles.buttonText,
-        (variant === 'pink' || variant === 'orange' || variant === 'danger') &&
-          styles.buttonTextOnPink,
-      ]}
-    >
+    {/* Only bright pink clears WCAG AA with white text. Orange (#E79360) and
+        danger (#C05C6B) fail it, so they keep the default ink text. */}
+    <Text style={[styles.buttonText, variant === 'pink' && styles.buttonTextOnPink]}>
       {children}
     </Text>
   </Pressable>
@@ -190,6 +193,9 @@ export const IconButton = ({
 export interface SegmentOption<V extends string | number> {
   value: V;
   label: string;
+  // Optional per-segment testID so a parent screen can assert against a
+  // specific segment in tests.
+  testID?: string;
 }
 
 export const SegmentedControl = <V extends string | number>({
@@ -209,9 +215,11 @@ export const SegmentedControl = <V extends string | number>({
       return (
         <Pressable
           key={option.value}
+          testID={option.testID}
           onPress={() => onChange(option.value)}
           accessibilityRole="button"
           accessibilityState={{ selected: active }}
+          accessibilityLabel={option.label}
           style={({ pressed }) => [
             styles.segment,
             active && styles.segmentActive,
@@ -299,10 +307,13 @@ const styles = StyleSheet.create({
   // No horizontal padding here: screens add it on their own scroll content so
   // that full-bleed rows (e.g. swipe-to-delete) can reach the screen edges.
   screen: { flex: 1, backgroundColor: colors.canvas, paddingBottom: spacing.md },
+  // Screen-corner tape — full opacity (matches DESIGN.md 84% spec). Sits at the
+  // top edge so floating chrome (back button, language switcher) can overlap.
   washi: {
     position: 'absolute',
     backgroundColor: colors.orange,
-    opacity: 0.28,
+    opacity: 0.84,
+    borderRadius: 3,
     transform: [{ rotate: '-8deg' }],
     pointerEvents: 'none',
   },

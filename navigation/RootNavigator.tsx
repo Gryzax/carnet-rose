@@ -1,11 +1,16 @@
 import { Ionicons } from '@expo/vector-icons';
-import {
-  BottomTabBar,
-  createBottomTabNavigator,
-  type BottomTabBarProps,
-} from '@react-navigation/bottom-tabs';
+import { createBottomTabNavigator, type BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { ActivityIndicator, Text, View } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import {
+  AccessibilityInfo,
+  ActivityIndicator,
+  Animated,
+  Easing,
+  type LayoutChangeEvent,
+  Pressable,
+  View,
+} from 'react-native';
 import { colors } from '../constants/colors';
 import { ClassesScreen } from '../screens/ClassesScreen';
 import { ClassDashboardScreen } from '../screens/ClassDashboardScreen';
@@ -63,93 +68,227 @@ export const AuthStack = ({ onAuthenticated }: AuthStackProps) => {
   );
 };
 
-// Solid canvas-colored strip covering the bottom half of the floating tab
-// bar down to the screen edge. Content can still slide behind the bar's
-// opaque top half, but nothing peeks past its midline or through the gaps.
-// Height = bottom offset (12) + half the bar height (80 / 2).
-const AppTabBar = (props: BottomTabBarProps) => (
-  <>
-    <View
-      style={{
-        position: 'absolute',
-        left: 0,
-        right: 0,
-        bottom: 0,
-        height: 52,
-        backgroundColor: colors.canvas,
-        pointerEvents: 'none',
-      }}
-    />
-    <BottomTabBar {...props} />
-  </>
-);
-
 const TAB_ICONS: Record<keyof AppTabsParamList, IoniconName> = {
   Classes: 'albums-outline',
   Statistics: 'bar-chart-outline',
   Settings: 'settings-outline',
 };
 
+// Custom tab bar with a single pink-soft indicator that slides between cells.
+// Replaces React Navigation's BottomTabBar so we can share one moving layer
+// across all tabs instead of toggling per-cell fills. Outer canvas strip
+// preserves the visual seal between the floating bar and the screen edge.
+const TAB_BAR_HEIGHT = 60;
+const TAB_BAR_BOTTOM = 12;
+const TAB_BAR_INSET = 16;
+const INDICATOR_ANIM_MS = 220;
+
+const AppTabBar = ({ state, descriptors, navigation }: BottomTabBarProps) => {
+  const routeCount = state.routes.length;
+  const [innerWidth, setInnerWidth] = useState(0);
+  const cellWidth = innerWidth > 0 ? innerWidth / routeCount : 0;
+
+  const indicatorX = useRef(new Animated.Value(0)).current;
+  const hasLaidOutRef = useRef(false);
+  const [reduceMotion, setReduceMotion] = useState(false);
+
+  // Per-tab focus value (0 = inactive, 1 = active). Drives icon color
+  // cross-fade on the same curve as the indicator slide.
+  const focusValues = useRef(
+    state.routes.map((_, i) => new Animated.Value(i === state.index ? 1 : 0)),
+  ).current;
+  // Per-tab press scale.
+  const pressValues = useRef(state.routes.map(() => new Animated.Value(1))).current;
+
+  useEffect(() => {
+    let mounted = true;
+    AccessibilityInfo.isReduceMotionEnabled().then((flag) => {
+      if (mounted) setReduceMotion(flag);
+    });
+    const sub = AccessibilityInfo.addEventListener('reduceMotionChanged', setReduceMotion);
+    return () => {
+      mounted = false;
+      sub.remove();
+    };
+  }, []);
+
+  // Slide indicator when active index changes. First layout snaps without
+  // animation so the indicator appears under the initial tab.
+  useEffect(() => {
+    if (cellWidth === 0) return;
+    const target = state.index * cellWidth;
+    if (!hasLaidOutRef.current || reduceMotion) {
+      indicatorX.setValue(target);
+      hasLaidOutRef.current = true;
+    } else {
+      Animated.timing(indicatorX, {
+        toValue: target,
+        duration: INDICATOR_ANIM_MS,
+        easing: Easing.out(Easing.exp),
+        useNativeDriver: true,
+      }).start();
+    }
+
+    focusValues.forEach((value: Animated.Value, i) => {
+      const focusTarget = i === state.index ? 1 : 0;
+      if (reduceMotion) {
+        value.setValue(focusTarget);
+        return;
+      }
+      Animated.timing(value, {
+        toValue: focusTarget,
+        duration: INDICATOR_ANIM_MS,
+        easing: Easing.out(Easing.exp),
+        useNativeDriver: false,
+      }).start();
+    });
+  }, [cellWidth, state.index, reduceMotion, indicatorX, focusValues]);
+
+  const onBarLayout = (e: LayoutChangeEvent) => {
+    const w = e.nativeEvent.layout.width;
+    if (w !== innerWidth) setInnerWidth(w);
+  };
+
+  return (
+    <>
+      {/* Solid canvas strip sealing the bottom edge behind the floating bar. */}
+      <View
+        style={{
+          position: 'absolute',
+          left: 0,
+          right: 0,
+          bottom: 0,
+          height: TAB_BAR_BOTTOM + TAB_BAR_HEIGHT / 2,
+          backgroundColor: colors.canvas,
+          pointerEvents: 'none',
+        }}
+      />
+      <View
+        onLayout={onBarLayout}
+        style={{
+          position: 'absolute',
+          left: TAB_BAR_INSET,
+          right: TAB_BAR_INSET,
+          bottom: TAB_BAR_BOTTOM,
+          height: TAB_BAR_HEIGHT,
+          flexDirection: 'row',
+          backgroundColor: colors.white,
+          borderColor: colors.border,
+          borderWidth: 1.5,
+          borderRadius: 999,
+          overflow: 'hidden',
+          elevation: 2,
+          boxShadow: `0px 0px 6px ${colors.ink}0F`,
+        }}
+      >
+        {cellWidth > 0 && (
+          <Animated.View
+            pointerEvents="none"
+            style={{
+              position: 'absolute',
+              top: 0,
+              bottom: 0,
+              left: 0,
+              width: cellWidth,
+              backgroundColor: colors.lightPink,
+              transform: [{ translateX: indicatorX }],
+            }}
+          />
+        )}
+
+        {state.routes.map((route, index) => {
+          const focused = state.index === index;
+          const options = descriptors[route.key]?.options;
+          const accessibilityLabel =
+            options?.tabBarAccessibilityLabel ??
+            (options?.title as string | undefined) ??
+            route.name;
+          const iconName = TAB_ICONS[route.name as keyof AppTabsParamList];
+          const focusValue = focusValues[index]!;
+          const pressValue = pressValues[index]!;
+
+          const iconColor = focusValue.interpolate({
+            inputRange: [0, 1],
+            outputRange: [colors.muted, colors.ink],
+          });
+
+          const onPress = () => {
+            const event = navigation.emit({
+              type: 'tabPress',
+              target: route.key,
+              canPreventDefault: true,
+            });
+            if (!focused && !event.defaultPrevented) {
+              navigation.navigate(route.name as never);
+            }
+          };
+
+          const onLongPress = () => {
+            navigation.emit({ type: 'tabLongPress', target: route.key });
+          };
+
+          const pressIn = () => {
+            Animated.timing(pressValue, {
+              toValue: 0.97,
+              duration: 90,
+              easing: Easing.out(Easing.quad),
+              useNativeDriver: true,
+            }).start();
+          };
+
+          const pressOut = () => {
+            Animated.timing(pressValue, {
+              toValue: 1,
+              duration: 140,
+              easing: Easing.out(Easing.exp),
+              useNativeDriver: true,
+            }).start();
+          };
+
+          return (
+            <Pressable
+              key={route.key}
+              accessibilityRole="tab"
+              accessibilityState={{ selected: focused }}
+              accessibilityLabel={accessibilityLabel}
+              onPress={onPress}
+              onLongPress={onLongPress}
+              onPressIn={pressIn}
+              onPressOut={pressOut}
+              style={{ flex: 1 }}
+            >
+              <Animated.View
+                style={{
+                  flex: 1,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transform: [{ scale: pressValue }],
+                }}
+              >
+                <AnimatedIonicon name={iconName} size={24} color={iconColor} />
+              </Animated.View>
+            </Pressable>
+          );
+        })}
+      </View>
+    </>
+  );
+};
+
+// Ionicons isn't an Animated component out of the box. Wrap once so the icon
+// color can ride the focus interpolation without re-rendering every frame.
+const AnimatedIonicon = Animated.createAnimatedComponent(Ionicons);
+
 export interface AppTabsProps {
   onSignedOut: () => void;
 }
-
-const TAB_LABEL_KEYS: Record<
-  keyof AppTabsParamList,
-  'tabClasses' | 'tabStatistics' | 'tabSettings'
-> = {
-  Classes: 'tabClasses',
-  Statistics: 'tabStatistics',
-  Settings: 'tabSettings',
-};
 
 export const AppTabs = ({ onSignedOut }: AppTabsProps) => {
   const { t } = useT();
   return (
     <Tabs.Navigator
       tabBar={(props) => <AppTabBar {...props} />}
-      screenOptions={({ route }) => ({
-        headerShown: false,
-        tabBarActiveTintColor: colors.ink,
-        tabBarInactiveTintColor: colors.muted,
-        // Render the label ourselves: react-native-web puts `overflow: hidden`
-        // on the default (numberOfLines={1}) label, which clips PatrickHand's
-        // deep descenders (the "g" in "Réglages"). A plain Text has no clip.
-        tabBarLabel: ({ color }) => (
-          <Text
-            style={{
-              fontFamily: 'PatrickHand_400Regular',
-              fontSize: 14,
-              lineHeight: 26,
-              color,
-            }}
-          >
-            {t(TAB_LABEL_KEYS[route.name]) as string}
-          </Text>
-        ),
-        tabBarItemStyle: { borderRadius: 999, marginVertical: 8, paddingVertical: 4 },
-        tabBarStyle: {
-          position: 'absolute',
-          left: 16,
-          right: 16,
-          bottom: 12,
-          backgroundColor: colors.white,
-          borderColor: colors.border,
-          borderTopColor: colors.border,
-          borderWidth: 1.5,
-          borderTopWidth: 1.5,
-          borderRadius: 999,
-          overflow: 'hidden',
-          elevation: 2,
-          boxShadow: `0px 0px 6px ${colors.ink}0F`,
-          height: 80,
-          paddingTop: 0,
-          paddingBottom: 0,
-        },
-        tabBarIcon: ({ color, size }) => (
-          <Ionicons name={TAB_ICONS[route.name]} size={size} color={color} />
-        ),
-      })}
+      screenOptions={{ headerShown: false }}
     >
       <Tabs.Screen
         name="Classes"

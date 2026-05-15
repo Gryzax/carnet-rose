@@ -1,5 +1,5 @@
 import { useMutation } from '@tanstack/react-query';
-import { addClass, deleteClass, markClassUsed, updateClass } from '../domain/classController';
+import { addClass, deleteClass, markClassUsed, updateClass } from '../domain/classService';
 import type { ClassRow } from '../types/domain';
 
 // Class write operations as TanStack mutations. The class repository already

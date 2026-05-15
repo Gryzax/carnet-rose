@@ -5,7 +5,7 @@ import {
   updateStudent,
   type AddStudentInput,
   type EditStudentInput,
-} from '../domain/studentController';
+} from '../domain/studentService';
 import type { StudentRow } from '../types/domain';
 
 // Student write operations as TanStack mutations. Cache invalidation is handled

@@ -1,6 +1,6 @@
 import { Animated, StyleSheet, Text } from 'react-native';
 import { useEffect, useRef } from 'react';
-import { colors } from '../constants/colors';
+import { colors, typography } from '../constants/colors';
 import { PillButton } from './Themed';
 import { useT } from '../utils/i18n';
 import { USE_NATIVE_DRIVER } from '../utils/animation';
@@ -55,6 +55,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     gap: 12,
   },
-  text: { color: colors.ink, fontFamily: 'PatrickHand_400Regular', flex: 1, fontSize: 18 },
+  text: { color: colors.ink, fontFamily: typography.regular, flex: 1, fontSize: 18 },
   undo: { minHeight: 44, paddingVertical: 6 },
 });

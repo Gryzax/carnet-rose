@@ -16,18 +16,18 @@ jest.mock('../../hooks/useStudents', () => ({
   useStudents: jest.fn(() => ({ students: [student], refresh: mockRefresh })),
 }));
 
-jest.mock('../../domain/studentController', () => ({
+jest.mock('../../domain/studentService', () => ({
   addStudent: jest.fn(() => Promise.resolve({ lastInsertRowId: 2 })),
   deleteStudent: jest.fn(() => Promise.resolve()),
   updateStudent: jest.fn(() => Promise.resolve()),
 }));
 
-jest.mock('../../domain/classController', () => ({
+jest.mock('../../domain/classService', () => ({
   markClassUsed: jest.fn(() => Promise.resolve()),
 }));
 
-import { addStudent, deleteStudent, updateStudent } from '../../domain/studentController';
-import { markClassUsed } from '../../domain/classController';
+import { addStudent, deleteStudent, updateStudent } from '../../domain/studentService';
+import { markClassUsed } from '../../domain/classService';
 
 beforeEach(() => jest.clearAllMocks());
 

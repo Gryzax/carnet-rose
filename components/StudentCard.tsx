@@ -1,11 +1,11 @@
 import { memo, useEffect, useRef } from 'react';
 import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors } from '../constants/colors';
+import { colors, typography } from '../constants/colors';
 import { CROSSES_FOR_DETENTION, TICKS_FOR_MERIT } from '../constants/config';
 import { ProgressBar } from './ProgressBar';
 import { StudentAvatar, getStudentAvatarColor, type StudentLike } from './StudentAvatar';
-import { CatMascot, Pill, Sparkle } from './Themed';
+import { CardTape, CatMascot, Pill, Sparkle } from './Themed';
 import { useT } from '../utils/i18n';
 import { USE_NATIVE_DRIVER } from '../utils/animation';
 import type { StudentRow } from '../types/domain';
@@ -43,7 +43,8 @@ const StudentCardBase = ({ student, onPress, onMenu }: StudentCardProps) => {
         onPress={onPress}
         style={({ pressed }) => [styles.card, pressed && styles.pressed]}
       >
-        <View style={styles.washi} />
+        {/* Bookmarked-tape variant: corner-anchored, not centered. */}
+        <CardTape style={styles.washi} />
         <CatMascot />
         <View style={styles.header}>
           <StudentAvatar student={student} />
@@ -129,22 +130,21 @@ const styles = StyleSheet.create({
     padding: 16,
     marginBottom: 12,
   },
+  // Overrides the default centered placement of CardTape: bookmarked at the
+  // top-left corner instead.
   washi: {
-    position: 'absolute',
     top: -9,
     left: 24,
+    alignSelf: 'flex-start',
     width: 76,
     height: 22,
-    borderRadius: 3,
-    backgroundColor: colors.orange,
-    opacity: 0.82,
     transform: [{ rotate: '-5deg' }],
   },
   pressed: { transform: [{ scale: 0.97 }] },
   header: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 12 },
   nameBlock: { flex: 1 },
   nameRow: { flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' },
-  name: { fontFamily: 'PatrickHand_400Regular', fontSize: 23, color: colors.ink, lineHeight: 27 },
+  name: { fontFamily: typography.regular, fontSize: 23, color: colors.ink, lineHeight: 27 },
   alertBadge: {
     width: 22,
     height: 22,
@@ -169,8 +169,8 @@ const styles = StyleSheet.create({
   },
   row: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 8 },
   metric: { width: 92, textAlign: 'center' },
-  count: { fontFamily: 'PatrickHand_400Regular', color: colors.ink, fontSize: 18, width: 38 },
+  count: { fontFamily: typography.regular, color: colors.ink, fontSize: 18, width: 38 },
   badges: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginTop: 12 },
   badgeRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  badge: { fontFamily: 'PatrickHand_400Regular', color: colors.ink, fontSize: 17 },
+  badge: { fontFamily: typography.regular, color: colors.ink, fontSize: 17 },
 });
