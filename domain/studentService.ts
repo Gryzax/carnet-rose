@@ -1,6 +1,6 @@
 import { UNDO_LIMIT_SECONDS } from '../constants/config';
 import { getThresholds } from '../utils/thresholds';
-import { getLastActiveEvent } from '../models/historyModel';
+import { getAllEvents, getLastActiveEvent } from '../models/historyModel';
 import { getAllStudents, getStudentById } from '../models/studentModel';
 import { removeStudent, saveStudent } from '../repositories/studentRepository';
 import { touchClass } from '../repositories/classRepository';
@@ -56,21 +56,26 @@ const buildEvent = (
   type: EventRow['type'],
   reason: string,
   next: StudentRow,
-): EventRow => ({
-  id: uuid(),
-  studentId: student.id,
-  type,
-  reason: reason || null,
-  trimester: student.currentTrimester,
-  createdAt: nowIso(),
-  previousTicks: student.ticks,
-  previousCrosses: student.crosses,
-  newTicks: next.ticks,
-  newCrosses: next.crosses,
-  previousForgets: student.forgets,
-  newForgets: next.forgets,
-  cancelled: 0,
-});
+): EventRow => {
+  const { ticksForMerit, crossesForDetention } = getThresholds();
+  return {
+    id: uuid(),
+    studentId: student.id,
+    type,
+    reason: reason || null,
+    trimester: student.currentTrimester,
+    createdAt: nowIso(),
+    previousTicks: student.ticks,
+    previousCrosses: student.crosses,
+    newTicks: next.ticks,
+    newCrosses: next.crosses,
+    previousForgets: student.forgets,
+    newForgets: next.forgets,
+    cancelled: 0,
+    ticksForMerit,
+    crossesForDetention,
+  };
+};
 
 export const addTick = async (student: StudentRow, reason = ''): Promise<TickResult> => {
   const next: StudentRow = { ...student, ticks: student.ticks + 1 };
@@ -127,9 +132,63 @@ export const undoLastAction = async (studentId: string): Promise<UndoResult> => 
   return { cancelled: true, student: restored };
 };
 
+// Recomputes a student's counters from scratch by replaying every non-cancelled
+// event of their current trimester in chronological order, using the current
+// thresholds. Used after deleting a history entry so the displayed counters
+// stay consistent even when the removed event triggered a rollover.
+const replayStudentCounters = async (studentId: string): Promise<void> => {
+  const student = await getStudentById(studentId);
+  if (!student) return;
+  const events = await getAllEvents();
+  const trimesterEvents = events
+    .filter(
+      (e) =>
+        e.studentId === studentId && e.trimester === student.currentTrimester && e.cancelled === 0,
+    )
+    .sort((a, b) => String(a.createdAt).localeCompare(String(b.createdAt)));
+  const fallback = getThresholds();
+  let ticks = 0;
+  let crosses = 0;
+  let forgets = 0;
+  let merits = 0;
+  let detentions = 0;
+  for (const event of trimesterEvents) {
+    const tickThreshold = event.ticksForMerit ?? fallback.ticksForMerit;
+    const crossThreshold = event.crossesForDetention ?? fallback.crossesForDetention;
+    if (event.type === 'tick') {
+      ticks += 1;
+      if (ticks >= tickThreshold) {
+        ticks = 0;
+        merits += 1;
+      }
+    } else if (event.type === 'cross') {
+      crosses += 1;
+      if (crosses >= crossThreshold) {
+        crosses = 0;
+        detentions += 1;
+      }
+    } else if (event.type === 'forgot') {
+      forgets += 1;
+    }
+  }
+  // Never regress acquired merits/detentions: replay can only confirm or grow.
+  await saveStudent({
+    ...student,
+    ticks,
+    crosses,
+    forgets,
+    merits: Math.max(student.merits, merits),
+    detentions: Math.max(student.detentions, detentions),
+  });
+  await touchClass(student.classId);
+};
+
 export const deleteEvent = async (eventId: string): Promise<void> => {
   if (!eventId) throw new Error('Event not found.');
+  const events = await getAllEvents();
+  const event = events.find((e) => e.id === eventId);
   await removeEvent(eventId);
+  if (event) await replayStudentCounters(event.studentId);
 };
 
 export const resetTrimester = async (trimesterNumber?: number): Promise<ResetTrimesterResult> => {

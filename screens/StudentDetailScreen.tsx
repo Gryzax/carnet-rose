@@ -192,15 +192,15 @@ export const StudentDetailScreen = ({ route, navigation }: Props) => {
       <View style={styles.progressGroup}>
         <ProgressBar
           value={student.ticks}
-          max={4}
+          max={ticksForMerit}
           color={colors.successGreen}
-          label={`${t('ticksLabel')} ${student.ticks}/4`}
+          label={`${t('ticksLabel')} ${student.ticks}/${ticksForMerit}`}
         />
         <ProgressBar
           value={student.crosses}
-          max={4}
+          max={crossesForDetention}
           color={colors.dangerRed}
-          label={`${t('crossesLabel')} ${student.crosses}/4`}
+          label={`${t('crossesLabel')} ${student.crosses}/${crossesForDetention}`}
         />
         <Text style={styles.legend}>
           {t('counterLegend', { ticks: ticksForMerit, crosses: crossesForDetention })}

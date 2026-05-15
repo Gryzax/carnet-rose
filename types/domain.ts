@@ -50,6 +50,8 @@ export interface EventRow {
   previousForgets: number;
   newForgets: number;
   cancelled: 0 | 1;
+  ticksForMerit?: number;
+  crossesForDetention?: number;
 }
 
 export interface ArchiveRow {

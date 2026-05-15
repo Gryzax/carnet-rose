@@ -1,5 +1,6 @@
 import { useSyncExternalStore } from 'react';
 import { CROSSES_FOR_DETENTION, TICKS_FOR_MERIT } from '../constants/config';
+import { invalidate } from '../lib/queryClient';
 import { getPref, setPref } from './prefs';
 
 // Tunable rollover thresholds: how many ticks roll up into a merit, how many
@@ -70,6 +71,7 @@ export const setThresholds = (patch: Partial<Thresholds>): void => {
   }
   current = next;
   notify();
+  invalidate('classes', 'students', 'events');
   setPref(KEY, JSON.stringify(current)).catch(() => {});
 };
 
